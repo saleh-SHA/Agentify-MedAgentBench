@@ -1,8 +1,10 @@
 """Simplified MCP server for MedAgentBench FHIR tools."""
 from __future__ import annotations
 
+import json
 import os
 import time
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import requests
@@ -12,10 +14,9 @@ from pydantic import BaseModel, Field
 
 # Configuration
 FHIR_API_BASE = os.environ.get("MCP_FHIR_API_BASE", "http://localhost:8080/fhir/").rstrip("/")
-app = FastAPI(title="MedAgentBench MCP Server", version="0.1.0")
-def create_app() -> FastAPI:
-    return app
+TASKS_FILE = os.environ.get("MCP_TASKS_FILE", "src/mcp/resources/tasks/tasks.json")
 
+app = FastAPI(title="MedAgentBench MCP Server", version="0.1.0")
 _started_at = time.monotonic()
 
 
@@ -47,17 +48,33 @@ class ToolInvocationResponse(BaseModel):
     result: Dict[str, Any]
 
 
+# Load tasks from JSON file
+def _load_tasks() -> List[Dict[str, Any]]:
+    """Load tasks from JSON file."""
+    tasks_path = Path(TASKS_FILE)
+    if not tasks_path.exists():
+        print(f"Warning: Tasks file '{TASKS_FILE}' not found. No tasks will be available.")
+        return []
+    
+    try:
+        with open(tasks_path, 'r', encoding='utf-8') as f:
+            tasks = json.load(f)
+        print(f"Loaded {len(tasks)} tasks from {TASKS_FILE}")
+        return tasks
+    except Exception as e:
+        print(f"Error loading tasks from '{TASKS_FILE}': {e}")
+        return []
+
+
+# Initialize tasks
+_TASKS = _load_tasks()
+
 # Resources
 RESOURCES = [
     ResourceHandle(
-        resource_id="medagentbench.overview",
-        name="MedAgentBench Overview",
-        description="High-level facts about the MedAgentBench benchmark.",
-    ),
-    ResourceHandle(
-        resource_id="medagentbench.quickstart",
-        name="Quickstart Instructions",
-        description="Setup instructions for MedAgentBench.",
+        resource_id="medagentbench_tasks",
+        name="MedAgentBench Tasks",
+        description=f"Complete list of {len(_TASKS)} evaluation tasks with instructions and expected solutions.",
     ),
 ]
 
@@ -73,7 +90,6 @@ def _call_fhir(method: str, path: str, params: Optional[Dict] = None, body: Opti
         response.raise_for_status()
         return {"url": url, "method": method, "status_code": response.status_code, "response": response.json()}
     except requests.RequestException as e:
-        # Log more details about the error
         error_detail = str(e)
         if hasattr(e, 'response') and e.response is not None:
             try:
@@ -86,26 +102,22 @@ def _call_fhir(method: str, path: str, params: Optional[Dict] = None, body: Opti
 # Tool handlers
 def _get_handler(path: str, required_params: List[str]):
     """Create a GET handler for a FHIR endpoint."""
-
     def handler(args: Dict[str, Any]) -> Dict[str, Any]:
         missing = [p for p in required_params if p not in args]
         if missing:
             raise HTTPException(status_code=400, detail=f"Missing required fields: {', '.join(missing)}")
         params = {k: v for k, v in args.items() if v is not None}
         return _call_fhir("GET", path, params=params)
-
     return handler
 
 
 def _post_handler(path: str, required_fields: List[str]):
     """Create a POST handler for a FHIR endpoint."""
-
     def handler(args: Dict[str, Any]) -> Dict[str, Any]:
         missing = [f for f in required_fields if f not in args]
         if missing:
             raise HTTPException(status_code=400, detail=f"Missing required fields: {', '.join(missing)}")
         return _call_fhir("POST", path, body=args)
-
     return handler
 
 
@@ -171,11 +183,7 @@ TOOLS = [
             "type": "object",
             "properties": {
                 "resourceType": {"type": "string", "description": 'Use "Observation".'},
-                "category": {
-                    "type": "array",
-                    "description": "Observation categories with coding metadata.",
-                    "items": {"type": "object"}
-                },
+                "category": {"type": "array", "description": "Observation categories with coding metadata."},
                 "code": {"type": "object", "description": "Flowsheet row / vital concept."},
                 "effectiveDateTime": {"type": "string", "description": "ISO timestamp of measurement."},
                 "status": {"type": "string", "description": 'Use "final".'},
@@ -207,11 +215,7 @@ TOOLS = [
                 "resourceType": {"type": "string", "description": 'Use "MedicationRequest".'},
                 "medicationCodeableConcept": {"type": "object", "description": "Medication coding and display name."},
                 "authoredOn": {"type": "string", "description": "Date/time when prescription was authored."},
-                "dosageInstruction": {
-                    "type": "array",
-                    "description": "Dose, rate, and route instructions.",
-                    "items": {"type": "object"}
-                },
+                "dosageInstruction": {"type": "array", "description": "Dose, rate, and route instructions."},
                 "status": {"type": "string", "description": 'Order status such as "active".'},
                 "intent": {"type": "string", "description": 'Order intent, typically "order".'},
                 "subject": {"type": "object", "description": "Reference to the patient resource."},
@@ -245,6 +249,8 @@ TOOLS = [
                 "intent": {"type": "string", "description": 'Order intent, typically "order".'},
                 "priority": {"type": "string", "description": "Priority such as 'stat'."},
                 "subject": {"type": "object", "description": "Reference to the patient."},
+                "occurrenceDateTime": {"type": "string", "description": "Optional desired time for service."},
+                "note": {"type": "object", "description": "Optional clinician instructions or comments."},
             },
             "required": ["resourceType", "code", "authoredOn", "status", "intent", "priority", "subject"],
         },
@@ -278,35 +284,33 @@ async def list_resources() -> List[ResourceHandle]:
 
 @app.get("/resources/{resource_id}")
 async def get_resource(resource_id: str) -> Dict[str, Any]:
-    resource = next((r for r in RESOURCES if r.resource_id == resource_id), None)
-    if not resource:
-        raise HTTPException(status_code=404, detail=f"Resource '{resource_id}' not found")
+    """Get full resource data."""
     
-    # Return resource data
-    if resource_id == "medagentbench.overview":
-        return {
-            "resource_id": resource.resource_id,
-            "name": resource.name,
-            "description": resource.description,
-            "data": {
-                "paper": {"title": "MedAgentBench: A Virtual EHR Environment", "journal": "NEJM AI", "year": 2025},
-                "docker_image": "jyxsu6/medagentbench:latest",
-                "task_ports": list(range(5000, 5016)),
-            },
-        }
-    elif resource_id == "medagentbench.quickstart":
-        return {
-            "resource_id": resource.resource_id,
-            "name": resource.name,
-            "description": resource.description,
-            "data": "1. Create conda environment\n2. Install dependencies\n3. Pull Docker image\n4. Configure agent\n5. Run tasks",
-        }
-    return {"resource_id": resource.resource_id, "name": resource.name, "description": resource.description}
+    try:
+        # Tasks resources
+        if resource_id == "medagentbench_tasks":
+            return {
+                "resource_id": resource_id,
+                "name": "MedAgentBench Tasks",
+                "description": f"Complete list of {len(_TASKS)} evaluation tasks.",
+                "data": {
+                    "total_tasks": len(_TASKS),
+                    "tasks": _TASKS,
+                },
+            }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get resource '{resource_id}': {e}")
 
 
 @app.get("/tools", response_model=List[ToolDescriptor])
 async def list_tools() -> List[ToolDescriptor]:
     return TOOLS
+
+
+@app.get("/favicon.ico")
+async def favicon() -> Dict[str, Any]:
+    """Return empty favicon response to avoid noisy 404s."""
+    return {"detail": "No favicon available"}
 
 
 @app.post("/tools/invoke", response_model=ToolInvocationResponse)
@@ -323,8 +327,17 @@ async def invoke_tool(request: ToolInvocationRequest) -> ToolInvocationResponse:
         raise HTTPException(status_code=400, detail=str(e))
 
 
+def create_app() -> FastAPI:
+    """Factory function for creating the app."""
+    return app
+
+
 def main() -> None:
     """Entrypoint used by `python -m src.mcp.server`."""
+    print(f"Starting MedAgentBench MCP Server on port 8002")
+    print(f"FHIR API base: {FHIR_API_BASE}")
+    print(f"Tasks file: {TASKS_FILE}")
+    print(f"Loaded {len(_TASKS)} tasks")
     uvicorn.run("server:app", host="0.0.0.0", port=8002, reload=False)
 
 
