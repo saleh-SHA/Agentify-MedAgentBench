@@ -1,0 +1,17 @@
+.vscode/
+instructions/
+.env
+*.log
+
+# Python-generated files
+src/__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+logs/
+.clangd/
