@@ -3,29 +3,32 @@
 import multiprocessing
 import json
 from pathlib import Path
+
+import requests
 from src.green_agent.medagent import start_medagent_green
 from src.white_agent.medagent import start_medagent_white
 from src.my_util import my_a2a, logging_config
+from src.typings import *
 
 logger = logging_config.setup_logging("logs/medagent.log", "medagent_launcher")
 
-
-def load_medagent_test_data(data_file: str = None):
-    """Load MedAgentBench test data.
+def load_medagent_tasks(mcp_server_url: str):
+    """Load MedAgentBench tasks from MCP server.
 
     Args:
-        data_file: Path to the test data JSON file. If None, uses default location.
+        mcp_server_url: URL of the MCP server
 
     Returns:
-        List of test cases
+        List of MedAgentBench Task Inputs
     """
-    if data_file is None:
-        # Default location
-        project_root = Path(__file__).parent.parent
-        data_file = project_root / "MedAgentBench" / "data" / "medagentbench" / "test_data_v2.json"
-
-    with open(data_file, 'r') as f:
-        return json.load(f)
+    try:
+        response = requests.get(f"{mcp_server_url}/resources/medagentbench_tasks", timeout=10.0)
+        response.raise_for_status()
+        response_json = response.json()
+        tasks = response_json["data"]["tasks"]
+        return tasks
+    except requests.RequestException as e:
+        raise ClientException(reason="Error loading MedAgentBench tasks from MCP server", detail=str(e))
 
 
 async def launch_medagent_evaluation(
@@ -47,16 +50,15 @@ async def launch_medagent_evaluation(
 
     # Load test data
     logger.info("Loading MedAgentBench test data...")
-    test_data = load_medagent_test_data()
-
-    if task_index >= len(test_data):
-        logger.error(f"Error: Task index {task_index} out of range (max: {len(test_data) - 1})")
+    tasks = load_medagent_tasks(mcp_server_url)
+    if task_index >= len(tasks):
+        logger.error(f"Error: Task index {task_index} out of range (max: {len(tasks) - 1})")
         return
 
-    task_data = test_data[task_index]
-    logger.info(f"Selected task: {task_data['id']}")
-    logger.info(f"Question: {task_data['instruction']}")
-    logger.info(f"Expected answer: {task_data['sol']}")
+    task_data = tasks[task_index]
+    logger.info(f"Selected task: {task_data["id"]}")
+    logger.info(f"Question: {task_data["instruction"]}")
+    logger.info(f"Expected answer: {task_data.get("sol", [])}")
 
     # Start green agent
     logger.info("Launching MedAgentBench green agent...")
