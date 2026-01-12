@@ -240,7 +240,6 @@ class MedAgentGreenExecutor(AgentExecutor):
             "completed": SampleStatus.COMPLETED,
             "max_rounds_reached": SampleStatus.TASK_LIMIT_REACHED,
         }
-        sample_status = status_mapping.get(result["status"], SampleStatus.UNKNOWN)
 
         # Transform history to match ChatHistoryItem schema
         # Convert "assistant" role to "agent"
@@ -258,26 +257,24 @@ class MedAgentGreenExecutor(AgentExecutor):
         # Create TaskOutput object
         task_output = TaskOutput(
             index=task_data["id"],
-            status=sample_status,
+            status=result["status"],
             result=result.get("result"),
             history=transformed_history,
-            rounds=result.get("rounds")
+            rounds=result.get("rounds"),
         )
         eval_result = eval.eval(task_data, result, FHIR_API_BASE)
-        result.correct = eval_result
-        print("================================================Eval result: ", eval_result, flush=True)
+
+        # Determine success
+        success = task_output.status == "completed" and eval_result is True
+        result_emoji = "✅" if success else "❌"
 
         # Calculate metrics
         metrics = {
             "time_used": time.time() - timestamp_started,
-            "status": result.status,
-            "rounds_used": result.rounds,
-            "correct": result.correct,
+            "status": task_output.status,
+            "rounds_used": task_output.rounds,
+            "correct": success,
         }
-
-        # Determine success
-        success = result.status == "completed" and result.correct is True
-        result_emoji = "✅" if success else "❌"
 
         # Prepare report
         report = f"""MedAgentBench Evaluation Complete {result_emoji}
