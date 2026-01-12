@@ -235,12 +235,6 @@ class MedAgentGreenExecutor(AgentExecutor):
             max_num_steps=max_rounds
         )
 
-        # Map result status to SampleStatus
-        status_mapping = {
-            "completed": SampleStatus.COMPLETED,
-            "max_rounds_reached": SampleStatus.TASK_LIMIT_REACHED,
-        }
-
         # Transform history to match ChatHistoryItem schema
         # Convert "assistant" role to "agent"
         history = result.get("history", [])

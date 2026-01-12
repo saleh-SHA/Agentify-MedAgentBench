@@ -2,22 +2,16 @@ from typing import Union, List
 
 from pydantic import BaseModel, root_validator
 
-from . import ChatHistoryItem
-from .general import JSONSerializable, SampleIndex
+from .general import JSONSerializable, SampleIndex, ChatHistoryItem
 from .status import SampleStatus, AgentOutputStatus
 
 
 class TaskOutput(BaseModel):
     index: Union[None, SampleIndex] = None
-    status: SampleStatus = SampleStatus.RUNNING
+    status: Union[None, str] = None
     result: JSONSerializable = None
     history: Union[None, List[ChatHistoryItem]] = None
     rounds: Union[None, int] = None
-
-
-class TaskSampleExecutionResult(BaseModel):
-    status: SampleStatus = SampleStatus.COMPLETED
-    result: JSONSerializable = None
 
 
 class AgentOutput(BaseModel):
@@ -32,9 +26,3 @@ class AgentOutput(BaseModel):
             or instance.get("content") is not None
         ), "If status is NORMAL, content should not be None"
         return instance
-
-
-class TaskClientOutput(BaseModel):
-    error: Union[str, None] = None
-    info: Union[str, None] = None
-    output: Union[TaskOutput, None] = None

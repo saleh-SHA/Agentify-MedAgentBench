@@ -1,4 +1,4 @@
-from enum import IntEnum, Enum
+from enum import Enum
 
 
 class SampleStatus(str, Enum):
@@ -10,12 +10,6 @@ class SampleStatus(str, Enum):
     TASK_LIMIT_REACHED = "task limit reached"
     UNKNOWN = "unknown"
     TASK_ERROR = "task error"
-
-
-class WorkerStatus(IntEnum):
-    ALIVE = 0
-    COMA = 1
-    DEAD = 2
 
 
 class AgentOutputStatus(str, Enum):
