@@ -1,53 +1,53 @@
 """Simplified MCP server for MedAgentBench FHIR tools."""
 from __future__ import annotations
-
+ 
 import json
 import os
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-
+ 
 import requests
 import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
-
+ 
 # Configuration
 FHIR_API_BASE = os.environ.get("MCP_FHIR_API_BASE", "http://localhost:8080/fhir/").rstrip("/")
 TASKS_FILE = os.environ.get("MCP_TASKS_FILE", "src/mcp/resources/tasks/tasks.json")
-
+ 
 app = FastAPI(title="MedAgentBench MCP Server", version="0.1.0")
 _started_at = time.monotonic()
-
-
+ 
+ 
 # Models
 class HealthResponse(BaseModel):
     status: str
     uptime_seconds: float
-
-
+ 
+ 
 class ToolDescriptor(BaseModel):
     name: str
     description: str
     input_schema: Dict[str, Any] = Field(default_factory=dict)
-
-
+ 
+ 
 class ResourceHandle(BaseModel):
     resource_id: str
     name: str
     description: Optional[str] = None
-
-
+ 
+ 
 class ToolInvocationRequest(BaseModel):
     tool_name: str
     arguments: Dict[str, Any] = Field(default_factory=dict)
-
-
+ 
+ 
 class ToolInvocationResponse(BaseModel):
     tool_name: str
     result: Dict[str, Any]
-
-
+ 
+ 
 # Load tasks from JSON file
 def _load_tasks() -> List[Dict[str, Any]]:
     """Load tasks from JSON file."""
@@ -64,11 +64,11 @@ def _load_tasks() -> List[Dict[str, Any]]:
     except Exception as e:
         print(f"Error loading tasks from '{TASKS_FILE}': {e}")
         return []
-
-
+ 
+ 
 # Initialize tasks
 _TASKS = _load_tasks()
-
+ 
 # Resources
 RESOURCES = [
     ResourceHandle(
@@ -77,8 +77,8 @@ RESOURCES = [
         description=f"Complete list of {len(_TASKS)} evaluation tasks with instructions and expected solutions.",
     ),
 ]
-
-
+ 
+ 
 # Helper functions
 def _call_fhir(method: str, path: str, params: Optional[Dict] = None, body: Optional[Dict] = None) -> Dict[str, Any]:
     """Make a request to the FHIR server."""
@@ -97,8 +97,8 @@ def _call_fhir(method: str, path: str, params: Optional[Dict] = None, body: Opti
             except:
                 pass
         raise HTTPException(status_code=400, detail=f"FHIR server error: {error_detail}")
-
-
+ 
+ 
 # Tool handlers
 def _get_handler(path: str, required_params: List[str]):
     """Create a GET handler for a FHIR endpoint."""
@@ -109,8 +109,8 @@ def _get_handler(path: str, required_params: List[str]):
         params = {k: v for k, v in args.items() if v is not None}
         return _call_fhir("GET", path, params=params)
     return handler
-
-
+ 
+ 
 def _post_handler(path: str, required_fields: List[str]):
     """Create a POST handler for a FHIR endpoint."""
     def handler(args: Dict[str, Any]) -> Dict[str, Any]:
@@ -119,8 +119,8 @@ def _post_handler(path: str, required_fields: List[str]):
             raise HTTPException(status_code=400, detail=f"Missing required fields: {', '.join(missing)}")
         return _call_fhir("POST", path, body=args)
     return handler
-
-
+ 
+ 
 # Tool definitions
 TOOLS = [
     ToolDescriptor(
@@ -264,7 +264,7 @@ TOOLS = [
         },
     ),
 ]
-
+ 
 # Tool handler registry
 _TOOL_HANDLERS = {
     "search_patients": _get_handler("/Patient", []),
@@ -277,19 +277,19 @@ _TOOL_HANDLERS = {
     "list_patient_procedures": _get_handler("/Procedure", ["patient", "date"]),
     "create_service_request": _post_handler("/ServiceRequest", ["resourceType", "code", "authoredOn", "status", "intent", "priority", "subject"]),
 }
-
-
+ 
+ 
 # API Endpoints
 @app.get("/health", response_model=HealthResponse)
 async def health() -> HealthResponse:
     return HealthResponse(status="ok", uptime_seconds=time.monotonic() - _started_at)
-
-
+ 
+ 
 @app.get("/resources", response_model=List[ResourceHandle])
 async def list_resources() -> List[ResourceHandle]:
     return RESOURCES
-
-
+ 
+ 
 @app.get("/resources/{resource_id}")
 async def get_resource(resource_id: str) -> Dict[str, Any]:
     """Get full resource data."""
@@ -308,19 +308,19 @@ async def get_resource(resource_id: str) -> Dict[str, Any]:
             }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get resource '{resource_id}': {e}")
-
-
+ 
+ 
 @app.get("/tools", response_model=List[ToolDescriptor])
 async def list_tools() -> List[ToolDescriptor]:
     return TOOLS
-
-
+ 
+ 
 @app.get("/favicon.ico")
 async def favicon() -> Dict[str, Any]:
     """Return empty favicon response to avoid noisy 404s."""
     return {"detail": "No favicon available"}
-
-
+ 
+ 
 @app.post("/tools/invoke", response_model=ToolInvocationResponse)
 async def invoke_tool(request: ToolInvocationRequest) -> ToolInvocationResponse:
     handler = _TOOL_HANDLERS.get(request.tool_name)
@@ -333,13 +333,13 @@ async def invoke_tool(request: ToolInvocationRequest) -> ToolInvocationResponse:
         raise
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-
-
+ 
+ 
 def create_app() -> FastAPI:
     """Factory function for creating the app."""
     return app
-
-
+ 
+ 
 def main() -> None:
     """Entrypoint used by `python -m src.mcp.server`."""
     print(f"Starting MedAgentBench MCP Server on port 8002")
@@ -347,7 +347,7 @@ def main() -> None:
     print(f"Tasks file: {TASKS_FILE}")
     print(f"Loaded {len(_TASKS)} tasks")
     uvicorn.run("server:app", host="0.0.0.0", port=8002, reload=False)
-
-
+ 
+ 
 if __name__ == "__main__":
     main()

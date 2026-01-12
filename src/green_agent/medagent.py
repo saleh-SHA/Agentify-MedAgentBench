@@ -1,10 +1,12 @@
 """Green agent implementation for MedAgentBench - manages assessment and evaluation."""
 
+import os
 import uvicorn
 import tomllib
 import dotenv
 import json
 import time
+from src.green_agent.eval_resources import eval
 from typing import Dict, Any
 from src.typings.output import TaskOutput
 from src.typings.status import SampleStatus
@@ -18,6 +20,7 @@ from a2a.utils import new_agent_text_message, get_text_parts
 from src.my_util import parse_tags, my_a2a, logging_config
 
 dotenv.load_dotenv()
+FHIR_API_BASE = os.environ.get("MCP_FHIR_API_BASE", "http://localhost:8080/fhir/")
 
 logger = logging_config.setup_logging("logs/green_agent.log", "green_agent")
 
@@ -260,17 +263,20 @@ class MedAgentGreenExecutor(AgentExecutor):
             history=transformed_history,
             rounds=result.get("rounds")
         )
+        eval_result = eval.eval(task_data, result, FHIR_API_BASE)
+        result.correct = eval_result
+        print("================================================Eval result: ", eval_result, flush=True)
 
         # Calculate metrics
         metrics = {
             "time_used": time.time() - timestamp_started,
-            "status": result["status"],
-            "rounds_used": result["rounds"],
-            "correct": result.get("correct"),
+            "status": result.status,
+            "rounds_used": result.rounds,
+            "correct": result.correct,
         }
 
         # Determine success
-        success = result["status"] == "completed" and result.get("correct") is True
+        success = result.status == "completed" and result.correct is True
         result_emoji = "✅" if success else "❌"
 
         # Prepare report
