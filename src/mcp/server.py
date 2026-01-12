@@ -183,7 +183,11 @@ TOOLS = [
             "type": "object",
             "properties": {
                 "resourceType": {"type": "string", "description": 'Use "Observation".'},
-                "category": {"type": "array", "description": "Observation categories with coding metadata."},
+                "category": {
+                    "type": "array",
+                    "description": "Observation categories with coding metadata.",
+                    "items": {"type": "object"}
+                },
                 "code": {"type": "object", "description": "Flowsheet row / vital concept."},
                 "effectiveDateTime": {"type": "string", "description": "ISO timestamp of measurement."},
                 "status": {"type": "string", "description": 'Use "final".'},
@@ -215,7 +219,11 @@ TOOLS = [
                 "resourceType": {"type": "string", "description": 'Use "MedicationRequest".'},
                 "medicationCodeableConcept": {"type": "object", "description": "Medication coding and display name."},
                 "authoredOn": {"type": "string", "description": "Date/time when prescription was authored."},
-                "dosageInstruction": {"type": "array", "description": "Dose, rate, and route instructions."},
+                "dosageInstruction": {
+                    "type": "array",
+                    "description": "Dose, rate, and route instructions.",
+                    "items": {"type": "object"}
+                },
                 "status": {"type": "string", "description": 'Order status such as "active".'},
                 "intent": {"type": "string", "description": 'Order intent, typically "order".'},
                 "subject": {"type": "object", "description": "Reference to the patient resource."},

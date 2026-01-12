@@ -12,6 +12,7 @@ class TaskOutput(BaseModel):
     status: SampleStatus = SampleStatus.RUNNING
     result: JSONSerializable = None
     history: Union[None, List[ChatHistoryItem]] = None
+    rounds: Union[None, int] = None
 
 
 class TaskSampleExecutionResult(BaseModel):

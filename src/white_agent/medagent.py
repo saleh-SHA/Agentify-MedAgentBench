@@ -203,7 +203,6 @@ class MedAgentWhiteExecutor(AgentExecutor):
                         function_name,
                         function_args
                     )
-
                     logger.info(f"Tool result received")
 
                     # Add tool result to messages

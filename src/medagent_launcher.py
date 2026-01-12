@@ -28,7 +28,7 @@ def load_medagent_tasks(mcp_server_url: str):
         tasks = response_json["data"]["tasks"]
         return tasks
     except requests.RequestException as e:
-        raise ClientException(reason="Error loading MedAgentBench tasks from MCP server", detail=str(e))
+        raise Exception(reason="Error loading MedAgentBench tasks from MCP server", detail=str(e))
 
 
 async def launch_medagent_evaluation(
@@ -46,6 +46,9 @@ async def launch_medagent_evaluation(
         max_rounds: Maximum number of interaction rounds
         green_port: Port for the green agent
         white_port: Port for the white agent
+
+    Returns:
+        Dictionary containing task_id, task_index, and evaluation response
     """
 
     # Load test data
@@ -93,15 +96,15 @@ async def launch_medagent_evaluation(
     }
 
     task_text = f"""Your task is to instantiate MedAgentBench to test the agent located at:
-<white_agent_url>
-{white_url}/
-</white_agent_url>
+            <white_agent_url>
+            {white_url}/
+            </white_agent_url>
 
-You should use the following configuration:
-<medagent_config>
-{json.dumps(medagent_config, indent=2)}
-</medagent_config>
-"""
+            You should use the following configuration:
+            <medagent_config>
+            {json.dumps(medagent_config, indent=2)}
+            </medagent_config>
+        """
 
     logger.info("Task configuration:")
     logger.info(task_text)
@@ -113,7 +116,33 @@ You should use the following configuration:
     logger.info("=" * 80)
     logger.info("EVALUATION RESULTS")
     logger.info("=" * 80)
-    logger.info(response)
+
+    # Extract text from A2A response structure
+    response_text = None
+    try:
+        if hasattr(response, 'result') and hasattr(response.result, 'parts'):
+            # Extract text from SendMessageSuccessResponse
+            for part in response.result.parts:
+                if hasattr(part, 'root') and hasattr(part.root, 'text'):
+                    response_text = part.root.text
+                    logger.info(response_text)
+        elif isinstance(response, str):
+            response_text = response
+            # If it's already a string, try to parse as JSON for formatting
+            try:
+                response_obj = json.loads(response)
+                logger.info(json.dumps(response_obj, indent=2, ensure_ascii=False))
+            except json.JSONDecodeError:
+                logger.info(response)
+        else:
+            # Fall back to string representation
+            response_text = str(response)
+            logger.info(response_text)
+    except Exception as e:
+        logger.warning(f"Could not format response: {e}")
+        response_text = str(response)
+        logger.info(response_text)
+
     logger.info("=" * 80)
 
     # Cleanup
@@ -123,6 +152,13 @@ You should use the following configuration:
     p_white.terminate()
     p_white.join()
     logger.info("Agents terminated.")
+
+    # Return result for batch processing with JSON-serializable response
+    return {
+        "task_index": task_index,
+        "task_id": task_data["id"],
+        "response": response_text
+    }
 
 
 async def launch_medagent_batch_evaluation(
@@ -139,10 +175,11 @@ async def launch_medagent_batch_evaluation(
         max_rounds: Maximum rounds per task
         output_file: Path to save results. If None, prints to console.
     """
-    test_data = load_medagent_test_data()
+    logger.info("Loading MedAgentBench test data...")
+    tasks = load_medagent_tasks(mcp_server_url)
 
     if task_indices is None:
-        task_indices = list(range(len(test_data)))
+        task_indices = list(range(len(tasks)))
 
     results = []
 
@@ -151,12 +188,31 @@ async def launch_medagent_batch_evaluation(
         logger.info(f"Running task {idx + 1}/{len(task_indices)}")
         logger.info(f"{'='*80}\n")
 
-        await launch_medagent_evaluation(
+        result = await launch_medagent_evaluation(
             task_index=idx,
             mcp_server_url=mcp_server_url,
             max_rounds=max_rounds
         )
+        results.append(result)
 
     logger.info("\n" + "="*80)
     logger.info("BATCH EVALUATION COMPLETE")
     logger.info("="*80)
+    logger.info(f"Total tasks evaluated: {len(results)}")
+
+    # Save results to file if specified
+    if output_file:
+        try:
+            # Remove existing file if it exists
+            output_path = Path(output_file)
+            if output_path.exists():
+                output_path.unlink()
+                logger.info(f"Removed existing results file: {output_file}")
+
+            with open(output_file, 'w', encoding='utf-8') as f:
+                json.dump(results, f, indent=2, ensure_ascii=False)
+            logger.info(f"Results saved to: {output_file}")
+        except Exception as e:
+            logger.error(f"Failed to save results to {output_file}: {e}")
+
+    return results

@@ -6,6 +6,8 @@ import dotenv
 import json
 import time
 from typing import Dict, Any
+from src.typings.output import TaskOutput
+from src.typings.status import SampleStatus
 from a2a.server.apps import A2AStarletteApplication
 from a2a.server.request_handlers import DefaultRequestHandler
 from a2a.server.agent_execution import AgentExecutor, RequestContext
@@ -228,6 +230,35 @@ class MedAgentGreenExecutor(AgentExecutor):
             task_data=task_data,
             mcp_server_url=mcp_server_url,
             max_num_steps=max_rounds
+        )
+
+        # Map result status to SampleStatus
+        status_mapping = {
+            "completed": SampleStatus.COMPLETED,
+            "max_rounds_reached": SampleStatus.TASK_LIMIT_REACHED,
+        }
+        sample_status = status_mapping.get(result["status"], SampleStatus.UNKNOWN)
+
+        # Transform history to match ChatHistoryItem schema
+        # Convert "assistant" role to "agent"
+        history = result.get("history", [])
+        transformed_history = []
+        for item in history:
+            role = item.get("role", "user")
+            if role == "assistant":
+                role = "agent"
+            transformed_history.append({
+                "role": role,
+                "content": item.get("content", "")
+            })
+
+        # Create TaskOutput object
+        task_output = TaskOutput(
+            index=task_data["id"],
+            status=sample_status,
+            result=result.get("result"),
+            history=transformed_history,
+            rounds=result.get("rounds")
         )
 
         # Calculate metrics

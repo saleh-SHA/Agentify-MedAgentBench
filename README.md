@@ -7,7 +7,7 @@ A complete implementation of MedAgentBench using the A2A (Agent-to-Agent) protoc
 This project provides a standardized framework for evaluating medical AI agents using FHIR (Fast Healthcare Interoperability Resources) servers. It implements a green-agent/white-agent architecture where:
 - **Green agent**: Assessment manager that coordinates evaluations
 - **White agent**: The AI agent being tested (uses GPT-5 + function calling)
-- **MCP server**: Provides 9 FHIR tools for medical data access
+- **MCP server**: Provides 9 FHIR tools for medical data access and serves evaluation tasks
 - **FHIR server**: Contains medical records and patient data
 
 ## Architecture
@@ -50,14 +50,13 @@ agentify-medagentbench/
 │   ├── white_agent/
 │   │   └── medagent.py             # White agent (GPT-5 + MCP)
 │   ├── mcp/
-│   │   └── server.py               # MCP server (9 FHIR tools)
+│   │   ├── server.py               # MCP server (9 FHIR tools + task serving)
+│   │   └── resources/
+│   │       └── tasks/
+│   │           └── tasks.json      # Test cases served by MCP server
 │   ├── medagent_launcher.py        # Evaluation launcher
 │   └── my_util/
 │       └── my_a2a.py               # A2A protocol utilities
-└── MedAgentBench/
-    └── data/
-        └── medagentbench/
-            └── test_data_v2.json   # Test cases
 ```
 
 ## Quick Start
@@ -146,6 +145,11 @@ uv run python main.py batch \
   --task-indices "0,5,10" \
   --mcp-server http://0.0.0.0:8002 \
   --max-rounds 10
+
+# Save results to a file
+uv run python main.py batch \
+  --task-indices "0,1,2" \
+  --output-file results.json
 ```
 
 ### Run Individual Components
@@ -177,7 +181,7 @@ Run multiple tasks in sequence.
 - `--task-indices STR` - Comma-separated task indices (e.g., "0,1,2"). If not provided, runs all tasks.
 - `--mcp-server STR` - MCP server URL (default: http://0.0.0.0:8002)
 - `--max-rounds INT` - Maximum interaction rounds (default: 8)
-- `--output-file STR` - Path to save results (not implemented yet)
+- `--output-file STR` - Path to save results as JSON file (optional). Note: Existing file will be overwritten.
 
 ### `green` - Start Green Agent
 Start the green agent (assessment manager) only on port 9001.
@@ -189,7 +193,7 @@ Start the white agent (agent being tested) only on port 9002.
 
 ### 1. Evaluation Flow
 
-1. **Launcher** loads test data from JSON and starts both agents
+1. **Launcher** loads test data from MCP server and starts both agents
 2. **Green agent** sends task + MCP server URL to white agent
 3. **White agent** discovers available tools from MCP server
 4. **White agent** uses GPT-5 with function calling to solve the task
@@ -228,8 +232,14 @@ The MedAgentBench white agent:
 
 **File**: [src/mcp/server.py](src/mcp/server.py)
 
-The MCP server provides 9 FHIR tools:
+The MCP server provides two main functions:
 
+**A. Task Management**
+- Loads and serves evaluation tasks from `src/mcp/resources/tasks/tasks.json`
+- Provides tasks via `/resources/medagentbench_tasks` endpoint
+- Both single and batch evaluations retrieve tasks from the MCP server
+
+**B. 9 FHIR Tools**
 1. **search_patients** - Search for patients by name, DOB, identifier
 2. **list_patient_problems** - Get patient conditions/problem list
 3. **list_lab_observations** - Get laboratory results
@@ -242,7 +252,7 @@ The MCP server provides 9 FHIR tools:
 
 ## Test Data
 
-Test cases are located in `MedAgentBench/data/medagentbench/test_data_v2.json`.
+Test cases are stored in `src/mcp/resources/tasks/tasks.json` and served by the MCP server.
 
 Each test case includes:
 - `id`: Task identifier (e.g., "task1_1")
@@ -258,6 +268,11 @@ Example:
   "context": "If the patient does not exist, the answer should be \"Patient not found\"",
   "sol": ["S6534835"]
 }
+```
+
+**Note**: The MCP server loads tasks at startup. To check available tasks:
+```bash
+curl http://0.0.0.0:8002/resources/medagentbench_tasks | jq
 ```
 
 ## Evaluation Metrics
@@ -309,14 +324,24 @@ You can also use the MedAgentBench components programmatically:
 
 ```python
 import asyncio
-from src.medagent_launcher import launch_medagent_evaluation
+from src.medagent_launcher import launch_medagent_evaluation, launch_medagent_batch_evaluation
 
 # Run a specific task
-asyncio.run(launch_medagent_evaluation(
+result = asyncio.run(launch_medagent_evaluation(
     task_index=0,
     mcp_server_url="http://0.0.0.0:8002",
     max_rounds=8
 ))
+print(result)  # Returns dict with task_index, task_id, and response
+
+# Run batch evaluation
+results = asyncio.run(launch_medagent_batch_evaluation(
+    task_indices=[0, 1, 2],
+    mcp_server_url="http://0.0.0.0:8002",
+    max_rounds=8,
+    output_file="results.json"  # Optional
+))
+print(f"Evaluated {len(results)} tasks")
 ```
 
 ## Technologies
@@ -381,8 +406,9 @@ kill -9 <PID>
 
 ### Common Issues
 
-**Issue**: Schema validation errors from OpenAI API
-- **Solution**: Restart MCP server to load updated tool definitions
+**Issue**: Schema validation errors from OpenAI API (e.g., "array schema missing items")
+- **Cause**: Invalid JSON schema for array-type parameters in tool definitions
+- **Solution**: Ensure all array properties in tool schemas include an `items` field. Restart MCP server to load updated tool definitions.
 
 **Issue**: Agent processes not terminating
 - **Solution**: Use `ps aux | grep python` and `kill -9 <PID>`
@@ -390,24 +416,31 @@ kill -9 <PID>
 **Issue**: Docker FHIR server not starting
 - **Solution**: Check if port 8080 is already in use: `lsof -i :8080`
 
+**Issue**: Tasks not found or empty task list
+- **Cause**: MCP server cannot find or load tasks.json file
+- **Solution**: Verify `src/mcp/resources/tasks/tasks.json` exists and contains valid JSON. Check MCP server startup logs for task loading status.
+
 ## Key Files
 
 - [src/green_agent/medagent.py](src/green_agent/medagent.py) - Green agent implementation
 - [src/white_agent/medagent.py](src/white_agent/medagent.py) - White agent with MCP support
-- [src/mcp/server.py](src/mcp/server.py) - MCP server providing FHIR tools
+- [src/mcp/server.py](src/mcp/server.py) - MCP server providing FHIR tools and task serving
+- [src/mcp/resources/tasks/tasks.json](src/mcp/resources/tasks/tasks.json) - Test cases served by MCP server
 - [src/medagent_launcher.py](src/medagent_launcher.py) - Evaluation launcher
 - [main.py](main.py) - CLI entry point
-- [MedAgentBench/data/medagentbench/test_data_v2.json](MedAgentBench/data/medagentbench/test_data_v2.json) - Test cases
 
 ## Next Steps
 
 - ✅ Batch evaluation support (implemented via `batch` command)
 - ✅ Flexible answer matching (exact + substring)
+- ✅ MCP server task management (tasks loaded from MCP server)
+- ✅ Fixed JSON schema validation (array items properly defined)
+- ✅ Result collection and aggregation for batch evaluations
+- ✅ Output file saving for batch results (JSON format)
 - Customize white agent reasoning strategies
 - Add more FHIR tools to MCP server
-- Implement result aggregation and reporting for batch evaluations
 - Add support for different LLM backends (currently uses GPT-5)
-- Implement output file saving for batch results
+- Generate summary statistics and reports from batch results
 
 ## License
 
