@@ -10,6 +10,7 @@ dependencies = [
     "fastmcp>=2.0.0",
     "httpx>=0.27.0",
     "litellm>=1.53.8",
+    "mcp>=1.0.0",
     "typer>=0.19.2",
     "uvicorn>=0.37.0",
     "pydantic>=2.10.5",

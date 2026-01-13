@@ -4,8 +4,7 @@ import os
 import uvicorn
 import dotenv
 import json
-import httpx
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from a2a.server.apps import A2AStarletteApplication
 from a2a.server.request_handlers import DefaultRequestHandler
 from a2a.server.agent_execution import AgentExecutor, RequestContext
@@ -14,6 +13,8 @@ from a2a.server.tasks import InMemoryTaskStore
 from a2a.types import AgentSkill, AgentCard, AgentCapabilities
 from a2a.utils import new_agent_text_message
 from litellm import completion
+from mcp import ClientSession
+from mcp.client.sse import sse_client
 from src.my_util import logging_config
 
 dotenv.load_dotenv()
@@ -55,35 +56,38 @@ class MedAgentWhiteExecutor(AgentExecutor):
 
     def __init__(self):
         self.ctx_id_to_messages = {}
-        self.ctx_id_to_tools = {}
         self.mcp_server_url = MCP_SERVER_URL
 
-    async def discover_tools(self, mcp_server_url: str) -> List[Dict[str, Any]]:
+    async def discover_tools(self, session: ClientSession) -> List[Dict[str, Any]]:
         """Discover available tools from MCP server.
 
         Args:
-            mcp_server_url: URL of the MCP server
+            session: MCP client session
 
         Returns:
             List of tool descriptors
         """
         try:
-            async with httpx.AsyncClient() as client:
-                response = await client.get(f"{mcp_server_url}/tools", timeout=10.0)
-                response.raise_for_status()
-                tools = response.json()
-                return tools
+            result = await session.list_tools()
+            tools = []
+            for tool in result.tools:
+                tools.append({
+                    "name": tool.name,
+                    "description": tool.description or "",
+                    "input_schema": tool.inputSchema if hasattr(tool, 'inputSchema') else {}
+                })
+            return tools
         except Exception as e:
             logger.error(f"Error discovering tools from MCP server: {e}")
             return []
 
     async def invoke_tool(
-        self, mcp_server_url: str, tool_name: str, arguments: Dict[str, Any]
+        self, session: ClientSession, tool_name: str, arguments: Dict[str, Any]
     ) -> Dict[str, Any]:
         """Invoke a tool via MCP server.
 
         Args:
-            mcp_server_url: URL of the MCP server
+            session: MCP client session
             tool_name: Name of the tool to invoke
             arguments: Tool arguments
 
@@ -91,14 +95,24 @@ class MedAgentWhiteExecutor(AgentExecutor):
             Tool invocation result
         """
         try:
-            async with httpx.AsyncClient() as client:
-                response = await client.post(
-                    f"{mcp_server_url}/tools/invoke",
-                    json={"tool_name": tool_name, "arguments": arguments},
-                    timeout=30.0
-                )
-                response.raise_for_status()
-                return response.json()
+            result = await session.call_tool(tool_name, arguments=arguments)
+            # Extract content from the result
+            if result.content:
+                # MCP returns content as a list of content items
+                content_parts = []
+                for item in result.content:
+                    if hasattr(item, 'text'):
+                        content_parts.append(item.text)
+                    elif hasattr(item, 'data'):
+                        content_parts.append(str(item.data))
+                
+                # Try to parse as JSON if it looks like JSON
+                combined = "\n".join(content_parts)
+                try:
+                    return json.loads(combined)
+                except json.JSONDecodeError:
+                    return {"result": combined}
+            return {"result": str(result)}
         except Exception as e:
             return {
                 "error": str(e),
@@ -121,11 +135,103 @@ class MedAgentWhiteExecutor(AgentExecutor):
                 "function": {
                     "name": tool["name"],
                     "description": tool["description"],
-                    "parameters": tool["input_schema"]
+                    "parameters": tool.get("input_schema", {})
                 }
             }
             openai_tools.append(openai_tool)
         return openai_tools
+
+    async def _run_with_mcp(
+        self,
+        messages: List[Dict[str, Any]],
+        session: ClientSession,
+        openai_tools: List[Dict[str, Any]],
+        context_id: str
+    ) -> str:
+        """Run the LLM loop with MCP tools.
+
+        Args:
+            messages: Conversation history
+            session: MCP client session
+            openai_tools: Tools in OpenAI format
+            context_id: Context ID for logging
+
+        Returns:
+            Final response content
+        """
+        max_iterations = 10  # Prevent infinite loops
+        
+        for iteration in range(max_iterations):
+            logger.info(f"Calling GPT-5 with tools (iteration {iteration + 1})")
+            response = completion(
+                messages=messages,
+                model="openai/gpt-5",
+                custom_llm_provider="openai",
+                tools=openai_tools,
+                tool_choice="auto"
+            )
+
+            message = response.choices[0].message.model_dump()
+            messages.append(message)
+
+            # Check if the model wants to call a tool
+            tool_calls = message.get("tool_calls")
+            if tool_calls:
+                logger.info(f"Model requested {len(tool_calls)} tool calls")
+
+                # Execute each tool call
+                for tool_call in tool_calls:
+                    function_name = tool_call["function"]["name"]
+                    function_args = json.loads(tool_call["function"]["arguments"])
+
+                    logger.info(f"Invoking tool '{function_name}' with args: {function_args}")
+
+                    # Invoke tool via MCP server
+                    tool_result = await self.invoke_tool(
+                        session,
+                        function_name,
+                        function_args
+                    )
+                    logger.info(f"Tool '{function_name}' returned {'error' if 'error' in tool_result else 'success'}")
+
+                    # Add tool result to messages
+                    messages.append({
+                        "role": "tool",
+                        "tool_call_id": tool_call["id"],
+                        "name": function_name,
+                        "content": json.dumps(tool_result)
+                    })
+
+                # Continue loop to get next response from model
+                continue
+
+            # No tool calls, check if we have a final answer
+            content = message.get("content")
+            if content:
+                return content
+
+        # If we exhausted iterations
+        logger.warning(f"Maximum iterations ({max_iterations}) reached")
+        return "FINISH([\"Unable to complete task within maximum iterations\"])"
+
+    async def _run_without_tools(self, messages: List[Dict[str, Any]]) -> str:
+        """Run LLM without tools.
+
+        Args:
+            messages: Conversation history
+
+        Returns:
+            Response content
+        """
+        logger.info("Calling GPT-5 without tools")
+        response = completion(
+            messages=messages,
+            model="openai/gpt-5",
+            custom_llm_provider="openai",
+        )
+        message = response.choices[0].message.model_dump()
+        messages.append(message)
+        return message.get("content", "")
 
     async def execute(self, context: RequestContext, event_queue: EventQueue) -> None:
         """Execute the white agent task with MCP tool support.
@@ -149,92 +255,52 @@ class MedAgentWhiteExecutor(AgentExecutor):
             "content": user_input,
         })
 
-        # Discover tools from MCP server on first message
-        if len(messages) == 1:
-            logger.info(f"Discovering tools from MCP server: {self.mcp_server_url}")
-            mcp_tools = await self.discover_tools(self.mcp_server_url)
-            self.ctx_id_to_tools[context.context_id] = {
-                "mcp_url": self.mcp_server_url,
-                "tools": mcp_tools,
-                "openai_tools": self.convert_tools_to_openai_format(mcp_tools)
-            }
-            logger.info(f"Discovered {len(mcp_tools)} tools")
+        # Connect to MCP server and run the entire tool-calling loop within the context
+        sse_url = f"{self.mcp_server_url}/sse"
+        logger.info(f"Connecting to MCP server at {sse_url}")
 
-        # Get tools for this context
-        tool_config = self.ctx_id_to_tools.get(context.context_id)
+        final_content: Optional[str] = None
 
-        # Call LLM with or without tools
-        max_iterations = 10  # Prevent infinite loops
-        for iteration in range(max_iterations):
-            if tool_config:
-                # Use function calling
-                logger.info(f"Calling GPT-5 with {len(tool_config['openai_tools'])} tools (iteration {iteration + 1})")
-                response = completion(
-                    messages=messages,
-                    model="openai/gpt-5",
-                    custom_llm_provider="openai",
-                    tools=tool_config["openai_tools"],
-                    tool_choice="auto"
+        try:
+            # Use proper async with blocks to keep the connection alive
+            async with sse_client(sse_url) as (read_stream, write_stream):
+                async with ClientSession(read_stream, write_stream) as session:
+                    await session.initialize()
+                    logger.info("MCP session initialized")
+
+                    # Discover tools
+                    mcp_tools = await self.discover_tools(session)
+                    logger.info(f"Discovered {len(mcp_tools)} tools")
+
+                    if mcp_tools:
+                        openai_tools = self.convert_tools_to_openai_format(mcp_tools)
+                        # Run the LLM loop with tools
+                        final_content = await self._run_with_mcp(
+                            messages, session, openai_tools, context.context_id
+                        )
+                    else:
+                        # No tools available, run without
+                        final_content = await self._run_without_tools(messages)
+
+        except Exception as e:
+            logger.error(f"Failed to connect to MCP server or execute: {e}")
+            # Fall back to running without tools
+            final_content = await self._run_without_tools(messages)
+
+        # Send final response
+        if final_content:
+            preview = final_content[:200] + "..." if len(final_content) > 200 else final_content
+            logger.info(f"Sending final response to green agent: {preview}")
+            await event_queue.enqueue_event(
+                new_agent_text_message(final_content, context_id=context.context_id)
+            )
+        else:
+            await event_queue.enqueue_event(
+                new_agent_text_message(
+                    "FINISH([\"No response generated\"])",
+                    context_id=context.context_id
                 )
-            else:
-                # Regular completion without tools
-                logger.info(f"Calling GPT-5 without tools")
-                response = completion(
-                    messages=messages,
-                    model="openai/gpt-5",
-                    custom_llm_provider="openai",
-                )
-
-            message = response.choices[0].message.model_dump()
-            messages.append(message)
-
-            # Check if the model wants to call a tool
-            tool_calls = message.get("tool_calls")
-            if tool_calls:
-                logger.info(f"Model requested {len(tool_calls)} tool calls")
-
-                # Execute each tool call
-                for tool_call in tool_calls:
-                    function_name = tool_call["function"]["name"]
-                    function_args = json.loads(tool_call["function"]["arguments"])
-
-                    logger.info(f"Invoking tool '{function_name}' with args: {function_args}")
-
-                    # Invoke tool via MCP server
-                    tool_result = await self.invoke_tool(
-                        tool_config["mcp_url"],
-                        function_name,
-                        function_args
-                    )
-                    logger.info(f"Tool result received")
-
-                    # Add tool result to messages
-                    messages.append({
-                        "role": "tool",
-                        "tool_call_id": tool_call["id"],
-                        "name": function_name,
-                        "content": json.dumps(tool_result)
-                    })
-
-                # Continue loop to get next response from model
-                continue
-
-            # No tool calls, check if we have a final answer
-            content = message.get("content")
-            if content:
-                logger.info(f"Sending final response to green agent: {content[:200]}...")
-
-                await event_queue.enqueue_event(
-                    new_agent_text_message(content, context_id=context.context_id)
-                )
-                return
-
-        # If we exhausted iterations, return whatever we have
-        logger.warning(f"Maximum iterations ({max_iterations}) reached")
-        final_msg = "FINISH([\"Unable to complete task within maximum iterations\"])"
-        await event_queue.enqueue_event(
-            new_agent_text_message(final_msg, context_id=context.context_id)
-        )
+            )
 
     async def cancel(self, context, event_queue) -> None:
         """Cancel execution."""

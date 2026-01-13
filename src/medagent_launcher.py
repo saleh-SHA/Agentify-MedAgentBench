@@ -6,7 +6,8 @@ import os
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 
-import requests
+from mcp import ClientSession
+from mcp.client.sse import sse_client
 from src.green_agent.medagent import start_medagent_green, OUTPUT_DIR
 from src.white_agent.medagent import start_medagent_white
 from src.my_util import my_a2a, logging_config
@@ -176,8 +177,9 @@ def write_overall_json(
     
     return overall
 
-def load_medagent_tasks(mcp_server_url: str):
-    """Load MedAgentBench tasks from MCP server.
+
+async def load_medagent_tasks(mcp_server_url: str):
+    """Load MedAgentBench tasks from MCP server via SSE.
 
     Args:
         mcp_server_url: URL of the MCP server
@@ -185,14 +187,31 @@ def load_medagent_tasks(mcp_server_url: str):
     Returns:
         List of MedAgentBench Task Inputs
     """
+    sse_url = f"{mcp_server_url}/sse"
+    logger.info(f"Connecting to MCP server at {sse_url} to load tasks...")
+    
     try:
-        response = requests.get(f"{mcp_server_url}/resources/medagentbench_tasks", timeout=10.0)
-        response.raise_for_status()
-        response_json = response.json()
-        tasks = response_json["data"]["tasks"]
-        return tasks
-    except requests.RequestException as e:
-        raise Exception(reason="Error loading MedAgentBench tasks from MCP server", detail=str(e))
+        async with sse_client(sse_url) as (read_stream, write_stream):
+            async with ClientSession(read_stream, write_stream) as session:
+                await session.initialize()
+                
+                # Read the tasks resource
+                result = await session.read_resource("medagentbench://tasks")
+                
+                # Extract content from the result
+                if result.contents:
+                    for content in result.contents:
+                        if hasattr(content, 'text'):
+                            data = json.loads(content.text)
+                            tasks = data.get("tasks", [])
+                            logger.info(f"Loaded {len(tasks)} tasks from MCP server")
+                            return tasks
+                
+                logger.error("No task content found in MCP response")
+                return []
+    except Exception as e:
+        logger.error(f"Error loading MedAgentBench tasks from MCP server: {e}")
+        raise Exception(f"Error loading MedAgentBench tasks from MCP server: {e}")
 
 
 async def launch_medagent_evaluation(
@@ -221,15 +240,15 @@ async def launch_medagent_evaluation(
 
     # Load test data
     logger.info("Loading MedAgentBench test data...")
-    tasks = load_medagent_tasks(mcp_server_url)
+    tasks = await load_medagent_tasks(mcp_server_url)
     if task_index >= len(tasks):
         logger.error(f"Error: Task index {task_index} out of range (max: {len(tasks) - 1})")
         return
 
     task_data = tasks[task_index]
-    logger.info(f"Selected task: {task_data["id"]}")
-    logger.info(f"Question: {task_data["instruction"]}")
-    logger.info(f"Expected answer: {task_data.get("sol", [])}")
+    logger.info(f"Selected task: {task_data['id']}")
+    instruction_preview = task_data['instruction'][:150] + "..." if len(task_data['instruction']) > 150 else task_data['instruction']
+    logger.info(f"Question: {instruction_preview}")
 
     # Start green agent
     logger.info("Launching MedAgentBench green agent...")
@@ -277,8 +296,7 @@ async def launch_medagent_evaluation(
             </medagent_config>
         """
 
-    logger.info("Task configuration:")
-    logger.info(task_text)
+    logger.info(f"Prepared task configuration for task {task_data['id']}")
 
     # Send task to green agent
     logger.info("Sending task to green agent...")
@@ -361,7 +379,7 @@ async def launch_medagent_batch_evaluation(
         List of task results and writes overall.json to output directory
     """
     logger.info("Loading MedAgentBench test data...")
-    tasks = load_medagent_tasks(mcp_server_url)
+    tasks = await load_medagent_tasks(mcp_server_url)
 
     if task_indices is None:
         task_indices = list(range(len(tasks)))
@@ -375,17 +393,14 @@ async def launch_medagent_batch_evaluation(
         runs_file = os.path.join(output_dir, "runs.jsonl")
         if os.path.exists(runs_file):
             os.remove(runs_file)
-            logger.info(f"Cleared previous runs file: {runs_file}")
         
         error_file = os.path.join(output_dir, "error.jsonl")
         if os.path.exists(error_file):
             os.remove(error_file)
-            logger.info(f"Cleared previous error file: {error_file}")
         
         overall_file = os.path.join(output_dir, "overall.json")
         if os.path.exists(overall_file):
             os.remove(overall_file)
-            logger.info(f"Cleared previous overall file: {overall_file}")
     
     logger.info(f"Output directory: {output_dir}")
     logger.info(f"Running {len(task_indices)} tasks...")

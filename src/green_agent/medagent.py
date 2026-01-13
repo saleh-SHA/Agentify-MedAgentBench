@@ -151,6 +151,23 @@ def write_overall_metrics(
     return overall
 
 
+def sanitize_task_data(task_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Create a sanitized copy of task_data without evaluation fields.
+    
+    Removes 'sol' (solution) and 'eval_MRN' fields which should not be
+    exposed to the agent being evaluated.
+    
+    Args:
+        task_data: Original task data
+        
+    Returns:
+        Sanitized task data safe to send to the white agent
+    """
+    # Fields that should not be sent to the white agent
+    evaluation_fields = {'sol', 'eval_MRN'}
+    return {k: v for k, v in task_data.items() if k not in evaluation_fields}
+
+
 async def ask_agent_to_solve(
     white_agent_url: str,
     task_data: Dict[str, Any],
@@ -169,7 +186,8 @@ async def ask_agent_to_solve(
             - id: Task identifier
             - instruction: The medical question to answer
             - context: Additional context for the task
-            - sol: Expected solution (for evaluation)
+            - sol: Expected solution (for evaluation, NOT sent to agent)
+            - eval_MRN: Evaluation MRN (for evaluation, NOT sent to agent)
         mcp_server_url: URL of the MCP server providing FHIR tools (e.g., "http://0.0.0.0:8002")
         max_num_steps: Maximum number of tool-calling rounds (passed to white agent context)
 
@@ -180,20 +198,20 @@ async def ask_agent_to_solve(
             - history: Conversation history
             - correct: Whether the answer was correct (if completed)
     """
+    # Sanitize task_data to remove evaluation fields before using in prompts
+    safe_task_data = sanitize_task_data(task_data)
 
     # Build the task prompt with MCP server information
     task_prompt = MEDAGENT_PROMPT.format(
         mcp_server_url=mcp_server_url,
-        context=task_data.get('context', 'N/A'),
-        question=task_data['instruction']
+        context=safe_task_data.get('context', 'N/A'),
+        question=safe_task_data['instruction']
     )
 
     history = []
 
-    logger.info(f"Starting MedAgentBench task {task_data['id']}...")
-    logger.info(f"Sending task to white agent...")
-    logger.info(f"MCP Server URL: {mcp_server_url}")
-    logger.info(f"Task: {task_data['instruction'][:100]}...")
+    instruction_preview = task_data['instruction'][:100] + "..." if len(task_data['instruction']) > 100 else task_data['instruction']
+    logger.info(f"Starting task {task_data['id']}: {instruction_preview}")
 
     # Send the task prompt to white agent - it will handle tool discovery and invocation internally
     white_agent_response = await my_a2a.send_message(
@@ -215,7 +233,8 @@ async def ask_agent_to_solve(
     # Clean up response (remove markdown code blocks if present - common with some models)
     agent_response = agent_response.replace('```tool_code', '').replace('```', '').strip()
 
-    logger.info(f"White agent final response:\n{agent_response[:500]}...")
+    response_preview = agent_response[:500] + "..." if len(agent_response) > 500 else agent_response
+    logger.info(f"White agent response: {response_preview}")
     history.append({"role": "assistant", "content": agent_response})
 
     # Parse the FINISH format from the response
@@ -286,7 +305,8 @@ async def ask_agent_to_solve(
         }
 
     # Agent didn't return FINISH format
-    logger.warning(f"Agent did not return FINISH format: {agent_response[:200]}...")
+    warning_preview = agent_response[:200] + "..." if len(agent_response) > 200 else agent_response
+    logger.warning(f"Agent did not return FINISH format: {warning_preview}")
     return {
         "status": "agent_invalid_action",
         "result": agent_response,
@@ -330,7 +350,6 @@ class MedAgentGreenExecutor(AgentExecutor):
         medagent_config = json.loads(medagent_config_str)
 
         # Extract configuration
-        logger.info("Setting up MedAgentBench environment...")
         mcp_server_url = medagent_config.get("mcp_server_url", "http://0.0.0.0:8002")
         max_rounds = medagent_config.get("max_rounds", 9)
         task_data = medagent_config["task_data"]
@@ -463,13 +482,11 @@ Metrics:
 {json.dumps(metrics, indent=2)}
 """
 
-        logger.info("Evaluation complete.")
-        logger.info(report)
+        logger.info(f"Task {task_data['id']} completed: {'Correct' if is_correct else 'Incorrect'} in {time_used:.2f}s")
         
-        # Print to console for visibility (matching MegAgentBench behavior)
+        # Print summary to console for visibility
         print(f"\n{'='*60}")
         print(f"Task {task_data['id']}: {result_emoji} {'Correct' if is_correct else 'Incorrect'}")
-        print(f"Status: {task_output.status}")
         print(f"Time: {time_used:.2f}s | Rounds: {task_output.rounds}")
         print(f"{'='*60}\n", flush=True)
 
