@@ -33,3 +33,40 @@ def send_get_request(url, params=None, headers=None):
         }
     except Exception as e:
         return {"error": str(e)}
+
+
+def send_post_request(url, payload, headers=None):
+    """
+    Sends a POST HTTP request to the given URL with JSON payload.
+
+    Args:
+        url (str): The URL to send the POST request to.
+        payload (dict): The JSON payload to include in the request body.
+        headers (dict, optional): HTTP headers to include in the request. Defaults to None.
+
+    Returns:
+        dict: A dictionary containing the response's status code and data.
+
+    Raises:
+        requests.exceptions.RequestException: If an error occurs during the request.
+    """
+    try:
+        default_headers = {"Content-Type": "application/json"}
+        if headers:
+            default_headers.update(headers)
+        
+        response = requests.post(url, json=payload, headers=default_headers)
+        response.raise_for_status()  # Raises an HTTPError if the response code is 4xx or 5xx
+        
+        # Try to parse as JSON, fall back to text
+        try:
+            data = response.json()
+        except:
+            data = response.text
+            
+        return {
+            "status_code": response.status_code,
+            "data": data
+        }
+    except Exception as e:
+        return {"error": str(e)}

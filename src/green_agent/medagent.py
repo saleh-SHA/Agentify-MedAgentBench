@@ -8,6 +8,8 @@ import json
 import time
 import datetime
 from src.green_agent.eval_resources import eval
+from src.green_agent.eval_resources.eval import calculate_overall_metrics
+from src.green_agent.eval_resources.utils import send_get_request, send_post_request
 from typing import Dict, Any, List, Optional
 from src.typings.output import TaskOutput
 from src.typings.status import SampleStatus
@@ -24,6 +26,35 @@ from src.my_util import parse_tags, my_a2a, logging_config
 dotenv.load_dotenv()
 FHIR_API_BASE = os.environ.get("MCP_FHIR_API_BASE", "http://localhost:8080/fhir/")
 OUTPUT_DIR = os.environ.get("MEDAGENT_OUTPUT_DIR", "outputs/medagentbench")
+
+# MedAgentBench prompt template with MCP server instructions
+MEDAGENT_PROMPT = """You are an expert in using FHIR functions to assist medical professionals. You are given a question and a set of possible functions. Based on the question, you will need to make one or more function/tool calls to achieve the purpose.
+
+* You have access to MCP tools for querying and updating a FHIR (Fast Healthcare Interoperability Resources) server.
+MCP Server URL: {mcp_server_url}
+
+Instructions:
+1. First, discover available tools by querying: GET {mcp_server_url}/tools
+
+2. Read the arguments carefully for each tool and decide which tool to call.
+
+3. Use tools by calling the MCP server's tool invocation endpoint: POST {mcp_server_url}/tools/invoke
+Payload format:
+{{
+  "tool_name": "tool_name",
+  "arguments": {{
+    "argument_name": "argument_value"
+  }}
+}}
+
+3. If you have got answers for all the questions and finished all the requested tasks, you MUST call to finish the conversation in the format of (make sure the list is JSON loadable.)
+FINISH([answer1, answer2, ...])
+
+Your response must be in the format of one of the three cases, and you can call only one function each time. You SHOULD NOT include any other text in the response.
+
+Task Context: {context}
+
+Question: {question}"""
 
 logger = logging_config.setup_logging("logs/green_agent.log", "green_agent")
 
@@ -99,85 +130,6 @@ def write_run_result(
     logger.info(f"Result written to {target_file}")
 
 
-def calculate_overall_metrics(
-    results: List[TaskOutput],
-    task_data_list: List[Dict[str, Any]],
-    fhir_api_base: str
-) -> Dict[str, Any]:
-    """Calculate overall evaluation metrics from a list of task results.
-    
-    Args:
-        results: List of TaskOutput objects
-        task_data_list: List of task data dictionaries (for evaluation)
-        fhir_api_base: Base URL for FHIR API
-        
-    Returns:
-        Dictionary containing overall metrics including:
-        - total: Total number of results
-        - validation: Status distribution and history length statistics
-        - custom: Task-specific metrics (success rate, raw results)
-    """
-    total = len(results)
-    
-    # Calculate status distribution
-    status_counts: Dict[str, int] = {}
-    for result in results:
-        status = result.status or "unknown"
-        status_counts[status] = status_counts.get(status, 0) + 1
-    
-    # Convert to percentages
-    status_distribution = {k: v / total for k, v in status_counts.items()}
-    
-    # Calculate history length statistics
-    history_lengths = [
-        len(result.history) if result.history else 0 
-        for result in results
-    ]
-    
-    validation = {
-        **status_distribution,
-        "average_history_length": sum(history_lengths) / total if total > 0 else 0,
-        "max_history_length": max(history_lengths) if history_lengths else 0,
-        "min_history_length": min(history_lengths) if history_lengths else 0,
-    }
-    
-    # Calculate task-specific metrics (success rate)
-    correct_count = 0
-    evaluated_results = []
-    
-    for i, result in enumerate(results):
-        if result.result is not None and i < len(task_data_list):
-            task_data = task_data_list[i]
-            try:
-                is_correct = eval.eval(task_data, result, fhir_api_base) is True
-            except Exception as e:
-                logger.error(f"Evaluation error for task {result.index}: {e}")
-                is_correct = False
-            
-            if is_correct:
-                correct_count += 1
-                result.status = (result.status or "") + " Correct"
-            else:
-                result.status = (result.status or "") + " Incorrect"
-        
-        evaluated_results.append(result.model_dump())
-    
-    success_rate = correct_count / total if total > 0 else 0
-    
-    custom = {
-        "success_rate": success_rate,
-        "correct_count": correct_count,
-        "total_evaluated": total,
-        "raw_results": evaluated_results,
-    }
-    
-    return {
-        "total": total,
-        "validation": validation,
-        "custom": custom,
-    }
-
-
 def write_overall_metrics(
     output_dir: str,
     results: List[TaskOutput],
@@ -216,8 +168,8 @@ async def ask_agent_to_solve(
     """Execute a single MedAgentBench task with the white agent.
 
     This function coordinates a multi-turn conversation with the white agent to solve
-    a medical task. The white agent will discover and use tools from the MCP server
-    to interact with the FHIR server and answer medical questions.
+    a medical task. The green agent receives GET/POST commands from the white agent,
+    executes them against the FHIR/MCP server, and returns the results in the conversation.
 
     Args:
         white_agent_url: URL of the white agent to test
@@ -227,7 +179,7 @@ async def ask_agent_to_solve(
             - context: Additional context for the task
             - sol: Expected solution (for evaluation)
         mcp_server_url: URL of the MCP server providing FHIR tools (e.g., "http://0.0.0.0:8002")
-        max_num_steps: Maximum number of interaction rounds (default: 8)
+        max_num_steps: Maximum number of interaction rounds (default: 9)
 
     Returns:
         Dictionary containing:
@@ -238,32 +190,11 @@ async def ask_agent_to_solve(
     """
 
     # Build the initial task prompt with MCP server information
-    task_prompt = f"""You are an expert in using FHIR functions to assist medical professionals. You are given a question and a set of possible functions. Based on the question, you will need to make one or more function/tool calls to achieve the purpose.
-
-1. If you decide to invoke a GET function, you MUST put it in the format of
-GET url?param_name1=param_value1&param_name2=param_value2...
-
-2. If you decide to invoke a POST function, you MUST put it in the format of
-POST url
-[your payload data in JSON format]
-
-3. If you have got answers for all the questions and finished all the requested tasks, you MUST call to finish the conversation in the format of (make sure the list is JSON loadable.)
-FINISH([answer1, answer2, ...])
-
-Your response must be in the format of one of the three cases, and you can call only one function each time. You SHOULD NOT include any other text in the response.
-
-Instructions:
-* You have access to tools for querying and updating a FHIR (Fast Healthcare Interoperability Resources) server.
-* First, discover available tools by querying: GET {mcp_server_url}/tools
-* Use tools by calling the MCP server's tool invocation endpoint: POST {mcp_server_url}/tools/invoke
-
-
-MCP Server URL: {mcp_server_url}
-
-Task Context: {task_data.get('context', 'N/A')}
-
-Question: {task_data['instruction']}
-"""
+    task_prompt = MEDAGENT_PROMPT.format(
+        mcp_server_url=mcp_server_url,
+        context=task_data.get('context', 'N/A'),
+        question=task_data['instruction']
+    )
 
     context_id = None
     history = []
@@ -290,20 +221,70 @@ Question: {task_data['instruction']}
     history.append({"role": "user", "content": task_prompt})
 
     # Multi-turn interaction loop
-    # The white agent will interact with the MCP server directly
+    # Parse agent responses and execute GET/POST requests, then inject results
     for round_num in range(max_num_steps):
         # Get agent's response
         text_parts = get_text_parts(res_result.parts)
         assert len(text_parts) == 1, "Expecting exactly one text part from the white agent"
         agent_response = text_parts[0].strip()
+        
+        # Clean up response (remove markdown code blocks if present - common with some models)
+        agent_response = agent_response.replace('```tool_code', '').replace('```', '').strip()
 
         logger.info(f"White agent response (round {round_num + 1}):\n{agent_response[:200]}...")
         history.append({"role": "assistant", "content": agent_response})
 
-        # Check if agent has finished
-        if agent_response.startswith('FINISH(') and agent_response.endswith(')'):
+        # Parse agent response and determine action
+        if agent_response.startswith('GET'):
+            # Handle GET request
+            url = agent_response[3:].strip()
+            # Add JSON format parameter if not already present
+            if '?' in url:
+                url = url + '&_format=json'
+            else:
+                url = url + '?_format=json'
+            
+            logger.info(f"Executing GET request: {url}")
+            get_res = send_get_request(url)
+            
+            if "data" in get_res:
+                feedback = f"Here is the response from the GET request:\n{get_res['data']}. Please call FINISH if you have got answers for all the questions and finished all the requested tasks"
+            else:
+                feedback = f"Error in sending the GET request: {get_res['error']}"
+            
+            logger.info(f"GET response received, sending back to agent...")
+
+        elif agent_response.startswith('POST'):
+            # Handle POST request
+            try:
+                # Parse the URL from the first line and payload from subsequent lines
+                lines = agent_response.split('\n')
+                url = lines[0][4:].strip()  # Remove 'POST' prefix
+                payload_str = '\n'.join(lines[1:])
+                payload = json.loads(payload_str)
+                
+                logger.info(f"Executing POST request to: {url}")
+                logger.info(f"Payload: {json.dumps(payload)[:200]}...")
+                
+                # Execute the POST request and return the result
+                post_res = send_post_request(url, payload)
+                
+                if "data" in post_res:
+                    feedback = f"Here is the response from the POST request:\n{post_res['data']}. Please call FINISH if you have got answers for all the questions and finished all the requested tasks"
+                else:
+                    feedback = f"Error in sending the POST request: {post_res['error']}"
+                
+                logger.info(f"POST response received, sending back to agent...")
+            except json.JSONDecodeError as e:
+                logger.error(f"Invalid JSON payload in POST request: {e}")
+                feedback = f"Invalid POST request: Could not parse JSON payload - {e}"
+            except Exception as e:
+                logger.error(f"Invalid POST request: {e}")
+                feedback = f"Invalid POST request: {e}"
+
+        elif agent_response.startswith('FINISH(') and agent_response.endswith(')'):
             # Agent has finished - extract answer
-            answer = agent_response[7:-1]  # Remove "FINISH(" and ")"
+            answer = agent_response[len('FINISH('):-1]  # Remove "FINISH(" and ")"
             logger.info(f"Task completed with answer: {answer}")
 
             # Check if answer is correct
@@ -317,7 +298,7 @@ Question: {task_data['instruction']}
                 else:
                     # Try substring match (check if expected answer is contained in agent's response)
                     for expected in expected_solutions:
-                        if expected in answer:
+                        if str(expected) in answer:
                             is_correct = True
                             break
 
@@ -329,12 +310,19 @@ Question: {task_data['instruction']}
                 "rounds": round_num + 1
             }
 
-        # If not finished, the white agent is continuing to work
-        # Send acknowledgment to allow it to continue
-        logger.info(f"White agent is continuing work...")
+        else:
+            # Invalid action - agent didn't follow the required format
+            # The agent MUST respond with GET, POST, or FINISH only
+            logger.warning(f"Agent returned invalid action: {agent_response[:100]}...")
+            return {
+                "status": "agent_invalid_action",
+                "result": None,
+                "history": history,
+                "correct": False,
+                "rounds": round_num + 1
+            }
 
-        feedback = "Continue with your analysis and tool usage."
-
+        # Send feedback back to the agent
         white_agent_response = await my_a2a.send_message(
             white_agent_url, feedback, context_id=context_id
         )
@@ -348,7 +336,7 @@ Question: {task_data['instruction']}
     # Max rounds reached
     logger.info(f"Maximum rounds ({max_num_steps}) reached without completion")
     return {
-        "status": "max_rounds_reached",
+        "status": "task_limit_reached",
         "result": None,
         "history": history,
         "correct": False,
@@ -361,10 +349,17 @@ class MedAgentGreenExecutor(AgentExecutor):
 
     This executor handles incoming task requests, sets up the MedAgentBench
     evaluation environment, coordinates with the white agent, and reports results.
+    
+    The executor tracks all task results and writes overall metrics when
+    the final task is processed (indicated by is_final_task flag in config).
     """
 
     def __init__(self):
-        pass
+        # Track all results and task data for overall metrics calculation
+        self.all_results: List[TaskOutput] = []
+        self.all_task_data: List[Dict[str, Any]] = []
+        self.current_output_dir: Optional[str] = None
+        self.current_fhir_api_base: str = FHIR_API_BASE
 
     async def execute(self, context: RequestContext, event_queue: EventQueue) -> None:
         """Execute a MedAgentBench evaluation task.
@@ -387,14 +382,19 @@ class MedAgentGreenExecutor(AgentExecutor):
         mcp_server_url = medagent_config.get("mcp_server_url", "http://0.0.0.0:8002")
         max_rounds = medagent_config.get("max_rounds", 9)
         task_data = medagent_config["task_data"]
+        is_final_task = medagent_config.get("is_final_task", False)
         
         # Optional: agent name and task name for output directory
         agent_name = medagent_config.get("agent_name", "default_agent")
         task_name = medagent_config.get("task_name", "medagentbench")
         output_dir = get_output_dir(agent_name, task_name)
+        
+        # Store output directory and fhir_api_base for overall metrics
+        self.current_output_dir = output_dir
+        self.current_fhir_api_base = medagent_config.get("fhir_api_base", FHIR_API_BASE)
 
         logger.info(f"Task ID: {task_data['id']}")
-        logger.info(f"MCP Server: {mcp_server_url}")
+        logger.info(f"MCP Server URL: {mcp_server_url}")
         logger.info(f"Max rounds: {max_rounds}")
         logger.info(f"Output directory: {output_dir}")
 
@@ -487,6 +487,24 @@ class MedAgentGreenExecutor(AgentExecutor):
             error=error_msg,
             info=error_info
         )
+        
+        # Store results for overall metrics calculation
+        self.all_results.append(task_output)
+        self.all_task_data.append(task_data)
+        
+        # If this is the final task, write overall metrics
+        if is_final_task:
+            logger.info("Final task completed, writing overall metrics...")
+            overall_metrics = write_overall_metrics(
+                output_dir=output_dir,
+                results=self.all_results,
+                task_data_list=self.all_task_data,
+                fhir_api_base=self.current_fhir_api_base
+            )
+            logger.info(f"Overall success rate: {overall_metrics['custom']['success_rate']:.2%}")
+            # Reset for next batch
+            self.all_results = []
+            self.all_task_data = []
 
         # Prepare detailed report
         report = f"""MedAgentBench Evaluation Complete {result_emoji}

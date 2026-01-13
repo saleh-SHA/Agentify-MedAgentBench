@@ -183,9 +183,9 @@ async def launch_medagent_batch_evaluation(
 
     results = []
 
-    for idx in task_indices:
+    for i, idx in enumerate(task_indices):
         logger.info(f"\n{'='*80}")
-        logger.info(f"Running task {idx + 1}/{len(task_indices)}")
+        logger.info(f"Running task {i + 1}/{len(task_indices)}")
         logger.info(f"{'='*80}\n")
 
         result = await launch_medagent_evaluation(
