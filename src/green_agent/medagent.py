@@ -8,7 +8,6 @@ import json
 import time
 import datetime
 from src.green_agent.eval_resources import eval
-from src.green_agent.eval_resources.eval import calculate_overall_metrics
 from src.green_agent.eval_resources.utils import send_get_request, send_post_request
 from typing import Dict, Any, List, Optional
 from src.typings.output import TaskOutput
@@ -30,15 +29,19 @@ OUTPUT_DIR = os.environ.get("MEDAGENT_OUTPUT_DIR", "outputs/medagentbench")
 # MedAgentBench prompt template with MCP server instructions
 MEDAGENT_PROMPT = """You are an expert in using FHIR functions to assist medical professionals. You are given a question and a set of possible functions. Based on the question, you will need to make one or more function/tool calls to achieve the purpose.
 
-* You have access to MCP tools for querying and updating a FHIR (Fast Healthcare Interoperability Resources) server.
-MCP Server URL: {mcp_server_url}
+
+
 
 Instructions:
-1. First, discover available tools by querying: GET {mcp_server_url}/tools
+* Read the arguments carefully for each tool before deciding which are the suitable arguments to use.
 
-2. Read the arguments carefully for each tool and decide which tool to call.
+* Some arguments are too general and some are more relevant to the question. You should use the more specific relevant arguments to the question.
 
-3. Use tools by calling the MCP server's tool invocation endpoint: POST {mcp_server_url}/tools/invoke
+* If you decide to invoke a GET function, you MUST put it in the format of
+GET {mcp_server_url}/tools
+
+* If you decide to invoke a POST function, you MUST put it in the format of 
+POST {mcp_server_url}/tools/invoke
 Payload format:
 {{
   "tool_name": "tool_name",
@@ -130,32 +133,83 @@ def write_run_result(
     logger.info(f"Result written to {target_file}")
 
 
-def write_overall_metrics(
-    output_dir: str,
-    results: List[TaskOutput],
-    task_data_list: List[Dict[str, Any]],
-    fhir_api_base: str
-) -> Dict[str, Any]:
-    """Calculate and write overall metrics to overall.json.
+def update_overall_from_runs(output_dir: str) -> Dict[str, Any]:
+    """Read all results from runs.jsonl and update overall.json.
+    
+    This function reads all completed task results from runs.jsonl,
+    calculates overall metrics, and writes them to overall.json.
+    Called after every task to keep overall.json up to date.
     
     Args:
-        output_dir: Directory to write the metrics to
-        results: List of TaskOutput objects
-        task_data_list: List of task data dictionaries
-        fhir_api_base: Base URL for FHIR API
+        output_dir: Directory containing runs.jsonl and where overall.json will be written
         
     Returns:
-        The calculated overall metrics dictionary
+        The calculated overall metrics dictionary, or empty dict if no results
     """
-    os.makedirs(output_dir, exist_ok=True)
+    runs_file = os.path.join(output_dir, "runs.jsonl")
     
-    overall = calculate_overall_metrics(results, task_data_list, fhir_api_base)
+    if not os.path.exists(runs_file):
+        logger.warning(f"No runs.jsonl found at {runs_file}")
+        return {}
     
+    # Read all results from runs.jsonl
+    results = []
+    with open(runs_file, "r", encoding="utf-8") as f:
+        for line in f:
+            if line.strip():
+                record = json.loads(line)
+                if record.get("output"):
+                    results.append(record["output"])
+    
+    if not results:
+        logger.warning("No results found in runs.jsonl")
+        return {}
+    
+    # Calculate simple overall metrics (without re-evaluation)
+    total = len(results)
+    
+    # Count by status
+    status_counts: Dict[str, int] = {}
+    correct_count = 0
+    for result in results:
+        status = result.get("status", "unknown")
+        status_counts[status] = status_counts.get(status, 0) + 1
+        # Check if marked as correct (status contains "Correct")
+        if "Correct" in status:
+            correct_count += 1
+    
+    # Calculate history length statistics
+    history_lengths = [
+        len(result.get("history", [])) 
+        for result in results
+    ]
+    
+    validation = {
+        **{k: v / total for k, v in status_counts.items()},
+        "average_history_length": sum(history_lengths) / total if total > 0 else 0,
+        "max_history_length": max(history_lengths) if history_lengths else 0,
+        "min_history_length": min(history_lengths) if history_lengths else 0,
+    }
+    
+    success_rate = correct_count / total if total > 0 else 0
+    
+    overall = {
+        "total": total,
+        "validation": validation,
+        "custom": {
+            "success_rate": success_rate,
+            "correct_count": correct_count,
+            "total_evaluated": total,
+            "raw_results": results,
+        },
+    }
+    
+    # Write to overall.json
     output_file = os.path.join(output_dir, "overall.json")
     with open(output_file, "w", encoding="utf-8") as f:
         f.write(json.dumps(overall, indent=4, ensure_ascii=False))
     
-    logger.info(f"Overall metrics written to {output_file}")
+    logger.info(f"Overall metrics updated: {correct_count}/{total} correct ({success_rate:.2%})")
     return overall
 
 
@@ -350,16 +404,12 @@ class MedAgentGreenExecutor(AgentExecutor):
     This executor handles incoming task requests, sets up the MedAgentBench
     evaluation environment, coordinates with the white agent, and reports results.
     
-    The executor tracks all task results and writes overall metrics when
-    the final task is processed (indicated by is_final_task flag in config).
+    Overall metrics (overall.json) are automatically updated after every task
+    by reading all results from runs.jsonl.
     """
 
     def __init__(self):
-        # Track all results and task data for overall metrics calculation
-        self.all_results: List[TaskOutput] = []
-        self.all_task_data: List[Dict[str, Any]] = []
-        self.current_output_dir: Optional[str] = None
-        self.current_fhir_api_base: str = FHIR_API_BASE
+        pass
 
     async def execute(self, context: RequestContext, event_queue: EventQueue) -> None:
         """Execute a MedAgentBench evaluation task.
@@ -382,16 +432,11 @@ class MedAgentGreenExecutor(AgentExecutor):
         mcp_server_url = medagent_config.get("mcp_server_url", "http://0.0.0.0:8002")
         max_rounds = medagent_config.get("max_rounds", 9)
         task_data = medagent_config["task_data"]
-        is_final_task = medagent_config.get("is_final_task", False)
         
         # Optional: agent name and task name for output directory
         agent_name = medagent_config.get("agent_name", "default_agent")
         task_name = medagent_config.get("task_name", "medagentbench")
         output_dir = get_output_dir(agent_name, task_name)
-        
-        # Store output directory and fhir_api_base for overall metrics
-        self.current_output_dir = output_dir
-        self.current_fhir_api_base = medagent_config.get("fhir_api_base", FHIR_API_BASE)
 
         logger.info(f"Task ID: {task_data['id']}")
         logger.info(f"MCP Server URL: {mcp_server_url}")
@@ -488,23 +533,8 @@ class MedAgentGreenExecutor(AgentExecutor):
             info=error_info
         )
         
-        # Store results for overall metrics calculation
-        self.all_results.append(task_output)
-        self.all_task_data.append(task_data)
-        
-        # If this is the final task, write overall metrics
-        if is_final_task:
-            logger.info("Final task completed, writing overall metrics...")
-            overall_metrics = write_overall_metrics(
-                output_dir=output_dir,
-                results=self.all_results,
-                task_data_list=self.all_task_data,
-                fhir_api_base=self.current_fhir_api_base
-            )
-            logger.info(f"Overall success rate: {overall_metrics['custom']['success_rate']:.2%}")
-            # Reset for next batch
-            self.all_results = []
-            self.all_task_data = []
+        # Update overall metrics from all runs (reads from runs.jsonl)
+        update_overall_from_runs(output_dir)
 
         # Prepare detailed report
         report = f"""MedAgentBench Evaluation Complete {result_emoji}
