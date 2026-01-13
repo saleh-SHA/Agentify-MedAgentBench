@@ -8,7 +8,7 @@ import json
 import time
 import datetime
 from src.green_agent.eval_resources import eval
-from src.green_agent.eval_resources.utils import send_get_request, send_post_request
+from src.green_agent.eval_resources.eval import calculate_overall_metrics
 from typing import Dict, Any, List, Optional
 from src.typings.output import TaskOutput
 from src.typings.status import SampleStatus
@@ -27,33 +27,22 @@ FHIR_API_BASE = os.environ.get("MCP_FHIR_API_BASE", "http://localhost:8080/fhir/
 OUTPUT_DIR = os.environ.get("MEDAGENT_OUTPUT_DIR", "outputs/medagentbench")
 
 # MedAgentBench prompt template with MCP server instructions
-MEDAGENT_PROMPT = """You are an expert in using FHIR functions to assist medical professionals. You are given a question and a set of possible functions. Based on the question, you will need to make one or more function/tool calls to achieve the purpose.
+# This prompt contains ALL instructions for the white agent (no system prompt in white agent)
+MEDAGENT_PROMPT = """You are an expert medical AI assistant that uses FHIR functions to assist medical professionals. You are given a question and a set of available FHIR tools. Based on the question, you will need to make one or more function/tool calls to achieve the purpose.
 
-
-
+You have access to FHIR tools via the MCP server at: {mcp_server_url}
 
 Instructions:
-* Read the arguments carefully for each tool before deciding which are the suitable arguments to use.
+1. Use the provided FHIR tools to query patient data, retrieve medical records, create orders, and perform other medical record operations as needed.
 
-* Some arguments are too general and some are more relevant to the question. You should use the more specific relevant arguments to the question.
+2. Read the arguments carefully for each tool before deciding which are the suitable arguments to use. Some arguments are too general and some are more relevant to the question.
 
-* If you decide to invoke a GET function, you MUST put it in the format of
-GET {mcp_server_url}/tools
+3. Make as many tool calls as needed to gather the information required to answer the question.
 
-* If you decide to invoke a POST function, you MUST put it in the format of 
-POST {mcp_server_url}/tools/invoke
-Payload format:
-{{
-  "tool_name": "tool_name",
-  "arguments": {{
-    "argument_name": "argument_value"
-  }}
-}}
-
-3. If you have got answers for all the questions and finished all the requested tasks, you MUST call to finish the conversation in the format of (make sure the list is JSON loadable.)
+4. When you have gathered all necessary information and have the final answer(s), you MUST respond with ONLY the finish format (make sure the list is JSON loadable):
 FINISH([answer1, answer2, ...])
 
-Your response must be in the format of one of the three cases, and you can call only one function each time. You SHOULD NOT include any other text in the response.
+IMPORTANT: Your final response MUST be in the FINISH format with no other text. The list inside FINISH() must be valid JSON.
 
 Task Context: {context}
 
@@ -133,83 +122,32 @@ def write_run_result(
     logger.info(f"Result written to {target_file}")
 
 
-def update_overall_from_runs(output_dir: str) -> Dict[str, Any]:
-    """Read all results from runs.jsonl and update overall.json.
-    
-    This function reads all completed task results from runs.jsonl,
-    calculates overall metrics, and writes them to overall.json.
-    Called after every task to keep overall.json up to date.
+def write_overall_metrics(
+    output_dir: str,
+    results: List[TaskOutput],
+    task_data_list: List[Dict[str, Any]],
+    fhir_api_base: str
+) -> Dict[str, Any]:
+    """Calculate and write overall metrics to overall.json.
     
     Args:
-        output_dir: Directory containing runs.jsonl and where overall.json will be written
+        output_dir: Directory to write the metrics to
+        results: List of TaskOutput objects
+        task_data_list: List of task data dictionaries
+        fhir_api_base: Base URL for FHIR API
         
     Returns:
-        The calculated overall metrics dictionary, or empty dict if no results
+        The calculated overall metrics dictionary
     """
-    runs_file = os.path.join(output_dir, "runs.jsonl")
+    os.makedirs(output_dir, exist_ok=True)
     
-    if not os.path.exists(runs_file):
-        logger.warning(f"No runs.jsonl found at {runs_file}")
-        return {}
+    overall = calculate_overall_metrics(results, task_data_list, fhir_api_base)
     
-    # Read all results from runs.jsonl
-    results = []
-    with open(runs_file, "r", encoding="utf-8") as f:
-        for line in f:
-            if line.strip():
-                record = json.loads(line)
-                if record.get("output"):
-                    results.append(record["output"])
-    
-    if not results:
-        logger.warning("No results found in runs.jsonl")
-        return {}
-    
-    # Calculate simple overall metrics (without re-evaluation)
-    total = len(results)
-    
-    # Count by status
-    status_counts: Dict[str, int] = {}
-    correct_count = 0
-    for result in results:
-        status = result.get("status", "unknown")
-        status_counts[status] = status_counts.get(status, 0) + 1
-        # Check if marked as correct (status contains "Correct")
-        if "Correct" in status:
-            correct_count += 1
-    
-    # Calculate history length statistics
-    history_lengths = [
-        len(result.get("history", [])) 
-        for result in results
-    ]
-    
-    validation = {
-        **{k: v / total for k, v in status_counts.items()},
-        "average_history_length": sum(history_lengths) / total if total > 0 else 0,
-        "max_history_length": max(history_lengths) if history_lengths else 0,
-        "min_history_length": min(history_lengths) if history_lengths else 0,
-    }
-    
-    success_rate = correct_count / total if total > 0 else 0
-    
-    overall = {
-        "total": total,
-        "validation": validation,
-        "custom": {
-            "success_rate": success_rate,
-            "correct_count": correct_count,
-            "total_evaluated": total,
-            "raw_results": results,
-        },
-    }
-    
-    # Write to overall.json
     output_file = os.path.join(output_dir, "overall.json")
     with open(output_file, "w", encoding="utf-8") as f:
         f.write(json.dumps(overall, indent=4, ensure_ascii=False))
     
-    logger.info(f"Overall metrics updated: {correct_count}/{total} correct ({success_rate:.2%})")
+    logger.info(f"Overall metrics written to {output_file}")
     return overall
 
 
@@ -221,9 +159,9 @@ async def ask_agent_to_solve(
 ) -> Dict[str, Any]:
     """Execute a single MedAgentBench task with the white agent.
 
-    This function coordinates a multi-turn conversation with the white agent to solve
-    a medical task. The green agent receives GET/POST commands from the white agent,
-    executes them against the FHIR/MCP server, and returns the results in the conversation.
+    This function sends the task prompt to the white agent which handles tool discovery
+    and invocation directly via the MCP server. The white agent performs multiple
+    internal rounds of tool calling and returns the final answer in FINISH format.
 
     Args:
         white_agent_url: URL of the white agent to test
@@ -233,7 +171,7 @@ async def ask_agent_to_solve(
             - context: Additional context for the task
             - sol: Expected solution (for evaluation)
         mcp_server_url: URL of the MCP server providing FHIR tools (e.g., "http://0.0.0.0:8002")
-        max_num_steps: Maximum number of interaction rounds (default: 9)
+        max_num_steps: Maximum number of tool-calling rounds (passed to white agent context)
 
     Returns:
         Dictionary containing:
@@ -243,25 +181,23 @@ async def ask_agent_to_solve(
             - correct: Whether the answer was correct (if completed)
     """
 
-    # Build the initial task prompt with MCP server information
+    # Build the task prompt with MCP server information
     task_prompt = MEDAGENT_PROMPT.format(
         mcp_server_url=mcp_server_url,
         context=task_data.get('context', 'N/A'),
         question=task_data['instruction']
     )
 
-    context_id = None
     history = []
 
     logger.info(f"Starting MedAgentBench task {task_data['id']}...")
-
-    # Send initial task prompt with MCP server URL
     logger.info(f"Sending task to white agent...")
     logger.info(f"MCP Server URL: {mcp_server_url}")
     logger.info(f"Task: {task_data['instruction'][:100]}...")
 
+    # Send the task prompt to white agent - it will handle tool discovery and invocation internally
     white_agent_response = await my_a2a.send_message(
-        white_agent_url, task_prompt, context_id=context_id
+        white_agent_url, task_prompt, context_id=None
     )
 
     res_root = white_agent_response.root
@@ -269,132 +205,94 @@ async def ask_agent_to_solve(
     res_result = res_root.result
     assert isinstance(res_result, Message)
 
-    if context_id is None:
-        context_id = res_result.context_id
-
     history.append({"role": "user", "content": task_prompt})
 
-    # Multi-turn interaction loop
-    # Parse agent responses and execute GET/POST requests, then inject results
-    for round_num in range(max_num_steps):
-        # Get agent's response
-        text_parts = get_text_parts(res_result.parts)
-        assert len(text_parts) == 1, "Expecting exactly one text part from the white agent"
-        agent_response = text_parts[0].strip()
-        
-        # Clean up response (remove markdown code blocks if present - common with some models)
-        agent_response = agent_response.replace('```tool_code', '').replace('```', '').strip()
+    # Get agent's final response
+    text_parts = get_text_parts(res_result.parts)
+    assert len(text_parts) == 1, "Expecting exactly one text part from the white agent"
+    agent_response = text_parts[0].strip()
+    
+    # Clean up response (remove markdown code blocks if present - common with some models)
+    agent_response = agent_response.replace('```tool_code', '').replace('```', '').strip()
 
-        logger.info(f"White agent response (round {round_num + 1}):\n{agent_response[:200]}...")
-        history.append({"role": "assistant", "content": agent_response})
+    logger.info(f"White agent final response:\n{agent_response[:500]}...")
+    history.append({"role": "assistant", "content": agent_response})
 
-        # Parse agent response and determine action
-        if agent_response.startswith('GET'):
-            # Handle GET request
-            url = agent_response[3:].strip()
-            # Add JSON format parameter if not already present
-            if '?' in url:
-                url = url + '&_format=json'
+    # Parse the FINISH format from the response
+    if agent_response.startswith('FINISH(') and agent_response.endswith(')'):
+        # Agent has finished - extract answer
+        answer = agent_response[len('FINISH('):-1]  # Remove "FINISH(" and ")"
+        logger.info(f"Task completed with answer: {answer}")
+
+        # Check if answer is correct
+        # Use flexible matching: check if any expected solution appears in the answer
+        expected_solutions = task_data.get('sol', [])
+        is_correct = False
+        if expected_solutions:
+            # Try exact match first
+            if answer in expected_solutions:
+                is_correct = True
             else:
-                url = url + '?_format=json'
-            
-            logger.info(f"Executing GET request: {url}")
-            get_res = send_get_request(url)
-            
-            if "data" in get_res:
-                feedback = f"Here is the response from the GET request:\n{get_res['data']}. Please call FINISH if you have got answers for all the questions and finished all the requested tasks"
+                # Try substring match (check if expected answer is contained in agent's response)
+                for expected in expected_solutions:
+                    if str(expected) in answer:
+                        is_correct = True
+                        break
+
+        return {
+            "status": "completed",
+            "result": answer,
+            "history": history,
+            "correct": is_correct,
+            "rounds": 1  # Single interaction from green agent perspective
+        }
+    
+    # Check if FINISH is somewhere in the response (agent may have added extra text)
+    finish_match = None
+    if 'FINISH(' in agent_response and ')' in agent_response:
+        start_idx = agent_response.find('FINISH(')
+        # Find the matching closing parenthesis
+        paren_count = 0
+        for i, char in enumerate(agent_response[start_idx:]):
+            if char == '(':
+                paren_count += 1
+            elif char == ')':
+                paren_count -= 1
+                if paren_count == 0:
+                    finish_match = agent_response[start_idx:start_idx + i + 1]
+                    break
+    
+    if finish_match:
+        answer = finish_match[len('FINISH('):-1]
+        logger.info(f"Task completed with extracted answer: {answer}")
+
+        expected_solutions = task_data.get('sol', [])
+        is_correct = False
+        if expected_solutions:
+            if answer in expected_solutions:
+                is_correct = True
             else:
-                feedback = f"Error in sending the GET request: {get_res['error']}"
-            
-            logger.info(f"GET response received, sending back to agent...")
+                for expected in expected_solutions:
+                    if str(expected) in answer:
+                        is_correct = True
+                        break
 
-        elif agent_response.startswith('POST'):
-            # Handle POST request
-            try:
-                # Parse the URL from the first line and payload from subsequent lines
-                lines = agent_response.split('\n')
-                url = lines[0][4:].strip()  # Remove 'POST' prefix
-                payload_str = '\n'.join(lines[1:])
-                payload = json.loads(payload_str)
-                
-                logger.info(f"Executing POST request to: {url}")
-                logger.info(f"Payload: {json.dumps(payload)[:200]}...")
-                
-                # Execute the POST request and return the result
-                post_res = send_post_request(url, payload)
-                
-                if "data" in post_res:
-                    feedback = f"Here is the response from the POST request:\n{post_res['data']}. Please call FINISH if you have got answers for all the questions and finished all the requested tasks"
-                else:
-                    feedback = f"Error in sending the POST request: {post_res['error']}"
-                
-                logger.info(f"POST response received, sending back to agent...")
-            except json.JSONDecodeError as e:
-                logger.error(f"Invalid JSON payload in POST request: {e}")
-                feedback = f"Invalid POST request: Could not parse JSON payload - {e}"
-            except Exception as e:
-                logger.error(f"Invalid POST request: {e}")
-                feedback = f"Invalid POST request: {e}"
+        return {
+            "status": "completed",
+            "result": answer,
+            "history": history,
+            "correct": is_correct,
+            "rounds": 1
+        }
 
-        elif agent_response.startswith('FINISH(') and agent_response.endswith(')'):
-            # Agent has finished - extract answer
-            answer = agent_response[len('FINISH('):-1]  # Remove "FINISH(" and ")"
-            logger.info(f"Task completed with answer: {answer}")
-
-            # Check if answer is correct
-            # Use flexible matching: check if any expected solution appears in the answer
-            expected_solutions = task_data.get('sol', [])
-            is_correct = False
-            if expected_solutions:
-                # Try exact match first
-                if answer in expected_solutions:
-                    is_correct = True
-                else:
-                    # Try substring match (check if expected answer is contained in agent's response)
-                    for expected in expected_solutions:
-                        if str(expected) in answer:
-                            is_correct = True
-                            break
-
-            return {
-                "status": "completed",
-                "result": answer,
-                "history": history,
-                "correct": is_correct,
-                "rounds": round_num + 1
-            }
-
-        else:
-            # Invalid action - agent didn't follow the required format
-            # The agent MUST respond with GET, POST, or FINISH only
-            logger.warning(f"Agent returned invalid action: {agent_response[:100]}...")
-            return {
-                "status": "agent_invalid_action",
-                "result": None,
-                "history": history,
-                "correct": False,
-                "rounds": round_num + 1
-            }
-
-        # Send feedback back to the agent
-        white_agent_response = await my_a2a.send_message(
-            white_agent_url, feedback, context_id=context_id
-        )
-        res_root = white_agent_response.root
-        assert isinstance(res_root, SendMessageSuccessResponse)
-        res_result = res_root.result
-        assert isinstance(res_result, Message)
-
-        history.append({"role": "user", "content": feedback})
-
-    # Max rounds reached
-    logger.info(f"Maximum rounds ({max_num_steps}) reached without completion")
+    # Agent didn't return FINISH format
+    logger.warning(f"Agent did not return FINISH format: {agent_response[:200]}...")
     return {
-        "status": "task_limit_reached",
-        "result": None,
+        "status": "agent_invalid_action",
+        "result": agent_response,
         "history": history,
         "correct": False,
-        "rounds": max_num_steps
+        "rounds": 1
     }
 
 
@@ -404,12 +302,16 @@ class MedAgentGreenExecutor(AgentExecutor):
     This executor handles incoming task requests, sets up the MedAgentBench
     evaluation environment, coordinates with the white agent, and reports results.
     
-    Overall metrics (overall.json) are automatically updated after every task
-    by reading all results from runs.jsonl.
+    The executor tracks all task results and writes overall metrics when
+    finalize() is called after all tasks are processed.
     """
 
     def __init__(self):
-        pass
+        # Track all results and task data for overall metrics calculation
+        self.all_results: List[TaskOutput] = []
+        self.all_task_data: List[Dict[str, Any]] = []
+        self.current_output_dir: Optional[str] = None
+        self.current_fhir_api_base: str = FHIR_API_BASE
 
     async def execute(self, context: RequestContext, event_queue: EventQueue) -> None:
         """Execute a MedAgentBench evaluation task.
@@ -437,6 +339,10 @@ class MedAgentGreenExecutor(AgentExecutor):
         agent_name = medagent_config.get("agent_name", "default_agent")
         task_name = medagent_config.get("task_name", "medagentbench")
         output_dir = get_output_dir(agent_name, task_name)
+        
+        # Store output directory and fhir_api_base for overall metrics
+        self.current_output_dir = output_dir
+        self.current_fhir_api_base = medagent_config.get("fhir_api_base", FHIR_API_BASE)
 
         logger.info(f"Task ID: {task_data['id']}")
         logger.info(f"MCP Server URL: {mcp_server_url}")
@@ -533,8 +439,9 @@ class MedAgentGreenExecutor(AgentExecutor):
             info=error_info
         )
         
-        # Update overall metrics from all runs (reads from runs.jsonl)
-        update_overall_from_runs(output_dir)
+        # Store results for overall metrics calculation (will be written when finalize() is called)
+        self.all_results.append(task_output)
+        self.all_task_data.append(task_data)
 
         # Prepare detailed report
         report = f"""MedAgentBench Evaluation Complete {result_emoji}
@@ -578,6 +485,41 @@ Metrics:
             event_queue: Event queue
         """
         raise NotImplementedError("Task cancellation not implemented")
+
+    def finalize(self) -> Dict[str, Any]:
+        """Finalize evaluation and write overall metrics to overall.json.
+        
+        This method should be called after all tasks have been executed.
+        It calculates overall metrics from all stored results and writes to overall.json.
+        
+        Returns:
+            The calculated overall metrics dictionary
+        """
+        if not self.all_results:
+            logger.warning("No results to finalize")
+            return {}
+        
+        if not self.current_output_dir:
+            logger.error("No output directory set")
+            return {}
+        
+        logger.info(f"Finalizing evaluation with {len(self.all_results)} results...")
+        
+        overall_metrics = write_overall_metrics(
+            output_dir=self.current_output_dir,
+            results=self.all_results,
+            task_data_list=self.all_task_data,
+            fhir_api_base=self.current_fhir_api_base
+        )
+        
+        logger.info(f"Overall success rate: {overall_metrics['custom']['success_rate']:.2%}")
+        logger.info(f"Correct: {overall_metrics['custom']['correct_count']}/{overall_metrics['total']}")
+        
+        # Reset for next batch
+        self.all_results = []
+        self.all_task_data = []
+        
+        return overall_metrics
 
 
 def start_medagent_green(

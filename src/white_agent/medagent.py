@@ -1,5 +1,6 @@
 """MedAgentBench white agent - supports MCP server tool calling."""
 
+import os
 import uvicorn
 import dotenv
 import json
@@ -16,6 +17,9 @@ from litellm import completion
 from src.my_util import logging_config
 
 dotenv.load_dotenv()
+
+# MCP server URL from environment (default to localhost:8002)
+MCP_SERVER_URL = os.environ.get("MCP_SERVER_URL", "http://0.0.0.0:8002")
 
 logger = logging_config.setup_logging("logs/white_agent.log", "white_agent")
 
@@ -43,11 +47,16 @@ def prepare_medagent_white_card(url):
 
 
 class MedAgentWhiteExecutor(AgentExecutor):
-    """White agent executor with MCP server tool calling support."""
+    """White agent executor with MCP server tool calling support.
+    
+    The agent receives all instructions from the green agent's prompt.
+    MCP server URL is configured via MCP_SERVER_URL environment variable.
+    """
 
     def __init__(self):
         self.ctx_id_to_messages = {}
         self.ctx_id_to_tools = {}
+        self.mcp_server_url = MCP_SERVER_URL
 
     async def discover_tools(self, mcp_server_url: str) -> List[Dict[str, Any]]:
         """Discover available tools from MCP server.
@@ -121,6 +130,9 @@ class MedAgentWhiteExecutor(AgentExecutor):
     async def execute(self, context: RequestContext, event_queue: EventQueue) -> None:
         """Execute the white agent task with MCP tool support.
 
+        The agent receives all instructions from the green agent's prompt.
+        MCP server URL is configured via environment variable.
+
         Args:
             context: Request context
             event_queue: Event queue for responses
@@ -137,25 +149,16 @@ class MedAgentWhiteExecutor(AgentExecutor):
             "content": user_input,
         })
 
-        # Check if this is the first message and contains MCP server URL
-        if len(messages) == 1 and "MCP Server URL:" in user_input:
-            # Extract MCP server URL
-            mcp_url = None
-            for line in user_input.split('\n'):
-                if line.startswith('MCP Server URL:'):
-                    mcp_url = line.split('MCP Server URL:')[1].strip()
-                    break
-
-            if mcp_url:
-                # Discover tools from MCP server
-                logger.info(f"Discovering tools from MCP server: {mcp_url}")
-                mcp_tools = await self.discover_tools(mcp_url)
-                self.ctx_id_to_tools[context.context_id] = {
-                    "mcp_url": mcp_url,
-                    "tools": mcp_tools,
-                    "openai_tools": self.convert_tools_to_openai_format(mcp_tools)
-                }
-                logger.info(f"Discovered {len(mcp_tools)} tools")
+        # Discover tools from MCP server on first message
+        if len(messages) == 1:
+            logger.info(f"Discovering tools from MCP server: {self.mcp_server_url}")
+            mcp_tools = await self.discover_tools(self.mcp_server_url)
+            self.ctx_id_to_tools[context.context_id] = {
+                "mcp_url": self.mcp_server_url,
+                "tools": mcp_tools,
+                "openai_tools": self.convert_tools_to_openai_format(mcp_tools)
+            }
+            logger.info(f"Discovered {len(mcp_tools)} tools")
 
         # Get tools for this context
         tool_config = self.ctx_id_to_tools.get(context.context_id)
@@ -219,23 +222,19 @@ class MedAgentWhiteExecutor(AgentExecutor):
             # No tool calls, check if we have a final answer
             content = message.get("content")
             if content:
-                logger.info(f"Sending response to green agent")
-                messages.append({
-                    "role": "assistant",
-                    "content": content
-                })
+                logger.info(f"Sending final response to green agent: {content[:200]}...")
 
                 await event_queue.enqueue_event(
                     new_agent_text_message(content, context_id=context.context_id)
                 )
-                break
+                return
 
-        # If we exhausted iterations
-        if iteration == max_iterations - 1:
-            error_msg = "Maximum iterations reached without completing task"
-            await event_queue.enqueue_event(
-                new_agent_text_message(error_msg, context_id=context.context_id)
-            )
+        # If we exhausted iterations, return whatever we have
+        logger.warning(f"Maximum iterations ({max_iterations}) reached")
+        final_msg = "FINISH([\"Unable to complete task within maximum iterations\"])"
+        await event_queue.enqueue_event(
+            new_agent_text_message(final_msg, context_id=context.context_id)
+        )
 
     async def cancel(self, context, event_queue) -> None:
         """Cancel execution."""
