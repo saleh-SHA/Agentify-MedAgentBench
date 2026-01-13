@@ -211,7 +211,7 @@ async def ask_agent_to_solve(
     white_agent_url: str,
     task_data: Dict[str, Any],
     mcp_server_url: str,
-    max_num_steps: int = 8
+    max_num_steps: int = 9
 ) -> Dict[str, Any]:
     """Execute a single MedAgentBench task with the white agent.
 
@@ -385,7 +385,7 @@ class MedAgentGreenExecutor(AgentExecutor):
         # Extract configuration
         logger.info("Setting up MedAgentBench environment...")
         mcp_server_url = medagent_config.get("mcp_server_url", "http://0.0.0.0:8002")
-        max_rounds = medagent_config.get("max_rounds", 8)
+        max_rounds = medagent_config.get("max_rounds", 9)
         task_data = medagent_config["task_data"]
         
         # Optional: agent name and task name for output directory

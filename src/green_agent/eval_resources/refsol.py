@@ -18,6 +18,9 @@ def extract_posts(results):
 def check_has_post(results):
     for i in results.history:
         if (i.role == 'agent') and ('POST' in i.content):
+            # Ignore POST requests to MCP tools endpoint - these are tool invocations, not FHIR data modifications
+            if '/tools/invoke' in i.content or '/tools' in i.content:
+                continue
             return True
     return False
 

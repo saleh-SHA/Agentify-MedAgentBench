@@ -26,7 +26,7 @@ You should use the following configuration:
 <medagent_config>
 {
   "mcp_server_url": "http://0.0.0.0:8002",
-  "max_rounds": 8,
+  "max_rounds": 9,
   "task_data": {
     "id": "task1_1",
     "instruction": "What's the MRN of the patient with name Peter Stafford and DOB of 1932-12-29?",

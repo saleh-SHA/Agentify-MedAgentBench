@@ -34,7 +34,7 @@ def load_medagent_tasks(mcp_server_url: str):
 async def launch_medagent_evaluation(
     task_index: int = 0,
     mcp_server_url: str = "http://0.0.0.0:8002",
-    max_rounds: int = 8,
+    max_rounds: int = 9,
     green_port: int = 9001,
     white_port: int = 9002
 ):
@@ -43,7 +43,7 @@ async def launch_medagent_evaluation(
     Args:
         task_index: Index of the task to run from test data
         mcp_server_url: URL of the MCP server providing FHIR tools
-        max_rounds: Maximum number of interaction rounds
+        max_rounds: Maximum number of interaction rounds. Original MedAgentBench uses 8. We use 9 to allow for MCP tool discovery.
         green_port: Port for the green agent
         white_port: Port for the white agent
 
