@@ -17,7 +17,7 @@ set -e
 # AgentBeats controller sets HOST and AGENT_PORT environment variables
 # If not set, use defaults for standalone mode
 if [ -z "$HOST" ]; then
-    export HOST="localhost"
+    export HOST="0.0.0.0"
 fi
 
 if [ -z "$AGENT_PORT" ]; then

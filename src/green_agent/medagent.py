@@ -626,7 +626,7 @@ def start_medagent_green(
     """
     # Read from environment variables if not provided (for AgentBeats controller compatibility)
     if host is None:
-        host = os.environ.get("HOST", "localhost")
+        host = os.environ.get("HOST", "0.0.0.0")
     if port is None:
         port = int(os.environ.get("AGENT_PORT", "9001"))
 
