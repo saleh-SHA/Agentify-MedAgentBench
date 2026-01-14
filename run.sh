@@ -1,54 +1,47 @@
 #!/bin/bash
 
-# MedAgentBench Launcher Script
+# MedAgentBench Green Agent Launcher Script
+#
+# This script is used by AgentBeats controller to start the green agent.
+# When run standalone, it can also launch evaluations:
 #
 # Usage:
-#   ./run.sh              - Run ALL available tasks (batch mode)
-#   ./run.sh 0            - Run single task with index 0
-#   ./run.sh 5            - Run single task with index 5
-#   ./run.sh 0,1,2        - Run batch evaluation with specific tasks (0, 1, 2)
-#   ./run.sh 0,5,10       - Run batch evaluation with tasks 0, 5, and 10
+#   ./run.sh              - Start green agent (for AgentBeats controller)
+#   ./run.sh batch        - Run ALL available tasks (batch mode)
+#   ./run.sh launch 0     - Run single task with index 0
+#   ./run.sh batch --task-indices "0,1,2"  - Run specific tasks
 #
-# The script automatically:
-# - Checks and launches FHIR server if not running (port 8080)
-# - Checks and launches MCP server if not running (port 8002)
-# - Runs the evaluation
-# - Cleans up services it started
 
 set -e
 
-# Display banner
+# AgentBeats controller sets HOST and AGENT_PORT environment variables
+# If not set, use defaults for standalone mode
+if [ -z "$HOST" ]; then
+    export HOST="localhost"
+fi
+
+if [ -z "$AGENT_PORT" ]; then
+    export AGENT_PORT="9001"
+fi
+
 echo "================================================================================"
-echo "                    MedAgentBench Evaluation Launcher"
+echo "                    MedAgentBench Green Agent"
 echo "================================================================================"
-echo ""
+echo "Host: $HOST"
+echo "Port: $AGENT_PORT"
+echo "================================================================================"
 
 # Check if task argument is provided
 if [ -z "$1" ]; then
-    # No argument provided - run all tasks in batch mode
-    echo "Mode: Batch Evaluation (All Tasks)"
-    echo "Command: uv run python main.py batch"
+    # No argument provided - start green agent (for AgentBeats controller)
+    echo "Starting green agent server..."
+    echo "Command: uv run python main.py green"
     echo "================================================================================"
-    uv run python main.py batch
-elif [[ "$1" == *","* ]]; then
-    # Multiple tasks specified - batch mode
-    TASK_INPUT="$1"
-    echo "Mode: Batch Evaluation"
-    echo "Tasks: $TASK_INPUT"
-    echo "Command: uv run python main.py batch --task-indices \"$TASK_INPUT\""
-    echo "================================================================================"
-    uv run python main.py batch --task-indices "$TASK_INPUT"
+    uv run python main.py green
 else
-    # Single task specified - single task mode
-    TASK_INPUT="$1"
-    echo "Mode: Single Task Evaluation"
-    echo "Task Index: $TASK_INPUT"
-    echo "Command: uv run python main.py launch --task-index $TASK_INPUT"
+    # Arguments provided - pass through to main.py for evaluation mode
+    echo "Running evaluation mode with arguments: $@"
+    echo "Command: uv run python main.py $@"
     echo "================================================================================"
-    uv run python main.py launch --task-index "$TASK_INPUT"
+    uv run python main.py "$@"
 fi
-
-echo ""
-echo "================================================================================"
-echo "Evaluation Complete!"
-echo "================================================================================"

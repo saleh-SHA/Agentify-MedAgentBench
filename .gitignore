@@ -15,3 +15,8 @@ wheels/
 .venv
 logs/
 .clangd/
+.ab/
+AGENTBEATS_USAGE.md
+send_evaluation_curl.sh
+send_evaluation_task.py
+interactive_evaluation.py

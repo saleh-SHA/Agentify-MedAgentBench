@@ -26,6 +26,8 @@ dotenv.load_dotenv()
 FHIR_API_BASE = os.environ.get("MCP_FHIR_API_BASE", "http://localhost:8080/fhir/")
 OUTPUT_DIR = os.environ.get("MEDAGENT_OUTPUT_DIR", "outputs/medagentbench")
 
+print(f"*Host*: {os.environ.get('HOST')}, *port*: {os.environ.get('AGENT_PORT')}")
+
 # MedAgentBench prompt template with MCP server instructions
 # This prompt contains ALL instructions for the white agent (no system prompt in white agent)
 MEDAGENT_PROMPT = """You are an expert medical AI assistant that uses FHIR functions to assist medical professionals. You are given a question and a set of available FHIR tools. Based on the question, you will need to make one or more function/tool calls to achieve the purpose.
@@ -612,17 +614,23 @@ Metrics:
 
 def start_medagent_green(
     agent_name: str = "medagent_green_agent",
-    host: str = "localhost",
-    port: int = 9001
+    host: str = None,
+    port: int = None
 ) -> None:
     """Start the MedAgentBench green agent server.
 
     Args:
         agent_name: Name of the agent configuration file (default: "medagent_green_agent")
-        host: Host to bind the server to (default: "localhost")
-        port: Port to bind the server to (default: 9001)
+        host: Host to bind the server to (reads from HOST env var, default: "localhost")
+        port: Port to bind the server to (reads from AGENT_PORT env var, default: 9001)
     """
-    logger.info("Starting MedAgentBench green agent...")
+    # Read from environment variables if not provided (for AgentBeats controller compatibility)
+    if host is None:
+        host = os.environ.get("HOST", "localhost")
+    if port is None:
+        port = int(os.environ.get("AGENT_PORT", "9001"))
+
+    logger.info(f"Starting MedAgentBench green agent on {host}:{port}...")
     agent_card_dict = load_agent_card_toml(agent_name)
     url = f"http://{host}:{port}"
     agent_card_dict["url"] = url  # Complete all required card fields

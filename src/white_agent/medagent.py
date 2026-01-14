@@ -322,17 +322,23 @@ class MedAgentWhiteExecutor(AgentExecutor):
 
 def start_medagent_white(
     agent_name: str = "medagent_white_agent",
-    host: str = "localhost",
-    port: int = 9002
+    host: str = None,
+    port: int = None
 ):
     """Start the MedAgentBench white agent server.
 
     Args:
         agent_name: Name of the agent
-        host: Host to bind to
-        port: Port to bind to
+        host: Host to bind to (reads from HOST env var, default: "localhost")
+        port: Port to bind to (reads from AGENT_PORT env var, default: 9002)
     """
-    logger.info("Starting MedAgentBench white agent...")
+    # Read from environment variables if not provided (for AgentBeats controller compatibility)
+    if host is None:
+        host = os.environ.get("HOST", "localhost")
+    if port is None:
+        port = int(os.environ.get("AGENT_PORT", "9002"))
+
+    logger.info(f"Starting MedAgentBench white agent on {host}:{port}...")
     url = f"http://{host}:{port}"
     card = prepare_medagent_white_card(url)
 
