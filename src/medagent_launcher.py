@@ -3,6 +3,9 @@
 import multiprocessing
 import json
 import os
+import subprocess
+import time
+import socket
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 
@@ -19,6 +22,50 @@ logger = logging_config.setup_logging("logs/medagent.log", "medagent_launcher")
 
 # Import FHIR_API_BASE for evaluation
 FHIR_API_BASE = os.environ.get("MCP_FHIR_API_BASE", "http://localhost:8080/fhir/")
+
+
+def is_port_open(host: str, port: int, timeout: float = 1.0) -> bool:
+    """Check if a port is open and accepting connections.
+
+    Args:
+        host: Host to check
+        port: Port to check
+        timeout: Connection timeout in seconds
+
+    Returns:
+        True if port is open, False otherwise
+    """
+    try:
+        with socket.create_connection((host, port), timeout=timeout):
+            return True
+    except (socket.timeout, ConnectionRefusedError, OSError):
+        return False
+
+
+def wait_for_service(host: str, port: int, service_name: str, max_wait: int = 60, check_interval: float = 2.0) -> bool:
+    """Wait for a service to become available on a specific port.
+
+    Args:
+        host: Host where service is running
+        port: Port where service should be listening
+        service_name: Name of the service (for logging)
+        max_wait: Maximum time to wait in seconds
+        check_interval: Time between checks in seconds
+
+    Returns:
+        True if service is available, False if timeout
+    """
+    logger.info(f"Waiting for {service_name} on {host}:{port}...")
+    start_time = time.time()
+
+    while time.time() - start_time < max_wait:
+        if is_port_open(host, port):
+            logger.info(f"{service_name} is ready on {host}:{port}")
+            return True
+        time.sleep(check_interval)
+
+    logger.error(f"{service_name} did not become ready within {max_wait} seconds")
+    return False
 
 
 def calculate_overall_from_runs(
@@ -238,11 +285,87 @@ async def launch_medagent_evaluation(
         Dictionary containing task_id, task_index, and evaluation response
     """
 
-    # Load test data
+    # Step 1: Launch FHIR server using fhir_launcher.sh (if not already running)
+    logger.info("=" * 80)
+    logger.info("CHECKING FHIR SERVER")
+    logger.info("=" * 80)
+
+    fhir_process = None
+    if is_port_open("localhost", 8080):
+        logger.info("FHIR server is already running on port 8080.")
+    else:
+        logger.info("FHIR server is not running. Launching it now...")
+        fhir_launcher_script = os.path.join(os.getcwd(), "fhir_launcher.sh")
+        if not os.path.exists(fhir_launcher_script):
+            logger.error(f"FHIR launcher script not found at {fhir_launcher_script}")
+            return
+
+        try:
+            # Launch FHIR server in background
+            logger.info(f"Starting FHIR server using {fhir_launcher_script}...")
+            fhir_process = subprocess.Popen(
+                ["bash", fhir_launcher_script],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
+            logger.info(f"FHIR server process started (PID: {fhir_process.pid})")
+
+            # Wait for FHIR server to be ready
+            fhir_ready = wait_for_service("localhost", 8080, "FHIR server", max_wait=300)
+            assert fhir_ready, "FHIR server failed to start in time"
+            logger.info("FHIR server is ready and accepting connections.")
+
+        except Exception as e:
+            logger.error(f"Failed to start FHIR server: {e}")
+            raise
+
+    # Step 2: Launch MCP server (if not already running)
+    logger.info("=" * 80)
+    logger.info("CHECKING MCP SERVER")
+    logger.info("=" * 80)
+
+    mcp_process = None
+    if is_port_open("localhost", 8002):
+        logger.info("MCP server is already running on port 8002.")
+    else:
+        logger.info("MCP server is not running. Launching it now...")
+        try:
+            # Launch MCP server in background
+            logger.info("Starting MCP server (src.mcp.server)...")
+            mcp_process = subprocess.Popen(
+                ["python", "-m", "src.mcp.server"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
+            logger.info(f"MCP server process started (PID: {mcp_process.pid})")
+
+            # Wait for MCP server to be ready
+            mcp_ready = wait_for_service("localhost", 8002, "MCP server", max_wait=60)
+            assert mcp_ready, "MCP server failed to start in time"
+            logger.info("MCP server is ready and accepting connections.")
+
+        except Exception as e:
+            logger.error(f"Failed to start MCP server: {e}")
+            # Cleanup FHIR server if we started it
+            if fhir_process:
+                fhir_process.terminate()
+            raise
+
+    # Step 3: Load test data
+    logger.info("=" * 80)
+    logger.info("LOADING TEST DATA")
+    logger.info("=" * 80)
     logger.info("Loading MedAgentBench test data...")
     tasks = await load_medagent_tasks(mcp_server_url)
     if task_index >= len(tasks):
         logger.error(f"Error: Task index {task_index} out of range (max: {len(tasks) - 1})")
+        # Cleanup services only if we started them
+        if mcp_process is not None:
+            mcp_process.terminate()
+        if fhir_process is not None:
+            fhir_process.terminate()
         return
 
     task_data = tasks[task_index]
@@ -335,12 +458,43 @@ async def launch_medagent_evaluation(
     logger.info("=" * 80)
 
     # Cleanup
-    logger.info("Evaluation complete. Terminating agents...")
+    logger.info("Evaluation complete. Terminating processes...")
+
+    # Terminate agents
+    logger.info("Terminating agents...")
     p_green.terminate()
     p_green.join()
     p_white.terminate()
     p_white.join()
     logger.info("Agents terminated.")
+
+    # Terminate MCP server only if we started it
+    if mcp_process is not None:
+        logger.info("Terminating MCP server...")
+        mcp_process.terminate()
+        try:
+            mcp_process.wait(timeout=10)
+            logger.info("MCP server terminated.")
+        except subprocess.TimeoutExpired:
+            logger.warning("MCP server did not terminate gracefully, killing it...")
+            mcp_process.kill()
+    else:
+        logger.info("MCP server was already running, leaving it active.")
+
+    # Terminate FHIR server only if we started it
+    if fhir_process is not None:
+        logger.info("Terminating FHIR server...")
+        fhir_process.terminate()
+        try:
+            fhir_process.wait(timeout=10)
+            logger.info("FHIR server terminated.")
+        except subprocess.TimeoutExpired:
+            logger.warning("FHIR server did not terminate gracefully, killing it...")
+            fhir_process.kill()
+    else:
+        logger.info("FHIR server was already running, leaving it active.")
+
+    logger.info("Cleanup complete.")
 
     # Return result for batch processing with JSON-serializable response
     return {
@@ -354,7 +508,6 @@ async def launch_medagent_batch_evaluation(
     task_indices: list = None,
     mcp_server_url: str = "http://0.0.0.0:8002",
     max_rounds: int = 8,
-    output_file: str = None,
     agent_name: str = "default_agent",
     task_name: str = "medagentbench",
     clear_previous_runs: bool = True
@@ -370,7 +523,6 @@ async def launch_medagent_batch_evaluation(
         task_indices: List of task indices to run. If None, runs all tasks.
         mcp_server_url: URL of the MCP server
         max_rounds: Maximum rounds per task
-        output_file: Path to save summary results. If None, only writes to output_dir.
         agent_name: Name of the agent being evaluated (for output directory)
         task_name: Name of the task (for output directory)
         clear_previous_runs: Whether to clear previous runs.jsonl before starting
@@ -378,6 +530,74 @@ async def launch_medagent_batch_evaluation(
     Returns:
         List of task results and writes overall.json to output directory
     """
+
+    # Step 1: Launch FHIR server (if not already running)
+    logger.info("=" * 80)
+    logger.info("CHECKING FHIR SERVER FOR BATCH EVALUATION")
+    logger.info("=" * 80)
+
+    fhir_process = None
+    if is_port_open("localhost", 8080):
+        logger.info("FHIR server is already running on port 8080.")
+    else:
+        logger.info("FHIR server is not running. Launching it now...")
+        fhir_launcher_script = os.path.join(os.getcwd(), "fhir_launcher.sh")
+        if not os.path.exists(fhir_launcher_script):
+            logger.error(f"FHIR launcher script not found at {fhir_launcher_script}")
+            return []
+
+        try:
+            logger.info(f"Starting FHIR server using {fhir_launcher_script}...")
+            fhir_process = subprocess.Popen(
+                ["bash", fhir_launcher_script],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
+            logger.info(f"FHIR server process started (PID: {fhir_process.pid})")
+
+            fhir_ready = wait_for_service("localhost", 8080, "FHIR server", max_wait=300)
+            assert fhir_ready, "FHIR server failed to start in time"
+            logger.info("FHIR server is ready and accepting connections.")
+
+        except Exception as e:
+            logger.error(f"Failed to start FHIR server: {e}")
+            raise
+
+    # Step 2: Launch MCP server (if not already running)
+    logger.info("=" * 80)
+    logger.info("CHECKING MCP SERVER FOR BATCH EVALUATION")
+    logger.info("=" * 80)
+
+    mcp_process = None
+    if is_port_open("localhost", 8002):
+        logger.info("MCP server is already running on port 8002.")
+    else:
+        logger.info("MCP server is not running. Launching it now...")
+        try:
+            logger.info("Starting MCP server (src.mcp.server)...")
+            mcp_process = subprocess.Popen(
+                ["python", "-m", "src.mcp.server"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
+            logger.info(f"MCP server process started (PID: {mcp_process.pid})")
+
+            mcp_ready = wait_for_service("localhost", 8002, "MCP server", max_wait=60)
+            assert mcp_ready, "MCP server failed to start in time"
+            logger.info("MCP server is ready and accepting connections.")
+
+        except Exception as e:
+            logger.error(f"Failed to start MCP server: {e}")
+            if fhir_process:
+                fhir_process.terminate()
+            raise
+
+    # Step 3: Load test data
+    logger.info("=" * 80)
+    logger.info("LOADING TEST DATA FOR BATCH EVALUATION")
+    logger.info("=" * 80)
     logger.info("Loading MedAgentBench test data...")
     tasks = await load_medagent_tasks(mcp_server_url)
 
@@ -455,19 +675,35 @@ async def launch_medagent_batch_evaluation(
         print(f"Results saved to: {output_dir}")
         print("="*60 + "\n")
 
-    # Save summary results to file if specified
-    if output_file:
-        try:
-            # Remove existing file if it exists
-            output_path = Path(output_file)
-            if output_path.exists():
-                output_path.unlink()
-                logger.info(f"Removed existing results file: {output_file}")
+    # Cleanup services only if we started them
+    logger.info("=" * 80)
+    logger.info("CLEANING UP BATCH EVALUATION SERVICES")
+    logger.info("=" * 80)
 
-            with open(output_file, 'w', encoding='utf-8') as f:
-                json.dump(results, f, indent=2, ensure_ascii=False)
-            logger.info(f"Results saved to: {output_file}")
-        except Exception as e:
-            logger.error(f"Failed to save results to {output_file}: {e}")
+    if mcp_process is not None:
+        logger.info("Terminating MCP server...")
+        mcp_process.terminate()
+        try:
+            mcp_process.wait(timeout=10)
+            logger.info("MCP server terminated.")
+        except subprocess.TimeoutExpired:
+            logger.warning("MCP server did not terminate gracefully, killing it...")
+            mcp_process.kill()
+    else:
+        logger.info("MCP server was already running, leaving it active.")
+
+    if fhir_process is not None:
+        logger.info("Terminating FHIR server...")
+        fhir_process.terminate()
+        try:
+            fhir_process.wait(timeout=10)
+            logger.info("FHIR server terminated.")
+        except subprocess.TimeoutExpired:
+            logger.warning("FHIR server did not terminate gracefully, killing it...")
+            fhir_process.kill()
+    else:
+        logger.info("FHIR server was already running, leaving it active.")
+
+    logger.info("Batch evaluation cleanup complete.")
 
     return results

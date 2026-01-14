@@ -41,8 +41,7 @@ def launch(
 def batch(
     task_indices: Optional[str] = typer.Option(None, help="Comma-separated task indices (e.g., '0,1,2'). If not provided, runs all tasks."),
     mcp_server: str = typer.Option("http://0.0.0.0:8002", help="MCP server URL"),
-    max_rounds: int = typer.Option(8, help="Maximum number of interaction rounds"),
-    output_file: Optional[str] = typer.Option(None, help="Path to save results (not implemented yet)")
+    max_rounds: int = typer.Option(8, help="Maximum number of interaction rounds")
 ):
     """Launch batch MedAgentBench evaluations on multiple tasks."""
     # Parse task indices
@@ -57,8 +56,7 @@ def batch(
     asyncio.run(launch_medagent_batch_evaluation(
         task_indices=task_list,
         mcp_server_url=mcp_server,
-        max_rounds=max_rounds,
-        output_file=output_file
+        max_rounds=max_rounds
     ))
 
 
