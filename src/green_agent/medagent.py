@@ -168,6 +168,69 @@ def sanitize_task_data(task_data: Dict[str, Any]) -> Dict[str, Any]:
     return {k: v for k, v in task_data.items() if k not in evaluation_fields}
 
 
+def extract_fhir_operations(response: str) -> tuple[str, List[Dict[str, Any]]]:
+    """Extract FHIR operations metadata from white agent response.
+    Tracks the POST operations, if any, that the white agent made to the FHIR server which will be used for evaluation.
+    
+    The white agent embeds FHIR POST operations in the response:
+    <fhir_operations>
+    [{"fhir_url": "...", "payload": {...}, "accepted": true}, ...]
+    </fhir_operations>
+    
+    Args:
+        response: Raw response from white agent
+        
+    Returns:
+        Tuple of (clean_response, fhir_operations_list)
+    """
+    import re
+    
+    fhir_ops = []
+    clean_response = response
+    
+    # Extract FHIR operations section
+    pattern = r'<fhir_operations>\s*(.*?)\s*</fhir_operations>'
+    match = re.search(pattern, response, re.DOTALL)
+    
+    if match:
+        try:
+            fhir_ops = json.loads(match.group(1))
+        except json.JSONDecodeError:
+            logger.warning("Failed to parse FHIR operations metadata")
+        
+        # Remove the metadata section from the response
+        clean_response = re.sub(pattern, '', response, flags=re.DOTALL).strip()
+    
+    return clean_response, fhir_ops
+
+
+def add_fhir_posts_to_history(history: List[Dict[str, str]], fhir_ops: List[Dict[str, Any]]) -> None:
+    """Add FHIR POST operations to history for evaluation.
+    
+    Adds entries in the format expected by refsol.py:
+    - {"role": "agent", "content": "POST <url>\n<payload_json>"}
+    - {"role": "user", "content": "POST request accepted"} (if accepted)
+    
+    Args:
+        history: History list to modify (in place)
+        fhir_ops: List of FHIR operations from white agent
+    """
+    for op in fhir_ops:
+        fhir_url = op.get("fhir_url", "")
+        payload = op.get("payload", {})
+        accepted = op.get("accepted", False)
+        
+        # Add the POST request entry (format expected by refsol.py)
+        post_content = f"POST {fhir_url}\n{json.dumps(payload)}"
+        history.append({"role": "agent", "content": post_content})
+        
+        # Add acceptance response if the POST was successful
+        if accepted:
+            history.append({"role": "user", "content": "POST request accepted"})
+        else:
+            history.append({"role": "user", "content": "POST request failed"})
+
+
 async def ask_agent_to_solve(
     white_agent_url: str,
     task_data: Dict[str, Any],
@@ -228,10 +291,18 @@ async def ask_agent_to_solve(
     # Get agent's final response
     text_parts = get_text_parts(res_result.parts)
     assert len(text_parts) == 1, "Expecting exactly one text part from the white agent"
-    agent_response = text_parts[0].strip()
+    raw_response = text_parts[0].strip()
     
     # Clean up response (remove markdown code blocks if present - common with some models)
-    agent_response = agent_response.replace('```tool_code', '').replace('```', '').strip()
+    raw_response = raw_response.replace('```tool_code', '').replace('```', '').strip()
+    
+    # Extract FHIR operations metadata and clean response
+    agent_response, fhir_ops = extract_fhir_operations(raw_response)
+    
+    # Add FHIR POST operations to history (for evaluation by refsol.py)
+    if fhir_ops:
+        logger.info(f"Extracted {len(fhir_ops)} FHIR POST operations for evaluation")
+        add_fhir_posts_to_history(history, fhir_ops)
 
     response_preview = agent_response[:500] + "..." if len(agent_response) > 500 else agent_response
     logger.info(f"White agent response: {response_preview}")

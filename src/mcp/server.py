@@ -44,7 +44,13 @@ _TASKS = _load_tasks()
 
 # FHIR helper function
 def _call_fhir(method: str, path: str, params: Optional[Dict] = None, body: Optional[Dict] = None) -> Dict[str, Any]:
-    """Make a request to the FHIR server."""
+    """Make a request to the FHIR server.
+    
+    For POST requests, returns additional 'fhir_post' field with details needed for evaluation:
+    - fhir_url: Full URL of the FHIR endpoint
+    - payload: The request body that was sent
+    - accepted: Whether the request was successful
+    """
     url = f"{FHIR_API_BASE}{path}"
     try:
         with httpx.Client(timeout=30.0) as client:
@@ -53,7 +59,18 @@ def _call_fhir(method: str, path: str, params: Optional[Dict] = None, body: Opti
             else:
                 response = client.request(method, url, json=body)
             response.raise_for_status()
-            return {"url": url, "method": method, "status_code": response.status_code, "response": response.json()}
+            
+            result = {"url": url, "method": method, "status_code": response.status_code, "response": response.json()}
+            
+            # For POST requests, include details needed for evaluation
+            if method == "POST" and body:
+                result["fhir_post"] = {
+                    "fhir_url": url,
+                    "payload": body,
+                    "accepted": response.status_code in (200, 201)
+                }
+            
+            return result
     except httpx.HTTPError as e:
         error_detail = str(e)
         if hasattr(e, 'response') and e.response is not None:

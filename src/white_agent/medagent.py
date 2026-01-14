@@ -157,9 +157,10 @@ class MedAgentWhiteExecutor(AgentExecutor):
             context_id: Context ID for logging
 
         Returns:
-            Final response content
+            Final response content with FHIR operations metadata
         """
         max_iterations = 10  # Prevent infinite loops
+        fhir_posts: List[Dict[str, Any]] = []  # Track FHIR POST operations for evaluation
         
         for iteration in range(max_iterations):
             logger.info(f"Calling GPT-5 with tools (iteration {iteration + 1})")
@@ -194,6 +195,12 @@ class MedAgentWhiteExecutor(AgentExecutor):
                     )
                     logger.info(f"Tool '{function_name}' returned {'error' if 'error' in tool_result else 'success'}")
 
+                    # Track FHIR POST operations for evaluation
+                    if isinstance(tool_result, dict) and "fhir_post" in tool_result:
+                        fhir_post = tool_result["fhir_post"]
+                        fhir_posts.append(fhir_post)
+                        logger.info(f"Tracked FHIR POST to {fhir_post['fhir_url']}")
+
                     # Add tool result to messages
                     messages.append({
                         "role": "tool",
@@ -208,11 +215,17 @@ class MedAgentWhiteExecutor(AgentExecutor):
             # No tool calls, check if we have a final answer
             content = message.get("content")
             if content:
+                # Append FHIR operations metadata if any POST requests were made
+                if fhir_posts:
+                    content = f"{content}\n<fhir_operations>\n{json.dumps(fhir_posts)}\n</fhir_operations>"
                 return content
 
         # If we exhausted iterations
         logger.warning(f"Maximum iterations ({max_iterations}) reached")
-        return "FINISH([\"Unable to complete task within maximum iterations\"])"
+        result = "FINISH([\"Unable to complete task within maximum iterations\"])"
+        if fhir_posts:
+            result = f"{result}\n<fhir_operations>\n{json.dumps(fhir_posts)}\n</fhir_operations>"
+        return result
 
     async def _run_without_tools(self, messages: List[Dict[str, Any]]) -> str:
         """Run LLM without tools.
