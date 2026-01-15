@@ -3,6 +3,7 @@
 import json
 import logging
 import os
+import re
 from typing import Any
 
 from dotenv import load_dotenv
@@ -20,10 +21,22 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("medagentbench_agent")
 
-# Configuration from environment
-MCP_SERVER_URL = os.environ.get("MCP_SERVER_URL", "http://localhost:8002")
-MCP_FHIR_API_BASE = os.environ.get("MCP_FHIR_API_BASE", "http://localhost:8080/fhir/").rstrip("/")
-LLM_MODEL = os.environ.get("MEDAGENT_LLM_MODEL", "openai/gpt-4o")
+# Configuration from environment (defaults)
+DEFAULT_MCP_SERVER_URL = os.environ.get("MCP_SERVER_URL", "http://localhost:8002")
+DEFAULT_FHIR_API_BASE = os.environ.get("MCP_FHIR_API_BASE", "http://localhost:8080/fhir/").rstrip("/")
+LLM_MODEL = os.environ.get("MEDAGENT_LLM_MODEL", "openai/gpt-5")
+
+
+def extract_mcp_server_url(text: str) -> str | None:
+    """Extract MCP server URL from task prompt.
+    
+    Looks for pattern: 'MCP server at: <url>'
+    """
+    pattern = r'MCP server at:\s*(https?://[^\s]+)'
+    match = re.search(pattern, text)
+    if match:
+        return match.group(1).rstrip('/')
+    return None
 
 
 # Mapping of MCP tool names to FHIR POST operations for tracking
@@ -73,8 +86,8 @@ FHIR_POST_TOOLS = {
 
 class Agent:
     def __init__(self):
-        self.mcp_server_url = MCP_SERVER_URL
-        self.fhir_api_base = MCP_FHIR_API_BASE
+        self.mcp_server_url = DEFAULT_MCP_SERVER_URL
+        self.fhir_api_base = DEFAULT_FHIR_API_BASE
         self.model = LLM_MODEL
 
     async def discover_tools(self, session: ClientSession) -> list[dict[str, Any]]:
@@ -149,6 +162,7 @@ class Agent:
             response = completion(
                 messages=messages,
                 model=self.model,
+                custom_llm_provider="openai",
                 tools=openai_tools,
                 tool_choice="auto"
             )
@@ -225,6 +239,7 @@ class Agent:
         response = completion(
             messages=messages,
             model=self.model,
+            custom_llm_provider="openai",
         )
         message = response.choices[0].message.model_dump()
         messages.append(message)
@@ -239,6 +254,14 @@ class Agent:
             new_agent_text_message("Processing request..."),
         )
 
+        # Extract MCP server URL from the task prompt (sent by green agent)
+        mcp_url = extract_mcp_server_url(user_input)
+        if mcp_url:
+            self.mcp_server_url = mcp_url
+            logger.info(f"Extracted MCP server URL from prompt: {mcp_url}")
+        else:
+            logger.info(f"Using default MCP server URL: {self.mcp_server_url}")
+
         messages = [{"role": "user", "content": user_input}]
 
         # Connect to MCP server
@@ -248,13 +271,15 @@ class Agent:
         final_content: str | None = None
 
         try:
+            logger.info(f"Attempting SSE connection to {sse_url}...")
             async with sse_client(sse_url) as (read_stream, write_stream):
+                logger.info("SSE connection established, initializing MCP session...")
                 async with ClientSession(read_stream, write_stream) as session:
                     await session.initialize()
-                    logger.info("MCP session initialized")
+                    logger.info("MCP session initialized successfully")
 
                     mcp_tools = await self.discover_tools(session)
-                    logger.info(f"Discovered {len(mcp_tools)} tools")
+                    logger.info(f"Discovered {len(mcp_tools)} tools: {[t['name'] for t in mcp_tools]}")
 
                     if mcp_tools:
                         openai_tools = self.convert_tools_to_openai_format(mcp_tools)
@@ -262,10 +287,12 @@ class Agent:
                             messages, session, openai_tools
                         )
                     else:
+                        logger.warning("No tools discovered from MCP server, running without tools")
                         final_content = await self._run_without_tools(messages)
 
         except Exception as e:
-            logger.error(f"Failed to connect to MCP server or execute: {e}")
+            logger.error(f"Failed to connect to MCP server at {sse_url}: {e}", exc_info=True)
+            logger.warning("Falling back to running without tools")
             final_content = await self._run_without_tools(messages)
 
         if final_content:
