@@ -2,6 +2,7 @@
 instructions/
 .env
 *.log
+outputs/
 
 # Python-generated files
 src/__pycache__/
