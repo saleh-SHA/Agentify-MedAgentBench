@@ -15,7 +15,7 @@ from executor import Executor
 
 def main():
     parser = argparse.ArgumentParser(description="Run the MedAgentBench agent (purple agent).")
-    parser.add_argument("--host", type=str, default="https://medagentbench.ddns.net", help="Host to bind the server")
+    parser.add_argument("--host", type=str, default="0.0.0.0", help="Host to bind the server")
     parser.add_argument("--port", type=int, default=9019, help="Port to bind the server")
     parser.add_argument("--card-url", type=str, help="URL to advertise in the agent card")
     args = parser.parse_args()

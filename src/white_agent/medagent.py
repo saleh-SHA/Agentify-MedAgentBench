@@ -20,7 +20,7 @@ from src.my_util import logging_config
 dotenv.load_dotenv()
 
 # MCP server URL from environment (default to medagentbench.ddns.net:8002)
-MCP_SERVER_URL = os.environ.get("MCP_SERVER_URL", "https://medagentbench.ddns.net:8002")
+MCP_SERVER_URL = os.environ.get("MCP_SERVER_URL", "http://medagentbench.ddns.net:8002")
 
 logger = logging_config.setup_logging("logs/white_agent.log", "white_agent")
 
@@ -103,7 +103,7 @@ class MedAgentWhiteExecutor(AgentExecutor):
     def __init__(self):
         self.ctx_id_to_messages = {}
         self.mcp_server_url = MCP_SERVER_URL
-        self.fhir_api_base = os.environ.get("MCP_FHIR_API_BASE", "https://medagentbench.ddns.net:8080/fhir/").rstrip("/")
+        self.fhir_api_base = os.environ.get("MCP_FHIR_API_BASE", "http://medagentbench.ddns.net:8080/fhir/").rstrip("/")
 
     async def discover_tools(self, session: ClientSession) -> List[Dict[str, Any]]:
         """Discover available tools from MCP server.

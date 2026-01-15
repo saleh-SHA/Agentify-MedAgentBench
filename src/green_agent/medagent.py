@@ -23,7 +23,7 @@ from a2a.utils import new_agent_text_message, get_text_parts
 from src.my_util import parse_tags, my_a2a, logging_config
 
 dotenv.load_dotenv()
-FHIR_API_BASE = os.environ.get("MCP_FHIR_API_BASE", "https://medagentbench.ddns.net:8080/fhir/")
+FHIR_API_BASE = os.environ.get("MCP_FHIR_API_BASE", "http://medagentbench.ddns.net:8080/fhir/")
 OUTPUT_DIR = os.environ.get("MEDAGENT_OUTPUT_DIR", "outputs/medagentbench")
 
 print(f"*Host*: {os.environ.get('HOST')}, *port*: {os.environ.get('AGENT_PORT')}")
@@ -429,7 +429,7 @@ class MedAgentGreenExecutor(AgentExecutor):
         medagent_config = json.loads(medagent_config_str)
 
         # Extract configuration
-        mcp_server_url = medagent_config.get("mcp_server_url", "https://medagentbench.ddns.net:8002")
+        mcp_server_url = medagent_config.get("mcp_server_url", "http://medagentbench.ddns.net:8002")
         max_rounds = medagent_config.get("max_rounds", 9)
         task_data = medagent_config["task_data"]
         
