@@ -50,6 +50,7 @@ cp sample.env .env
 ```
 
 Edit `.env` and add your API key:
+
 ```
 OPENAI_API_KEY=your_openai_api_key_here
 ```
@@ -59,6 +60,7 @@ OPENAI_API_KEY=your_openai_api_key_here
 MedAgentBench requires two external services to be running:
 
 **Terminal 1 - FHIR Server (Docker):**
+
 ```bash
 docker pull jyxsu6/medagentbench:latest
 docker run -p 8080:8080 jyxsu6/medagentbench:latest
@@ -67,6 +69,7 @@ docker run -p 8080:8080 jyxsu6/medagentbench:latest
 Wait for: `Started Application in XXX seconds`
 
 **Terminal 2 - MCP Server:**
+
 ```bash
 uv run python -m src.mcp.server
 ```
@@ -74,16 +77,19 @@ uv run python -m src.mcp.server
 ### 4. Run the Evaluation
 
 **Terminal 3:**
+
 ```bash
 uv run agentbeats-run scenarios/medagentbench/scenario.toml
 ```
 
 This command will:
+
 - Start the evaluator (green agent) and participant (purple agent) servers
 - Construct an `assessment_request` message with participant endpoints and config
 - Send the request to the green agent and print streamed responses
 
 **Options:**
+
 - `--show-logs`: Show agent stdout/stderr during assessment
 - `--serve-only`: Start agents without running the assessment (useful for debugging)
 
@@ -93,37 +99,39 @@ Edit `scenarios/medagentbench/scenario.toml` to customize the evaluation:
 
 ```toml
 [green_agent]
-endpoint = "http://127.0.0.1:9009"
-cmd = "python scenarios/medagentbench/evaluator/src/server.py --host 127.0.0.1 --port 9009"
+endpoint = "https://medagentbench.ddns.net:9009"
+cmd = "python scenarios/medagentbench/evaluator/src/server.py --host 0.0.0.0 --port 9009"
 
 [[participants]]
 role = "agent"
-endpoint = "http://127.0.0.1:9019"
-cmd = "python scenarios/medagentbench/agent/src/server.py --host 127.0.0.1 --port 9019"
+endpoint = "https://medagentbench.ddns.net:9019"
+cmd = "python scenarios/medagentbench/agent/src/server.py --host 0.0.0.0 --port 9019"
 
 [config]
 num_tasks = 5                                    # Number of tasks to run
 max_rounds = 10                                  # Max tool-calling rounds per task
-mcp_server_url = "http://localhost:8002"         # MCP server URL
-fhir_api_base = "http://localhost:8080/fhir/"    # FHIR server URL
+mcp_server_url = "https://medagentbench.ddns.net:8002"         # MCP server URL
+fhir_api_base = "https://medagentbench.ddns.net:8080/fhir/"    # FHIR server URL
 ```
 
 ## Assessment Flow
 
 1. **Assessment Request**: The green agent receives a JSON message:
+
    ```json
    {
-     "participants": { "agent": "http://127.0.0.1:9019" },
+     "participants": { "agent": "https://medagentbench.ddns.net:9019" },
      "config": {
        "num_tasks": 5,
        "max_rounds": 10,
-       "mcp_server_url": "http://localhost:8002",
-       "fhir_api_base": "http://localhost:8080/fhir/"
+       "mcp_server_url": "https://medagentbench.ddns.net:8002",
+       "fhir_api_base": "https://medagentbench.ddns.net:8080/fhir/"
      }
    }
    ```
 
 2. **Task Execution**: For each task, the green agent:
+
    - Sends the medical question to the purple agent
    - The purple agent uses FHIR tools via MCP to gather information
    - The purple agent returns `FINISH([answer1, answer2, ...])` format
@@ -137,34 +145,34 @@ fhir_api_base = "http://localhost:8080/fhir/"    # FHIR server URL
 
 MedAgentBench includes 10 task types covering various clinical scenarios:
 
-| Task | Type | Description |
-|------|------|-------------|
-| task1 | Query | Patient lookup by demographics |
-| task2 | Query | Calculate patient age |
-| task3 | Write | Record vital sign observation |
-| task4 | Query | Recent lab value lookup (24h) |
-| task5 | Conditional | Check magnesium & order if low |
-| task6 | Query | Average glucose (24h) |
-| task7 | Query | Latest glucose value |
-| task8 | Write | Create orthopedic consultation |
-| task9 | Conditional | Potassium replacement protocol |
+| Task   | Type        | Description                     |
+| ------ | ----------- | ------------------------------- |
+| task1  | Query       | Patient lookup by demographics  |
+| task2  | Query       | Calculate patient age           |
+| task3  | Write       | Record vital sign observation   |
+| task4  | Query       | Recent lab value lookup (24h)   |
+| task5  | Conditional | Check magnesium & order if low  |
+| task6  | Query       | Average glucose (24h)           |
+| task7  | Query       | Latest glucose value            |
+| task8  | Write       | Create orthopedic consultation  |
+| task9  | Conditional | Potassium replacement protocol  |
 | task10 | Conditional | HbA1C check & order if >1yr old |
 
 ## FHIR Tools (via MCP Server)
 
 The MCP server provides 9 FHIR tools:
 
-| Tool | Type | Description |
-|------|------|-------------|
-| `search_patients` | GET | Search patients by name, DOB, identifier |
-| `list_patient_problems` | GET | Get patient conditions/problem list |
-| `list_lab_observations` | GET | Get laboratory results by code |
-| `list_vital_signs` | GET | Get vital sign observations |
-| `record_vital_observation` | POST | Create a new vital sign observation |
-| `list_medication_requests` | GET | Get medication orders |
-| `create_medication_request` | POST | Create a new medication order |
-| `list_patient_procedures` | GET | Get completed procedures |
-| `create_service_request` | POST | Create lab/imaging/consult orders |
+| Tool                        | Type | Description                              |
+| --------------------------- | ---- | ---------------------------------------- |
+| `search_patients`           | GET  | Search patients by name, DOB, identifier |
+| `list_patient_problems`     | GET  | Get patient conditions/problem list      |
+| `list_lab_observations`     | GET  | Get laboratory results by code           |
+| `list_vital_signs`          | GET  | Get vital sign observations              |
+| `record_vital_observation`  | POST | Create a new vital sign observation      |
+| `list_medication_requests`  | GET  | Get medication orders                    |
+| `create_medication_request` | POST | Create a new medication order            |
+| `list_patient_procedures`   | GET  | Get completed procedures                 |
+| `create_service_request`    | POST | Create lab/imaging/consult orders        |
 
 ## Building Docker Images
 
@@ -182,13 +190,13 @@ docker build --platform linux/amd64 \
 
 ## Environment Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `OPENAI_API_KEY` | (required) | OpenAI API key for the purple agent |
-| `MEDAGENT_LLM_MODEL` | `openai/gpt-4o` | LLM model to use (litellm format) |
-| `MCP_SERVER_URL` | `http://localhost:8002` | MCP server URL |
-| `MCP_FHIR_API_BASE` | `http://localhost:8080/fhir/` | FHIR server base URL |
-| `MEDAGENTBENCH_TASKS_FILE` | `src/mcp/resources/tasks/tasks.json` | Path to tasks file |
+| Variable                   | Default                                     | Description                         |
+| -------------------------- | ------------------------------------------- | ----------------------------------- |
+| `OPENAI_API_KEY`           | (required)                                  | OpenAI API key for the purple agent |
+| `MEDAGENT_LLM_MODEL`       | `openai/gpt-4o`                             | LLM model to use (litellm format)   |
+| `MCP_SERVER_URL`           | `https://medagentbench.ddns.net:8002`       | MCP server URL                      |
+| `MCP_FHIR_API_BASE`        | `https://medagentbench.ddns.net:8080/fhir/` | FHIR server base URL                |
+| `MEDAGENTBENCH_TASKS_FILE` | `src/mcp/resources/tasks/tasks.json`        | Path to tasks file                  |
 
 ## Example Output
 
@@ -234,6 +242,7 @@ uv run python main.py batch --task-indices "0,1,2"
 ```
 
 See the original CLI commands:
+
 - `green`: Start green agent only
 - `white`: Start white agent only
 - `launch`: Run single task evaluation

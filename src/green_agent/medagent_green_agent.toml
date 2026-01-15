@@ -19,13 +19,13 @@ tags = ["green agent", "assessment hosting", "medagentbench", "medical", "fhir"]
 examples = ["""
 Your task is to instantiate MedAgentBench to test the agent located at:
 <white_agent_url>
-http://localhost:9002/
+https://medagentbench.ddns.net:9019/
 </white_agent_url>
 
 You should use the following configuration:
 <medagent_config>
 {
-  "mcp_server_url": "http://0.0.0.0:8002",
+  "mcp_server_url": "https://medagentbench.ddns.net:8002",
   "max_rounds": 9,
   "task_data": {
     "id": "task1_1",
@@ -36,6 +36,6 @@ You should use the following configuration:
 }
 </medagent_config>
 
-Note: The MCP server at http://0.0.0.0:8002 provides tools for interacting with the FHIR server.
+Note: The MCP server at https://medagentbench.ddns.net:8002 provides tools for interacting with the FHIR server.
 The white agent will use these tools to query patient information and complete medical tasks.
 """]

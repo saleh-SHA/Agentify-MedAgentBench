@@ -23,7 +23,7 @@ from a2a.utils import new_agent_text_message, get_text_parts
 from src.my_util import parse_tags, my_a2a, logging_config
 
 dotenv.load_dotenv()
-FHIR_API_BASE = os.environ.get("MCP_FHIR_API_BASE", "http://localhost:8080/fhir/")
+FHIR_API_BASE = os.environ.get("MCP_FHIR_API_BASE", "https://medagentbench.ddns.net:8080/fhir/")
 OUTPUT_DIR = os.environ.get("MEDAGENT_OUTPUT_DIR", "outputs/medagentbench")
 
 print(f"*Host*: {os.environ.get('HOST')}, *port*: {os.environ.get('AGENT_PORT')}")
@@ -429,7 +429,7 @@ class MedAgentGreenExecutor(AgentExecutor):
         medagent_config = json.loads(medagent_config_str)
 
         # Extract configuration
-        mcp_server_url = medagent_config.get("mcp_server_url", "http://0.0.0.0:8002")
+        mcp_server_url = medagent_config.get("mcp_server_url", "https://medagentbench.ddns.net:8002")
         max_rounds = medagent_config.get("max_rounds", 9)
         task_data = medagent_config["task_data"]
         
@@ -628,13 +628,13 @@ def start_medagent_green(
     Args:
         agent_name: Name of the agent configuration file (default: "medagent_green_agent")
         host: Host to bind the server to (reads from HOST env var, default: "localhost")
-        port: Port to bind the server to (reads from AGENT_PORT env var, default: 9001)
+        port: Port to bind the server to (reads from AGENT_PORT env var, default: 9009)
     """
     # Read from environment variables if not provided (for AgentBeats controller compatibility)
     if host is None:
         host = os.environ.get("HOST", "0.0.0.0")
     if port is None:
-        port = int(os.environ.get("AGENT_PORT", "9001"))
+        port = int(os.environ.get("AGENT_PORT", "9009"))
 
     logger.info(f"Starting MedAgentBench green agent on {host}:{port}...")
     agent_card_dict = load_agent_card_toml(agent_name)

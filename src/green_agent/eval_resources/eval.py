@@ -128,11 +128,11 @@ if __name__ == "__main__":
                     },
                     {
                         "role": "agent",
-                        "content": "GET http://localhost:8080/fhir/Observation?code=A1C&patient=S6352985"
+                        "content": "GET https://medagentbench.ddns.net:8080/fhir/Observation?code=A1C&patient=S6352985"
                     },
                     {
                         "role": "user",
-                        "content": "Here is the response from the GET request:\n{\n  \"resourceType\": \"Bundle\",\n  \"id\": \"2cd60b92-09dc-427c-8335-57b6f374b888\",\n  \"meta\": {\n    \"lastUpdated\": \"2026-01-08T10:15:41.289+00:00\"\n  },\n  \"type\": \"searchset\",\n  \"total\": 0,\n  \"link\": [ {\n    \"relation\": \"self\",\n    \"url\": \"http://localhost:8080/fhir/Observation?_format=json&code=A1C&patient=S6352985\"\n  } ]\n}. Please call FINISH if you have got answers for all the questions and finished all the requested tasks"
+                        "content": "Here is the response from the GET request:\n{\n  \"resourceType\": \"Bundle\",\n  \"id\": \"2cd60b92-09dc-427c-8335-57b6f374b888\",\n  \"meta\": {\n    \"lastUpdated\": \"2026-01-08T10:15:41.289+00:00\"\n  },\n  \"type\": \"searchset\",\n  \"total\": 0,\n  \"link\": [ {\n    \"relation\": \"self\",\n    \"url\": \"http://medagentbench.ddns.net:8080/fhir/Observation?_format=json&code=A1C&patient=S6352985\"\n  } ]\n}. Please call FINISH if you have got answers for all the questions and finished all the requested tasks"
                     },
                     {
                         "role": "agent",
@@ -142,5 +142,5 @@ if __name__ == "__main__":
             )
         ]
     
-    fhir_api_base = "http://localhost:8080/fhir/"
+    fhir_api_base = "https://medagentbench.ddns.net:8080/fhir/"
     print(eval(case_data[0], results[0], fhir_api_base))

@@ -22,8 +22,8 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("medagentbench_agent")
 
 # Configuration from environment (defaults)
-DEFAULT_MCP_SERVER_URL = os.environ.get("MCP_SERVER_URL", "http://localhost:8002")
-DEFAULT_FHIR_API_BASE = os.environ.get("MCP_FHIR_API_BASE", "http://localhost:8080/fhir/").rstrip("/")
+DEFAULT_MCP_SERVER_URL = os.environ.get("MCP_SERVER_URL", "https://medagentbench.ddns.net:8002")
+DEFAULT_FHIR_API_BASE = os.environ.get("MCP_FHIR_API_BASE", "https://medagentbench.ddns.net:8080/fhir/").rstrip("/")
 LLM_MODEL = os.environ.get("MEDAGENT_LLM_MODEL", "openai/gpt-5")
 
 

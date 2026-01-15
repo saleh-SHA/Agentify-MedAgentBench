@@ -15,7 +15,7 @@ from executor import Executor
 
 def main():
     parser = argparse.ArgumentParser(description="Run the MedAgentBench evaluator (green agent).")
-    parser.add_argument("--host", type=str, default="127.0.0.1", help="Host to bind the server")
+    parser.add_argument("--host", type=str, default="https://medagentbench.ddns.net", help="Host to bind the server")
     parser.add_argument("--port", type=int, default=9009, help="Port to bind the server")
     parser.add_argument("--card-url", type=str, help="URL to advertise in the agent card")
     args = parser.parse_args()
@@ -35,8 +35,8 @@ def main():
     "num_tasks": 5,
     "max_rounds": 10,
     "domain": "medagentbench",
-    "mcp_server_url": "http://localhost:8002",
-    "fhir_api_base": "http://localhost:8080/fhir/"
+    "mcp_server_url": "https://medagentbench.ddns.net:8002",
+    "fhir_api_base": "https://medagentbench.ddns.net:8080/fhir/"
   }
 }
 """.strip()

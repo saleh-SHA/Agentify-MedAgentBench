@@ -26,7 +26,7 @@ def white():
 @app.command()
 def launch(
     task_index: int = typer.Option(0, help="Index of the task to run from test_data_v2.json"),
-    mcp_server: str = typer.Option("http://0.0.0.0:8002", help="MCP server URL"),
+    mcp_server: str = typer.Option("https://medagentbench.ddns.net:8002", help="MCP server URL"),
     max_rounds: int = typer.Option(8, help="Maximum number of interaction rounds")
 ):
     """Launch a single MedAgentBench evaluation."""
@@ -40,7 +40,7 @@ def launch(
 @app.command()
 def batch(
     task_indices: Optional[str] = typer.Option(None, help="Comma-separated task indices (e.g., '0,1,2'). If not provided, runs all tasks."),
-    mcp_server: str = typer.Option("http://0.0.0.0:8002", help="MCP server URL"),
+    mcp_server: str = typer.Option("https://medagentbench.ddns.net:8002", help="MCP server URL"),
     max_rounds: int = typer.Option(8, help="Maximum number of interaction rounds")
 ):
     """Launch batch MedAgentBench evaluations on multiple tasks."""

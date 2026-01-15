@@ -1,16 +1,16 @@
 [green_agent]
-endpoint = "http://127.0.0.1:9009"
-cmd = "python scenarios/medagentbench/evaluator/src/server.py --host 127.0.0.1 --port 9009"
+endpoint = "https://medagentbench.ddns.net:9009"
+cmd = "python scenarios/medagentbench/evaluator/src/server.py --host https://medagentbench.ddns.net --port 9009"
 
 [[participants]]
 role = "agent"
-endpoint = "http://127.0.0.1:9019"
-cmd = "python scenarios/medagentbench/agent/src/server.py --host 127.0.0.1 --port 9019"
+endpoint = "https://medagentbench.ddns.net:9019"
+cmd = "python scenarios/medagentbench/agent/src/server.py --host https://medagentbench.ddns.net --port 9019"
 
 [config]
 # MedAgentBench evaluation configuration
-# FHIR server must be running at http://127.0.0.1:8080/fhir/
-# MCP server must be running at http://127.0.0.1:8002
+# FHIR server must be running at https://medagentbench.ddns.net:8080/fhir/
+# MCP server must be running at https://medagentbench.ddns.net:8002
 
 # Number of tasks to run (set to null or remove to run all tasks)
 num_tasks = 5
@@ -25,8 +25,8 @@ max_rounds = 10
 domain = "medagentbench"
 
 # MCP server URL for FHIR tools
-mcp_server_url = "http://127.0.0.1:8002"
+mcp_server_url = "http://medagentbench.ddns.net:8002"
 
 # FHIR server base URL
-fhir_api_base = "http://127.0.0.1:8080/fhir/"
+fhir_api_base = "http://medagentbench.ddns.net:8080/fhir/"
 

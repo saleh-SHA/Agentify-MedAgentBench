@@ -21,7 +21,7 @@ if [ -z "$HOST" ]; then
 fi
 
 if [ -z "$AGENT_PORT" ]; then
-    export AGENT_PORT="9001"
+    export AGENT_PORT="9009"
 fi
 
 echo "================================================================================"

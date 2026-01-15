@@ -19,8 +19,8 @@ from src.my_util import logging_config
 
 dotenv.load_dotenv()
 
-# MCP server URL from environment (default to localhost:8002)
-MCP_SERVER_URL = os.environ.get("MCP_SERVER_URL", "http://0.0.0.0:8002")
+# MCP server URL from environment (default to medagentbench.ddns.net:8002)
+MCP_SERVER_URL = os.environ.get("MCP_SERVER_URL", "https://medagentbench.ddns.net:8002")
 
 logger = logging_config.setup_logging("logs/white_agent.log", "white_agent")
 
@@ -103,7 +103,7 @@ class MedAgentWhiteExecutor(AgentExecutor):
     def __init__(self):
         self.ctx_id_to_messages = {}
         self.mcp_server_url = MCP_SERVER_URL
-        self.fhir_api_base = os.environ.get("MCP_FHIR_API_BASE", "http://localhost:8080/fhir/").rstrip("/")
+        self.fhir_api_base = os.environ.get("MCP_FHIR_API_BASE", "https://medagentbench.ddns.net:8080/fhir/").rstrip("/")
 
     async def discover_tools(self, session: ClientSession) -> List[Dict[str, Any]]:
         """Discover available tools from MCP server.
@@ -400,14 +400,14 @@ def start_medagent_white(
 
     Args:
         agent_name: Name of the agent
-        host: Host to bind to (reads from HOST env var, default: "localhost")
-        port: Port to bind to (reads from AGENT_PORT env var, default: 9002)
+        host: Host to bind to (reads from HOST env var, default: "0.0.0.0")
+        port: Port to bind to (reads from AGENT_PORT env var, default: 9019)
     """
     # Read from environment variables if not provided (for AgentBeats controller compatibility)
     if host is None:
-        host = os.environ.get("HOST", "localhost")
+        host = os.environ.get("HOST", "0.0.0.0")
     if port is None:
-        port = int(os.environ.get("AGENT_PORT", "9002"))
+        port = int(os.environ.get("AGENT_PORT", "9019"))
 
     logger.info(f"Starting MedAgentBench white agent on {host}:{port}...")
     url = f"http://{host}:{port}"

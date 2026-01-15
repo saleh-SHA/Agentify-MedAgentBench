@@ -21,7 +21,7 @@ from src.typings.general import ChatHistoryItem
 logger = logging_config.setup_logging("logs/medagent.log", "medagent_launcher")
 
 # Import FHIR_API_BASE for evaluation
-FHIR_API_BASE = os.environ.get("MCP_FHIR_API_BASE", "http://localhost:8080/fhir/")
+FHIR_API_BASE = os.environ.get("MCP_FHIR_API_BASE", "https://medagentbench.ddns.net:8080/fhir/")
 
 
 def is_port_open(host: str, port: int, timeout: float = 1.0) -> bool:
@@ -263,10 +263,10 @@ async def load_medagent_tasks(mcp_server_url: str):
 
 async def launch_medagent_evaluation(
     task_index: int = 0,
-    mcp_server_url: str = "http://0.0.0.0:8002",
+    mcp_server_url: str = "https://medagentbench.ddns.net:8002",
     max_rounds: int = 9,
-    green_port: int = 9001,
-    white_port: int = 9002,
+    green_port: int = 9009,
+    white_port: int = 9019,
     agent_name: str = "default_agent",
     task_name: str = "medagentbench"
 ):
@@ -375,7 +375,7 @@ async def launch_medagent_evaluation(
 
     # Start green agent
     logger.info("Launching MedAgentBench green agent...")
-    green_address = ("localhost", green_port)
+    green_address = ("medagentbench.ddns.net", green_port)
     green_url = f"http://{green_address[0]}:{green_address[1]}"
     p_green = multiprocessing.Process(
         target=start_medagent_green,
@@ -387,7 +387,7 @@ async def launch_medagent_evaluation(
 
     # Start MedAgentBench white agent
     logger.info("Launching MedAgentBench white agent...")
-    white_address = ("localhost", white_port)
+    white_address = ("medagentbench.ddns.net", white_port)
     white_url = f"http://{white_address[0]}:{white_address[1]}"
     p_white = multiprocessing.Process(
         target=start_medagent_white,
@@ -506,7 +506,7 @@ async def launch_medagent_evaluation(
 
 async def launch_medagent_batch_evaluation(
     task_indices: list = None,
-    mcp_server_url: str = "http://0.0.0.0:8002",
+    mcp_server_url: str = "https://medagentbench.ddns.net:8002",
     max_rounds: int = 8,
     agent_name: str = "default_agent",
     task_name: str = "medagentbench",
