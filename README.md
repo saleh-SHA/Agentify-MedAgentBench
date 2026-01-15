@@ -1,62 +1,38 @@
-# MedAgentBench Evaluation Framework
+# MedAgentBench for AgentBeats
 
-A complete implementation of MedAgentBench using the A2A (Agent-to-Agent) protocol and MCP (Model Context Protocol) servers for evaluating medical AI agents on clinical reasoning tasks.
+A medical AI agent evaluation framework compatible with the [AgentBeats](https://github.com/RDI-Foundation/agentbeats-tutorial) platform. This benchmark evaluates AI agents on clinical reasoning tasks using FHIR (Fast Healthcare Interoperability Resources) servers.
 
 ## Overview
 
-This project provides a standardized framework for evaluating medical AI agents using FHIR (Fast Healthcare Interoperability Resources) servers. It implements a green-agent/white-agent architecture where:
-- **Green agent**: Assessment manager that coordinates evaluations
-- **White agent**: The AI agent being tested (uses GPT-5 + function calling)
-- **MCP server**: Provides 9 FHIR tools for medical data access and serves evaluation tasks
-- **FHIR server**: Contains medical records and patient data
+MedAgentBench implements a green-agent/purple-agent architecture where:
 
-## Architecture
-
-```
-┌─────────────┐                    ┌─────────────┐
-│   Green     │  Task + MCP URL    │   White     │
-│   Agent     │──────────────────>│   Agent     │
-│ (Evaluator) │                    │ (GPT-5)     │
-└─────────────┘                    └─────────────┘
-                                          │
-                                          │ Discover & invoke tools
-                                          ▼
-                                   ┌─────────────┐
-                                   │     MCP     │
-                                   │   Server    │
-                                   │   :8002     │
-                                   └─────────────┘
-                                          │
-                                          │ FHIR requests
-                                          ▼
-                                   ┌─────────────┐
-                                   │    FHIR     │
-                                   │   Server    │
-                                   │   :8080     │
-                                   └─────────────┘
-```
+- **Green Agent (Evaluator)**: Orchestrates evaluations, sends tasks to purple agents, and validates answers using reference solutions
+- **Purple Agent (Participant)**: The AI agent being evaluated - uses FHIR tools via MCP server to answer medical questions
 
 ## Project Structure
 
 ```
-agentify-medagentbench/
-├── main.py                          # CLI entry point
-├── pyproject.toml                   # Project dependencies
-├── .env                            # API keys (create this)
-├── src/
-│   ├── green_agent/
-│   │   ├── medagent.py             # Green agent (evaluator)
-│   │   └── medagent_green_agent.toml
-│   ├── white_agent/
-│   │   └── medagent.py             # White agent (GPT-5 + MCP)
-│   ├── mcp/
-│   │   ├── server.py               # MCP server (9 FHIR tools + task serving)
-│   │   └── resources/
-│   │       └── tasks/
-│   │           └── tasks.json      # Test cases served by MCP server
-│   ├── medagent_launcher.py        # Evaluation launcher
-│   └── my_util/
-│       └── my_a2a.py               # A2A protocol utilities
+scenarios/
+└─ medagentbench/
+   ├─ evaluator/src/           # green agent (evaluator)
+   │  ├─ server.py             # A2A server entry point
+   │  ├─ agent.py              # evaluation logic + task graders
+   │  ├─ executor.py           # AgentExecutor implementation
+   │  └─ messenger.py          # A2A client helper
+   ├─ agent/src/               # purple agent (participant)
+   │  ├─ server.py             # A2A server entry point
+   │  ├─ agent.py              # LLM + MCP tool calling logic
+   │  └─ executor.py           # AgentExecutor implementation
+   ├─ Dockerfile.medagentbench-evaluator
+   ├─ Dockerfile.medagentbench-agent
+   └─ scenario.toml            # scenario configuration
+
+src/
+├─ agentbeats/                 # AgentBeats runner + A2A client helpers
+├─ mcp/                        # MCP server with FHIR tools
+│  ├─ server.py
+│  └─ resources/tasks/tasks.json
+└─ ...                         # original implementation (for reference)
 ```
 
 ## Quick Start
@@ -67,380 +43,209 @@ agentify-medagentbench/
 uv sync
 ```
 
-### 2. Set Up Environment
-
-Create a `.env` file in the project root:
+### 2. Set Environment Variables
 
 ```bash
+cp sample.env .env
+```
+
+Edit `.env` and add your API key:
+```
 OPENAI_API_KEY=your_openai_api_key_here
 ```
 
-### 3. Start the FHIR Server (Terminal 1)
+### 3. Start Required Services
 
+MedAgentBench requires two external services to be running:
+
+**Terminal 1 - FHIR Server (Docker):**
 ```bash
 docker pull jyxsu6/medagentbench:latest
-docker tag jyxsu6/medagentbench:latest medagentbench
-docker run -p 8080:8080 medagentbench
+docker run -p 8080:8080 jyxsu6/medagentbench:latest
 ```
 
 Wait for: `Started Application in XXX seconds`
 
-Verify: http://localhost:8080/
-
-### 4. Start the MCP Server (Terminal 2)
-
+**Terminal 2 - MCP Server:**
 ```bash
 uv run python -m src.mcp.server
 ```
 
-Verify:
+### 4. Run the Evaluation
+
+**Terminal 3:**
 ```bash
-curl http://0.0.0.0:8002/health
-# Should return: {"status":"ok","uptime_seconds":X.X}
+uv run agentbeats-run scenarios/medagentbench/scenario.toml
 ```
 
-### 5. Run Evaluation (Terminal 3)
-
-```bash
-# Run single task
-uv run python main.py launch
-
-# Run batch evaluation
-uv run python main.py batch --task-indices "0,1,2"
-```
-
-## Usage
-
-### Single Task Evaluation
-
-Run one task at a time:
-
-```bash
-# Run task at index 0 (default)
-uv run python main.py launch
-
-# Run a specific task
-uv run python main.py launch --task-index 5
-
-# Customize settings
-uv run python main.py launch \
-  --task-index 0 \
-  --mcp-server http://0.0.0.0:8002 \
-  --max-rounds 10
-```
-
-### Batch Evaluation
-
-Run multiple tasks in sequence:
-
-```bash
-# Run all tasks
-uv run python main.py batch
-
-# Run specific tasks (e.g., tasks 0, 1, 2)
-uv run python main.py batch --task-indices "0,1,2"
-
-# Run with custom settings
-uv run python main.py batch \
-  --task-indices "0,5,10" \
-  --mcp-server http://0.0.0.0:8002 \
-  --max-rounds 10
-
-# Save results to a file
-uv run python main.py batch \
-  --task-indices "0,1,2" \
-  --output-file results.json
-```
-
-### Run Individual Components
-
-For debugging or development:
-
-```bash
-# Start green agent only (port 9001)
-uv run python main.py green
-
-# Start white agent only (port 9002)
-uv run python main.py white
-```
-
-## CLI Commands
-
-### `launch` - Single Task Evaluation
-Run a single task evaluation.
+This command will:
+- Start the evaluator (green agent) and participant (purple agent) servers
+- Construct an `assessment_request` message with participant endpoints and config
+- Send the request to the green agent and print streamed responses
 
 **Options:**
-- `--task-index INT` - Task index to run (default: 0)
-- `--mcp-server STR` - MCP server URL (default: http://0.0.0.0:8002)
-- `--max-rounds INT` - Maximum interaction rounds (default: 8)
+- `--show-logs`: Show agent stdout/stderr during assessment
+- `--serve-only`: Start agents without running the assessment (useful for debugging)
 
-### `batch` - Batch Evaluation
-Run multiple tasks in sequence.
+## Configuration
 
-**Options:**
-- `--task-indices STR` - Comma-separated task indices (e.g., "0,1,2"). If not provided, runs all tasks.
-- `--mcp-server STR` - MCP server URL (default: http://0.0.0.0:8002)
-- `--max-rounds INT` - Maximum interaction rounds (default: 8)
-- `--output-file STR` - Path to save results as JSON file (optional). Note: Existing file will be overwritten.
+Edit `scenarios/medagentbench/scenario.toml` to customize the evaluation:
 
-### `green` - Start Green Agent
-Start the green agent (assessment manager) only on port 9001.
+```toml
+[green_agent]
+endpoint = "http://127.0.0.1:9009"
+cmd = "python scenarios/medagentbench/evaluator/src/server.py --host 127.0.0.1 --port 9009"
 
-### `white` - Start White Agent
-Start the white agent (agent being tested) only on port 9002.
+[[participants]]
+role = "agent"
+endpoint = "http://127.0.0.1:9019"
+cmd = "python scenarios/medagentbench/agent/src/server.py --host 127.0.0.1 --port 9019"
 
-## How It Works
-
-### 1. Evaluation Flow
-
-1. **Launcher** loads test data from MCP server and starts both agents
-2. **Green agent** sends task + MCP server URL to white agent
-3. **White agent** discovers available tools from MCP server
-4. **White agent** uses GPT-5 with function calling to solve the task
-5. **White agent** invokes tools via MCP server to query FHIR data
-6. **White agent** returns answer using `FINISH(answer)` format
-7. **Green agent** evaluates answer correctness using flexible matching
-8. **Green agent** reports metrics (correctness, time, rounds)
-
-### 2. Green Agent (Assessment Manager)
-
-**File**: [src/green_agent/medagent.py](src/green_agent/medagent.py)
-
-The green agent:
-- Receives task configuration with MCP server URL
-- Sends task to white agent with instructions to use the MCP server
-- Waits for white agent responses
-- Checks if answer is correct when white agent calls `FINISH(answer)` using **flexible matching**:
-  - First tries **exact match**: Full answer matches expected solution
-  - Falls back to **substring match**: Expected solution is contained in answer
-  - Examples: `"S6534835"` ✅, `"Patient MRN is S6534835"` ✅, `"S6534836"` ❌
-- Reports evaluation results with metrics (correctness, time, rounds)
-
-### 3. White Agent (Agent Being Tested)
-
-**File**: [src/white_agent/medagent.py](src/white_agent/medagent.py)
-
-The MedAgentBench white agent:
-- Uses **GPT-5** with function calling capability (no temperature parameter support)
-- Discovers tools from MCP server at startup
-- Converts MCP tool descriptors to OpenAI function format
-- Calls tools via MCP server when GPT-5 requests them
-- Processes FHIR responses and continues reasoning
-- Returns final answer via `FINISH(answer)`
-
-### 4. MCP Server
-
-**File**: [src/mcp/server.py](src/mcp/server.py)
-
-The MCP server provides two main functions:
-
-**A. Task Management**
-- Loads and serves evaluation tasks from `src/mcp/resources/tasks/tasks.json`
-- Provides tasks via `/resources/medagentbench_tasks` endpoint
-- Both single and batch evaluations retrieve tasks from the MCP server
-
-**B. 9 FHIR Tools**
-1. **search_patients** - Search for patients by name, DOB, identifier
-2. **list_patient_problems** - Get patient conditions/problem list
-3. **list_lab_observations** - Get laboratory results
-4. **list_vital_signs** - Get vital sign observations
-5. **record_vital_observation** - Create a new vital sign observation
-6. **list_medication_requests** - Get medication orders
-7. **create_medication_request** - Create a new medication order
-8. **list_patient_procedures** - Get completed procedures
-9. **create_service_request** - Create lab/imaging/consult orders
-
-## Test Data
-
-Test cases are stored in `src/mcp/resources/tasks/tasks.json` and served by the MCP server.
-
-Each test case includes:
-- `id`: Task identifier (e.g., "task1_1")
-- `instruction`: Medical question
-- `context`: Additional constraints or context
-- `sol`: Expected solution(s) as a list
-
-Example:
-```json
-{
-  "id": "task1_1",
-  "instruction": "What's the MRN of the patient with name Peter Stafford and DOB of 1932-12-29?",
-  "context": "If the patient does not exist, the answer should be \"Patient not found\"",
-  "sol": ["S6534835"]
-}
+[config]
+num_tasks = 5                                    # Number of tasks to run
+max_rounds = 10                                  # Max tool-calling rounds per task
+mcp_server_url = "http://localhost:8002"         # MCP server URL
+fhir_api_base = "http://localhost:8080/fhir/"    # FHIR server URL
 ```
 
-**Note**: The MCP server loads tasks at startup. To check available tasks:
+## Assessment Flow
+
+1. **Assessment Request**: The green agent receives a JSON message:
+   ```json
+   {
+     "participants": { "agent": "http://127.0.0.1:9019" },
+     "config": {
+       "num_tasks": 5,
+       "max_rounds": 10,
+       "mcp_server_url": "http://localhost:8002",
+       "fhir_api_base": "http://localhost:8080/fhir/"
+     }
+   }
+   ```
+
+2. **Task Execution**: For each task, the green agent:
+   - Sends the medical question to the purple agent
+   - The purple agent uses FHIR tools via MCP to gather information
+   - The purple agent returns `FINISH([answer1, answer2, ...])` format
+   - The green agent validates using task-specific grading functions
+
+3. **Results**: The green agent produces an artifact with:
+   - Pass rate and correct count
+   - Per-task results (correct/incorrect, time, status)
+
+## Task Types
+
+MedAgentBench includes 10 task types covering various clinical scenarios:
+
+| Task | Type | Description |
+|------|------|-------------|
+| task1 | Query | Patient lookup by demographics |
+| task2 | Query | Calculate patient age |
+| task3 | Write | Record vital sign observation |
+| task4 | Query | Recent lab value lookup (24h) |
+| task5 | Conditional | Check magnesium & order if low |
+| task6 | Query | Average glucose (24h) |
+| task7 | Query | Latest glucose value |
+| task8 | Write | Create orthopedic consultation |
+| task9 | Conditional | Potassium replacement protocol |
+| task10 | Conditional | HbA1C check & order if >1yr old |
+
+## FHIR Tools (via MCP Server)
+
+The MCP server provides 9 FHIR tools:
+
+| Tool | Type | Description |
+|------|------|-------------|
+| `search_patients` | GET | Search patients by name, DOB, identifier |
+| `list_patient_problems` | GET | Get patient conditions/problem list |
+| `list_lab_observations` | GET | Get laboratory results by code |
+| `list_vital_signs` | GET | Get vital sign observations |
+| `record_vital_observation` | POST | Create a new vital sign observation |
+| `list_medication_requests` | GET | Get medication orders |
+| `create_medication_request` | POST | Create a new medication order |
+| `list_patient_procedures` | GET | Get completed procedures |
+| `create_service_request` | POST | Create lab/imaging/consult orders |
+
+## Building Docker Images
+
 ```bash
-curl http://0.0.0.0:8002/resources/medagentbench_tasks | jq
+# Build evaluator (green agent)
+docker build --platform linux/amd64 \
+  -f scenarios/medagentbench/Dockerfile.medagentbench-evaluator \
+  -t ghcr.io/yourusername/medagentbench-evaluator:v1.0 .
+
+# Build agent (purple agent)
+docker build --platform linux/amd64 \
+  -f scenarios/medagentbench/Dockerfile.medagentbench-agent \
+  -t ghcr.io/yourusername/medagentbench-agent:v1.0 .
 ```
 
-## Evaluation Metrics
+## Environment Variables
 
-Each evaluation reports:
-- **correct**: Whether the answer was correct (True/False)
-- **time_used**: Time taken in seconds
-- **rounds_used**: Number of interaction rounds
-- **status**: Task completion status ("completed", "max_rounds_reached", etc.)
-
-## Evaluation Logic
-
-The green agent uses **flexible matching** to evaluate answers:
-1. First tries **exact match**: Full answer matches expected solution
-2. Falls back to **substring match**: Expected solution is contained in answer
-
-Examples:
-- `"S6534835"` → ✅ (exact match)
-- `"Patient MRN is S6534835"` → ✅ (contains "S6534835")
-- `"The patient's MRN number is S6534835"` → ✅ (contains "S6534835")
-- `"S6534836"` → ❌ (wrong MRN)
-- `"Patient not found"` → ✅ (if that's the expected answer)
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OPENAI_API_KEY` | (required) | OpenAI API key for the purple agent |
+| `MEDAGENT_LLM_MODEL` | `openai/gpt-4o` | LLM model to use (litellm format) |
+| `MCP_SERVER_URL` | `http://localhost:8002` | MCP server URL |
+| `MCP_FHIR_API_BASE` | `http://localhost:8080/fhir/` | FHIR server base URL |
+| `MEDAGENTBENCH_TASKS_FILE` | `src/mcp/resources/tasks/tasks.json` | Path to tasks file |
 
 ## Example Output
 
 ```
-MedAgentBench Evaluation Complete ✅
+[Status: working]
+Starting MedAgentBench assessment.
 
-Task ID: task1_1
-Question: What's the MRN of the patient with name Peter Stafford and DOB of 1932-12-29?
-Expected Answer: ['S6534835']
-Agent Answer: Patient MRN is S6534835
-Status: completed
-Correct: True
-Rounds Used: 1
-Time: 61.91s
+[Status: working]
+Evaluating 5 tasks in medagentbench domain
 
-Metrics: {
-  "time_used": 61.91,
-  "status": "completed",
-  "rounds_used": 1,
-  "correct": true
-}
+[Status: working]
+Task task1_1: ✓ (2.3s)
+
+[Status: working]
+Task task2_1: ✓ (3.1s)
+
+...
+
+MedAgentBench Results
+Domain: medagentbench
+Tasks: 5
+Pass Rate: 80.0% (4/5)
+Time: 45.2s
+
+Task Results:
+  task1_1: ✓ (completed)
+  task2_1: ✓ (completed)
+  task3_1: ✓ (completed)
+  task4_1: ✗ (completed)
+  task5_1: ✓ (completed)
 ```
 
-## Programmatic Usage
+## Original Implementation
 
-You can also use the MedAgentBench components programmatically:
+The repository also includes the original MedAgentBench implementation (in `src/`) which can be run using:
 
-```python
-import asyncio
-from src.medagent_launcher import launch_medagent_evaluation, launch_medagent_batch_evaluation
+```bash
+# Single task
+uv run python main.py launch --task-index 0
 
-# Run a specific task
-result = asyncio.run(launch_medagent_evaluation(
-    task_index=0,
-    mcp_server_url="http://0.0.0.0:8002",
-    max_rounds=8
-))
-print(result)  # Returns dict with task_index, task_id, and response
-
-# Run batch evaluation
-results = asyncio.run(launch_medagent_batch_evaluation(
-    task_indices=[0, 1, 2],
-    mcp_server_url="http://0.0.0.0:8002",
-    max_rounds=8,
-    output_file="results.json"  # Optional
-))
-print(f"Evaluated {len(results)} tasks")
+# Batch evaluation
+uv run python main.py batch --task-indices "0,1,2"
 ```
+
+See the original CLI commands:
+- `green`: Start green agent only
+- `white`: Start white agent only
+- `launch`: Run single task evaluation
+- `batch`: Run batch evaluation
 
 ## Technologies
 
-- **A2A Protocol**: Agent-to-agent communication standard
+- **A2A Protocol**: Agent-to-agent communication (a2a-sdk)
 - **MCP**: Model Context Protocol for tool management
 - **FHIR**: Fast Healthcare Interoperability Resources standard
-- **GPT-5**: OpenAI's latest model with function calling
+- **LiteLLM**: Multi-provider LLM interface
 - **Docker**: FHIR server containerization
-- **FastAPI**: MCP server web framework
-- **LiteLLM**: Universal LLM API wrapper
-- **Uvicorn**: ASGI web server
-- **Typer**: CLI framework
-
-## Troubleshooting
-
-### FHIR Server Not Responding
-
-```bash
-# Check if running
-docker ps | grep medagentbench
-
-# Check logs
-docker logs <container_id>
-
-# Restart
-docker restart <container_id>
-```
-
-### MCP Server Connection Issues
-
-```bash
-# Verify MCP server is running
-curl http://0.0.0.0:8002/health
-
-# Check available tools
-curl http://0.0.0.0:8002/tools | jq
-
-# Restart MCP server
-# Stop with Ctrl+C, then:
-uv run python -m src.mcp.server
-```
-
-### GPT-5 API Errors
-
-- Check `.env` file has valid `OPENAI_API_KEY`
-- Verify API quota at https://platform.openai.com/account/usage
-- Note: GPT-5 doesn't support `temperature` parameter
-
-### Agents Not Starting
-
-```bash
-# Check if ports are available
-lsof -i :9001  # Green agent
-lsof -i :9002  # White agent
-lsof -i :8002  # MCP server
-lsof -i :8080  # FHIR server
-
-# Kill any existing processes
-kill -9 <PID>
-```
-
-### Common Issues
-
-**Issue**: Schema validation errors from OpenAI API (e.g., "array schema missing items")
-- **Cause**: Invalid JSON schema for array-type parameters in tool definitions
-- **Solution**: Ensure all array properties in tool schemas include an `items` field. Restart MCP server to load updated tool definitions.
-
-**Issue**: Agent processes not terminating
-- **Solution**: Use `ps aux | grep python` and `kill -9 <PID>`
-
-**Issue**: Docker FHIR server not starting
-- **Solution**: Check if port 8080 is already in use: `lsof -i :8080`
-
-**Issue**: Tasks not found or empty task list
-- **Cause**: MCP server cannot find or load tasks.json file
-- **Solution**: Verify `src/mcp/resources/tasks/tasks.json` exists and contains valid JSON. Check MCP server startup logs for task loading status.
-
-## Key Files
-
-- [src/green_agent/medagent.py](src/green_agent/medagent.py) - Green agent implementation
-- [src/white_agent/medagent.py](src/white_agent/medagent.py) - White agent with MCP support
-- [src/mcp/server.py](src/mcp/server.py) - MCP server providing FHIR tools and task serving
-- [src/mcp/resources/tasks/tasks.json](src/mcp/resources/tasks/tasks.json) - Test cases served by MCP server
-- [src/medagent_launcher.py](src/medagent_launcher.py) - Evaluation launcher
-- [main.py](main.py) - CLI entry point
-
-## Next Steps
-
-- ✅ Batch evaluation support (implemented via `batch` command)
-- ✅ Flexible answer matching (exact + substring)
-- ✅ MCP server task management (tasks loaded from MCP server)
-- ✅ Fixed JSON schema validation (array items properly defined)
-- ✅ Result collection and aggregation for batch evaluations
-- ✅ Output file saving for batch results (JSON format)
-- Customize white agent reasoning strategies
-- Add more FHIR tools to MCP server
-- Add support for different LLM backends (currently uses GPT-5)
-- Generate summary statistics and reports from batch results
 
 ## License
 
