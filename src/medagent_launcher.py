@@ -259,7 +259,7 @@ async def launch_medagent_evaluation(
         args=("medagent_green_agent", *green_address)
     )
     p_green.start()
-    assert await my_a2a.wait_agent_ready(green_url), "Green agent not ready in time"
+    assert await my_a2a.wait_agent_ready(green_url, timeout=30), "Green agent not ready in time"
     logger.info("Green agent is ready.")
 
     # Start MedAgentBench white agent
@@ -271,7 +271,7 @@ async def launch_medagent_evaluation(
         args=("medagent_white_agent", *white_address)
     )
     p_white.start()
-    assert await my_a2a.wait_agent_ready(white_url), "White agent not ready in time"
+    assert await my_a2a.wait_agent_ready(white_url, timeout=30), "White agent not ready in time"
     logger.info("MedAgentBench white agent is ready.")
 
     # Prepare task configuration
