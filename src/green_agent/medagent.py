@@ -331,12 +331,14 @@ async def ask_agent_to_solve(
                         is_correct = True
                         break
 
+        # Calculate rounds as number of agent responses in history
+        rounds = sum(1 for h in history if h.get("role") in ("agent", "assistant"))
         return {
             "status": "completed",
             "result": answer,
             "history": history,
             "correct": is_correct,
-            "rounds": 1  # Single interaction from green agent perspective
+            "rounds": rounds
         }
     
     # Check if FINISH is somewhere in the response (agent may have added extra text)
@@ -369,23 +371,27 @@ async def ask_agent_to_solve(
                         is_correct = True
                         break
 
+        # Calculate rounds as number of agent responses in history
+        rounds = sum(1 for h in history if h.get("role") in ("agent", "assistant"))
         return {
             "status": "completed",
             "result": answer,
             "history": history,
             "correct": is_correct,
-            "rounds": 1
+            "rounds": rounds
         }
 
     # Agent didn't return FINISH format
     warning_preview = agent_response[:200] + "..." if len(agent_response) > 200 else agent_response
     logger.warning(f"Agent did not return FINISH format: {warning_preview}")
+    # Calculate rounds as number of agent responses in history
+    rounds = sum(1 for h in history if h.get("role") in ("agent", "assistant"))
     return {
         "status": "agent_invalid_action",
         "result": agent_response,
         "history": history,
         "correct": False,
-        "rounds": 1
+        "rounds": rounds
     }
 
 
