@@ -1,0 +1,32 @@
+[green_agent]
+endpoint = "http://127.0.0.1:9009"
+cmd = "python scenarios/medagentbench/evaluator/src/server.py --host 127.0.0.1 --port 9009"
+
+[[participants]]
+role = "agent"
+endpoint = "http://127.0.0.1:9019"
+cmd = "python scenarios/medagentbench/agent/src/server.py --host 127.0.0.1 --port 9019"
+
+[config]
+# MedAgentBench evaluation configuration
+# FHIR server must be running at http://localhost:8080/fhir/
+# MCP server must be running at http://localhost:8002
+
+# Number of tasks to run (set to null or remove to run all tasks)
+num_tasks = 5
+
+# Specific task IDs to run (optional, overrides num_tasks if provided)
+# task_ids = ["task1_1", "task2_1", "task3_1"]
+
+# Maximum tool-calling rounds per task
+max_rounds = 10
+
+# Domain for evaluation
+domain = "medagentbench"
+
+# MCP server URL for FHIR tools
+mcp_server_url = "http://localhost:8002"
+
+# FHIR server base URL
+fhir_api_base = "http://localhost:8080/fhir/"
+

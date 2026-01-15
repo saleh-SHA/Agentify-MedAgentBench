@@ -1,0 +1,2 @@
+"""AgentBeats Framework - MedAgentBench"""
+
