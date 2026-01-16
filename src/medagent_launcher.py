@@ -21,7 +21,7 @@ from src.typings.general import ChatHistoryItem
 logger = logging_config.setup_logging("logs/medagent.log", "medagent_launcher")
 
 # FHIR API base URL for evaluation
-FHIR_API_BASE = os.environ.get("MCP_FHIR_API_BASE", "http://localhost:8080/fhir/")
+FHIR_API_BASE = os.environ.get("fhir_api_base", "http://medagentbench.ddns.net:8080/fhir/")
 
 
 def is_port_open(host: str, port: int, timeout: float = 1.0) -> bool:

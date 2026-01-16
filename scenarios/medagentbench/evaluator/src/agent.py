@@ -792,7 +792,8 @@ class Agent:
         task_ids = request.config.get("task_ids")
         max_rounds = int(request.config.get("max_rounds", 10))
         mcp_server_url = str(request.config.get("mcp_server_url", "http://localhost:8002"))
-        fhir_api_base = str(request.config.get("fhir_api_base", "http://localhost:8080/fhir/"))
+        # Accept 'fhir_api_base', 'fhir_server_url', or env var MCP_FHIR_API_BASE
+        fhir_api_base = os.environ.get("fhir_api_base")
         
         # Load tasks
         tasks_file = os.environ.get(
