@@ -23,7 +23,7 @@ from a2a.utils import new_agent_text_message, get_text_parts
 from src.my_util import parse_tags, my_a2a, logging_config
 
 dotenv.load_dotenv()
-FHIR_API_BASE = os.environ.get("MCP_FHIR_API_BASE", "http://localhost:8080/fhir/")
+FHIR_API_BASE = os.environ.get("fhir_api_base", "http://medagentbench.ddns.net:8080/fhir/")
 OUTPUT_DIR = os.environ.get("MEDAGENT_OUTPUT_DIR", "outputs/medagentbench")
 
 # MedAgentBench prompt template with MCP server instructions
@@ -638,7 +638,7 @@ def start_medagent_green(
     agent_card_dict = load_agent_card_toml(agent_name)
     url = f"http://{host}:{port}"
     agent_card_dict["url"] = url  # Complete all required card fields
-
+    print(f"FHIR_API_BASE: {FHIR_API_BASE}")
     request_handler = DefaultRequestHandler(
         agent_executor=MedAgentGreenExecutor(),
         task_store=InMemoryTaskStore(),

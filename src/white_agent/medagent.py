@@ -103,7 +103,7 @@ class MedAgentWhiteExecutor(AgentExecutor):
     def __init__(self):
         self.ctx_id_to_messages = {}
         self.mcp_server_url = MCP_SERVER_URL
-        self.fhir_api_base = os.environ.get("MCP_FHIR_API_BASE", "http://localhost:8080/fhir/").rstrip("/")
+        self.fhir_api_base = os.environ.get("MCP_FHIR_API_BASE", "http://medagentbench.ddns.net:8080/fhir/").rstrip("/")
 
     async def discover_tools(self, session: ClientSession) -> List[Dict[str, Any]]:
         """Discover available tools from MCP server.

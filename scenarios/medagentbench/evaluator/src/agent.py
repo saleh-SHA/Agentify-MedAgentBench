@@ -61,9 +61,10 @@ def send_get_request(url, params=None, headers=None):
     try:
         response = requests.get(url, params=params, headers=headers)
         response.raise_for_status()
+        # Always return text - callers will json.loads() if needed
         return {
             "status_code": response.status_code,
-            "data": response.json() if response.headers.get('Content-Type') == 'application/json' else response.text
+            "data": response.text
         }
     except Exception as e:
         return {"error": str(e)}
@@ -792,8 +793,7 @@ class Agent:
         task_ids = request.config.get("task_ids")
         max_rounds = int(request.config.get("max_rounds", 10))
         mcp_server_url = str(request.config.get("mcp_server_url", "http://localhost:8002"))
-        # Accept 'fhir_api_base', 'fhir_server_url', or env var MCP_FHIR_API_BASE
-        fhir_api_base = os.environ.get("fhir_api_base")
+        fhir_api_base = str(request.config.get("fhir_api_base", "http://medagentbench.ddns.net:8080/fhir/"))
         
         # Load tasks
         tasks_file = os.environ.get(
