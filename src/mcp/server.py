@@ -9,8 +9,8 @@ from typing import Any, Dict, List, Optional
 import httpx
 from fastmcp import FastMCP
 
-# Configuration
-FHIR_API_BASE = os.environ.get("MCP_FHIR_API_BASE", "http://medagentbench.ddns.net:8080/fhir/").rstrip("/")
+# Configuration (defaults for local development)
+FHIR_API_BASE = os.environ.get("MCP_FHIR_API_BASE", "http://localhost:8080/fhir/").rstrip("/")
 TASKS_FILE = os.environ.get("MCP_TASKS_FILE", "src/mcp/resources/tasks/tasks.json")
 
 # Create FastMCP server

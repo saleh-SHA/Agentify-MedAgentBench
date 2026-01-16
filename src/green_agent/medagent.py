@@ -23,10 +23,8 @@ from a2a.utils import new_agent_text_message, get_text_parts
 from src.my_util import parse_tags, my_a2a, logging_config
 
 dotenv.load_dotenv()
-FHIR_API_BASE = os.environ.get("MCP_FHIR_API_BASE", "http://medagentbench.ddns.net:8080/fhir/")
+FHIR_API_BASE = os.environ.get("MCP_FHIR_API_BASE", "http://localhost:8080/fhir/")
 OUTPUT_DIR = os.environ.get("MEDAGENT_OUTPUT_DIR", "outputs/medagentbench")
-
-print(f"*Host*: {os.environ.get('HOST')}, *port*: {os.environ.get('AGENT_PORT')}")
 
 # MedAgentBench prompt template with MCP server instructions
 # This prompt contains ALL instructions for the white agent (no system prompt in white agent)

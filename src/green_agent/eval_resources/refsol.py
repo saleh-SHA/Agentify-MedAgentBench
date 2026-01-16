@@ -525,4 +525,3 @@ def task10(case_data, results, fhir_api_base):
     except Exception as e:
         print(f"task10 result parsing error: {e}", flush=True)
         return False
-#task2({'eval_MRN': 'S2874099'}, '[(0)]', "http://34.170.56.151:8080/fhir/")

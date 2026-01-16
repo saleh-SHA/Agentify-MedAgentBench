@@ -1,16 +1,25 @@
 #!/bin/bash
 
-# MedAgentBench Green Agent Launcher Script
+# =============================================================================
+# MedAgentBench - Main Entry Point
+# =============================================================================
 #
-# This script is used by AgentBeats controller to start the green agent.
-# When run standalone, it can also launch evaluations:
+# This is the primary script to run MedAgentBench evaluations.
+#
+# Prerequisites:
+#   1. FHIR server running: ./fhir_launcher.sh (or docker run -p 8080:8080 jyxsu6/medagentbench:latest)
+#   2. MCP server running: uv run python -m src.mcp.server
+#   3. Environment configured: cp sample.env .env && edit .env
 #
 # Usage:
-#   ./run.sh              - Start green agent (for AgentBeats controller)
-#   ./run.sh batch        - Run ALL available tasks (batch mode)
-#   ./run.sh launch 0     - Run single task with index 0
-#   ./run.sh batch --task-indices "0,1,2"  - Run specific tasks
+#   ./run.sh                              Start green agent server (for AgentBeats controller)
+#   ./run.sh batch                        Run ALL available tasks (batch mode)
+#   ./run.sh batch --task-indices "0,1,2" Run specific tasks by index
+#   ./run.sh launch --task-index 0        Run single task evaluation
+#   ./run.sh green                        Start green agent only
+#   ./run.sh white                        Start white (purple) agent only
 #
+# =============================================================================
 
 set -e
 
