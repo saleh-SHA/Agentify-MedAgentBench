@@ -36,6 +36,20 @@ MedAgentBench implements a **green-agent/purple-agent architecture**:
 | **Green Agent**  | Evaluator   | Orchestrates evaluations, sends tasks, validates answers        |
 | **Purple Agent** | Participant | The AI agent being tested - uses FHIR tools to answer questions |
 
+```
+┌──────────────┐      task       ┌──────────────┐      tools      ┌────────────┐
+│ GREEN AGENT  │ ──────────────> │ PURPLE AGENT │ <─────────────> │ MCP SERVER │
+│  (Evaluator) │ <────────────── │ (Participant)│                 │   :8002    │
+│    :9009     │    FINISH()     │    :9019     │                 └─────┬──────┘
+└──────────────┘                 └──────────────┘                       │
+                                                                        │ FHIR API
+                                                                        v
+                                                                 ┌────────────┐
+                                                                 │FHIR SERVER │
+                                                                 │   :8080    │
+                                                                 └────────────┘
+```
+
 The evaluation flow:
 
 1. Green agent sends a medical question to the purple agent

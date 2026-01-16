@@ -7,7 +7,7 @@ def parse_tags(str_with_tags: str) -> Dict[str, str]:
     
     Args:
         str_with_tags: String containing tags in format <tag_name>content</tag_name>
-        
+
     Returns:
         Dictionary mapping tag names to their stripped content
     """
