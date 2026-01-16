@@ -14,13 +14,12 @@ from mcp.client.sse import sse_client
 from src.green_agent.medagent import start_medagent_green, OUTPUT_DIR
 from src.white_agent.medagent import start_medagent_white
 from src.my_util import my_a2a, logging_config
-from src.typings import *
+from src.typings.status import SampleStatus
 from src.typings.output import TaskOutput
 from src.typings.general import ChatHistoryItem
 
 logger = logging_config.setup_logging("logs/medagent.log", "medagent_launcher")
 
-# Import FHIR_API_BASE for evaluation
 FHIR_API_BASE = os.environ.get("MCP_FHIR_API_BASE", "http://localhost:8080/fhir/")
 
 

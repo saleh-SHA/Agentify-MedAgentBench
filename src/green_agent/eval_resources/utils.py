@@ -1,72 +1,43 @@
 import requests
 
+
 def verify_fhir_server(fhir_api_base):
-    """
-    Verify connection to FHIR server. Returns True if everything is good
-    """
+    """Verify connection to FHIR server."""
     res = send_get_request(f'{fhir_api_base}metadata')
-    if res.get('status_code', 0) != 200:
-        return False
-    return True
+    return res.get('status_code', 0) == 200
+
 
 def send_get_request(url, params=None, headers=None):
-    """
-    Sends a GET HTTP request to the given URL.
-
-    Args:
-        url (str): The URL to send the GET request to.
-        params (dict, optional): Query parameters to include in the request. Defaults to None.
-        headers (dict, optional): HTTP headers to include in the request. Defaults to None.
-
-    Returns:
-        dict: A dictionary containing the response's status code and data.
-
-    Raises:
-        requests.exceptions.RequestException: If an error occurs during the request.
-    """
+    """Send a GET HTTP request to the given URL."""
     try:
         response = requests.get(url, params=params, headers=headers)
-        response.raise_for_status()  # Raises an HTTPError if the response code is 4xx or 5xx
+        response.raise_for_status()
         return {
             "status_code": response.status_code,
             "data": response.json() if response.headers.get('Content-Type') == 'application/json' else response.text
         }
-    except Exception as e:
+    except requests.exceptions.RequestException as e:
         return {"error": str(e)}
 
 
 def send_post_request(url, payload, headers=None):
-    """
-    Sends a POST HTTP request to the given URL with JSON payload.
-
-    Args:
-        url (str): The URL to send the POST request to.
-        payload (dict): The JSON payload to include in the request body.
-        headers (dict, optional): HTTP headers to include in the request. Defaults to None.
-
-    Returns:
-        dict: A dictionary containing the response's status code and data.
-
-    Raises:
-        requests.exceptions.RequestException: If an error occurs during the request.
-    """
+    """Send a POST HTTP request to the given URL with JSON payload."""
     try:
         default_headers = {"Content-Type": "application/json"}
         if headers:
             default_headers.update(headers)
         
         response = requests.post(url, json=payload, headers=default_headers)
-        response.raise_for_status()  # Raises an HTTPError if the response code is 4xx or 5xx
+        response.raise_for_status()
         
-        # Try to parse as JSON, fall back to text
         try:
             data = response.json()
-        except:
+        except ValueError:
             data = response.text
             
         return {
             "status_code": response.status_code,
             "data": data
         }
-    except Exception as e:
+    except requests.exceptions.RequestException as e:
         return {"error": str(e)}

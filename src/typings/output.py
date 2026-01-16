@@ -1,28 +1,25 @@
-from typing import Union, List
+from typing import Union, List, Optional
 
-from pydantic import BaseModel, root_validator
+from pydantic import BaseModel, model_validator
 
 from .general import JSONSerializable, SampleIndex, ChatHistoryItem
-from .status import SampleStatus, AgentOutputStatus
+from .status import AgentOutputStatus
 
 
 class TaskOutput(BaseModel):
-    index: Union[None, SampleIndex] = None
-    status: Union[None, str] = None
+    index: Optional[SampleIndex] = None
+    status: Optional[str] = None
     result: JSONSerializable = None
-    history: Union[None, List[ChatHistoryItem]] = None
-    rounds: Union[None, int] = None
+    history: Optional[List[ChatHistoryItem]] = None
+    rounds: Optional[int] = None
 
 
 class AgentOutput(BaseModel):
     status: AgentOutputStatus = AgentOutputStatus.NORMAL
-    content: Union[str, None] = None
+    content: Optional[str] = None
 
-    # at least one of them should be not None
-    @root_validator(pre=False, skip_on_failure=True)
-    def post_validate(cls, instance: dict):
-        assert (
-            instance.get("status") is not AgentOutputStatus.NORMAL
-            or instance.get("content") is not None
-        ), "If status is NORMAL, content should not be None"
-        return instance
+    @model_validator(mode='after')
+    def validate_content(self):
+        if self.status is AgentOutputStatus.NORMAL and self.content is None:
+            raise ValueError("If status is NORMAL, content should not be None")
+        return self
