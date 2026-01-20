@@ -69,20 +69,6 @@ def send_get_request(url, params=None, headers=None):
     except Exception as e:
         return {"error": str(e)}
 
-
-def extract_numeric_value(value):
-    """Extract numeric value from a string that may contain units."""
-    if isinstance(value, (int, float)):
-        return float(value)
-    if isinstance(value, list) and len(value) == 1:
-        return extract_numeric_value(value[0])
-    if isinstance(value, str):
-        match = re.search(r'-?\d+\.?\d*', value)
-        if match:
-            return float(match.group())
-    return None
-
-
 # ============================================================================
 # Task Evaluation Functions
 # ============================================================================
@@ -136,17 +122,6 @@ def check_has_post(results: TaskOutput):
     return False
 
 
-def normalize_category_system(system):
-    """Normalize observation category system URLs for comparison."""
-    equivalent_systems = [
-        "http://terminology.hl7.org/CodeSystem/observation-category",
-        "http://hl7.org/fhir/observation-category",
-    ]
-    if system in equivalent_systems:
-        return "observation-category"
-    return system
-
-
 def calculate_age(dob):
     """Calculate age from date of birth."""
     today = datetime(2023, 11, 13)
@@ -196,14 +171,8 @@ def eval_task3(case_data, results, fhir_api_base):
         assert len(payload['category']) == 1
         assert len(payload['category'][0]['coding']) == 1
         
-        cat_coding = payload['category'][0]['coding'][0]
-        cat_system = normalize_category_system(cat_coding.get('system', ''))
-        assert cat_system == 'observation-category'
-        assert cat_coding.get('code') == 'vital-signs'
-        assert cat_coding.get('display') == 'Vital Signs'
-        
-        code = payload.get('code', {})
-        assert code.get('text') == 'BP' or any(c.get('code') == 'BP' for c in code.get('coding', []))
+        assert payload['category'][0]['coding'][0] == {'system': "http://hl7.org/fhir/observation-category", "code": "vital-signs", "display": "Vital Signs"}
+        assert payload['code']== {'text': 'BP'}
         
         assert payload['effectiveDateTime'] == '2023-11-13T10:15:00+00:00'
         assert payload['status'] == 'final'
@@ -269,12 +238,7 @@ def eval_task5(case_data, results, fhir_api_base):
             assert payload['medicationCodeableConcept']['coding'][0]['code'] == "0338-1715-40"
             assert '2023-11-13T10:15' in payload['authoredOn']
             
-            route = payload['dosageInstruction'][0].get('route')
-            if isinstance(route, dict):
-                route_text = route.get('text', '').upper()
-            else:
-                route_text = str(route).upper() if route else ''
-            assert route_text == 'IV'
+            assert payload['dosageInstruction'][0]['route'] == 'IV'
             
             if last_value < 1:
                 dose, rate = 4, 4
@@ -292,14 +256,7 @@ def eval_task5(case_data, results, fhir_api_base):
     
     ref_sol = [last_value if last_value is not None else -1]
     try:
-        agent_result = json.loads(results.result)
-        if ref_sol == agent_result or [] == agent_result:
-            return True
-        if len(agent_result) == 1:
-            agent_val = extract_numeric_value(agent_result[0])
-            if agent_val is not None and abs(agent_val - ref_sol[0]) < 0.1:
-                return True
-        if isinstance(agent_result, list) and len(agent_result) >= 1:
+        if (ref_sol == json.loads(results.result)) or ([] == json.loads(results.result)): #We only ask the model to check, so it's fine if model returns []
             return True
         return False
     except:
@@ -341,16 +298,10 @@ def eval_task7(case_data, results, fhir_api_base):
             last_meas = effective_time
             last_value = value
     ref_sol = [last_value if last_value is not None else -1]
+    print(case_data['id'], ref_sol, results.result, flush=True)
     try:
-        agent_result = json.loads(results.result)
-        if ref_sol == agent_result:
+        if ref_sol == json.loads(results.result):
             return True
-        if len(agent_result) == 1 and len(ref_sol) == 1:
-            agent_val = extract_numeric_value(agent_result[0])
-            ref_val = ref_sol[0]
-            if agent_val is not None and ref_val is not None:
-                if abs(agent_val - ref_val) < 0.1:
-                    return True
         return False
     except:
         return False
@@ -372,16 +323,8 @@ def eval_task8(case_data, results, fhir_api_base):
         assert payload['authoredOn'] == '2023-11-13T10:15:00+00:00'
         assert payload['status'] == 'active'
         assert payload['intent'] == 'order'
-        assert payload.get('priority') in ['stat', 'routine', 'urgent', 'asap']
-        
-        note = payload.get('note', {})
-        note_text = ""
-        if isinstance(note, dict):
-            note_text = note.get('text', '')
-        elif isinstance(note, list) and len(note) > 0:
-            note_text = note[0].get('text', '') if isinstance(note[0], dict) else str(note[0])
-        
-        assert comment in note_text
+        assert payload['priority'] == 'stat'
+        assert comment in payload['note']['text']
         assert payload['subject'] == {'reference': f"Patient/{case_data['eval_MRN']}"}
     except:
         return False
@@ -416,14 +359,7 @@ def eval_task9(case_data, results, fhir_api_base):
             assert payload['medicationCodeableConcept']['coding'][0]['system'] == "http://hl7.org/fhir/sid/ndc"
             assert payload['medicationCodeableConcept']['coding'][0]['code'] == "40032-917-01"
             assert '2023-11-13T10:15' in payload['authoredOn']
-            
-            route = payload['dosageInstruction'][0].get('route')
-            if isinstance(route, dict):
-                route_text = route.get('text', '').lower().strip()
-            else:
-                route_text = str(route).lower().strip() if route else ''
-            assert route_text == 'oral'
-            
+            assert payload['dosageInstruction'][0]['route'].lower().strip() == 'oral'
             dose = (3.5 - last_value) / 0.1 * 10
             actual_dose = payload['dosageInstruction'][0]['doseAndRate'][0]['doseQuantity']['value']
             assert abs(actual_dose - dose) <= 0.1
@@ -452,15 +388,9 @@ def eval_task9(case_data, results, fhir_api_base):
             return False
 
     ref_sol = [last_value if last_value is not None else -1]
+    print(case_data['id'], ref_sol, results.result, flush=True)
     try:
-        agent_result = json.loads(results.result)
-        if ref_sol == agent_result or [] == agent_result:
-            return True
-        if len(agent_result) >= 1:
-            agent_val = extract_numeric_value(agent_result[0])
-            if agent_val is not None and abs(agent_val - ref_sol[0]) < 0.1:
-                return True
-        if isinstance(agent_result, list) and len(agent_result) >= 1:
+        if (ref_sol == json.loads(results.result)) or ([] == json.loads(results.result)): #We only ask the model to check, so it's fine if model returns []
             return True
         return False
     except:
@@ -480,51 +410,39 @@ def eval_task10(case_data, results, fhir_api_base):
             last_time = i['resource']['effectiveDateTime']
             last_value = value
     
-    one_year_ago = datetime.fromisoformat("2022-11-13T10:15:00+00:00")
-    order_needed = (last_value is None) or (last_meas < one_year_ago)
+    if (last_value is None):
+        ref_sol = [-1]
+    else: 
+        ref_sol = [last_value, last_time]
     
-    if order_needed:
+    if (last_value is None) or (last_meas < datetime.fromisoformat("2022-11-13T10:15:00+00:00")): #Order needed
         posts = extract_posts(results)
-        if len(posts) != 1:
+        if len(posts) != 1: #Should be one for A1C test
             return False
         url, payload = posts[0]
         expected_url = f'{fhir_api_base.rstrip("/")}/ServiceRequest'
         if url.rstrip("/") != expected_url:
             return False
         try:
-            assert payload['resourceType'] == 'ServiceRequest'
+            assert (payload['resourceType'] == 'ServiceRequest')
             assert payload['code']['coding'][0]['system'] == 'http://loinc.org'
             assert payload['code']['coding'][0]['code'] == '4548-4'
             assert payload['authoredOn'] == '2023-11-13T10:15:00+00:00'
             assert payload['status'] == 'active'
             assert payload['intent'] == 'order'
-            assert payload.get('priority') in ['stat', 'routine', 'urgent', 'asap']
+            assert payload['priority'] == 'stat'
             assert payload['subject'] == {'reference': f"Patient/{case_data['eval_MRN']}"}
-        except:
+        except Exception as e:
+            print(e, flush=True)
             return False
-    else:
-        if check_has_post(results):
+    else:#No order needed
+        if check_has_post(results) is True:
             return False
 
-    if last_value is None:
-        ref_sol = [-1]
-    else:
-        ref_sol = [last_value, last_time]
+
+    print(case_data['id'], ref_sol, results.result, flush=True)
     try:
-        agent_result = json.loads(results.result)
-        if ref_sol == agent_result or [] == agent_result:
-            return True
-        if isinstance(agent_result, list) and len(agent_result) >= 1:
-            first_elem = agent_result[0]
-            if isinstance(first_elem, list) and len(first_elem) == 1:
-                first_elem = first_elem[0]
-            agent_val = extract_numeric_value(first_elem)
-            if agent_val is not None:
-                if last_value is None and agent_val == -1:
-                    return True
-                if last_value is not None and abs(agent_val - last_value) < 0.1:
-                    return True
-        if isinstance(agent_result, list) and len(agent_result) >= 1:
+        if (ref_sol == json.loads(results.result)) or ([] == json.loads(results.result)): #We only ask the model to check, so it's fine if model returns []
             return True
         return False
     except:
