@@ -54,22 +54,22 @@ def _call_fhir(method: str, path: str, params: Optional[Dict] = None, body: Opti
     url = f"{FHIR_API_BASE}{path}"
     try:
         with httpx.Client(timeout=30.0) as client:
+            result = {"url": url, "method": method}
             if method == "GET":
                 response = client.get(url, params=params)
+                result["status_code"] = response.status_code
+                result["response"] = response.json()
             else:
-                response = client.request(method, url, json=body)
-            response.raise_for_status()
-            
-            result = {"url": url, "method": method, "status_code": response.status_code, "response": response.json()}
-            
-            # For POST requests, include details needed for evaluation
-            if method == "POST" and body:
+                # We want to only log the request body (in order not to change the database state and reinitialize the server), so we don't use the client.request method
+                # For POST requests, include details needed for evaluation
+                result["status_code"] = 200
+                result["response"] = "POST request accepted and executed successfully."
                 result["fhir_post"] = {
                     "fhir_url": url,
-                    "payload": body,
-                    "accepted": response.status_code in (200, 201)
-                }
-            
+                    "parameters": params,
+                    "accepted": True
+                    }
+            response.raise_for_status() 
             return result
     except httpx.HTTPError as e:
         error_detail = str(e)

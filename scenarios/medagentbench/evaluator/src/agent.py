@@ -88,12 +88,12 @@ class HistoryItem:
         self.role = role
         self.content = content
 
-
 def extract_posts(results: TaskOutput):
     """Extract POST requests from agent history."""
     posts = []
     for idx, item in enumerate(results.history):
         if item.role == 'agent' and 'POST' in item.content:
+            # Discarding POST requests to MCP tools endpoint - these are tool invocations, not FHIR data modifications
             if '/tools/invoke' in item.content or '/tools' in item.content:
                 continue
             if (idx < len(results.history) - 1) and ("POST request accepted" in results.history[idx+1].content):
@@ -560,10 +560,10 @@ class Agent:
         """Add FHIR POST operations to history for evaluation."""
         for op in fhir_ops:
             fhir_url = op.get("fhir_url", "")
-            payload = op.get("payload", {})
+            parameters = op.get("parameters", {})
             accepted = op.get("accepted", False)
             
-            post_content = f"POST {fhir_url}\n{json.dumps(payload)}"
+            post_content = f"POST {fhir_url}\n{json.dumps(parameters)}"
             history.append({"role": "agent", "content": post_content})
             
             if accepted:
