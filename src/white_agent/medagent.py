@@ -47,52 +47,6 @@ def prepare_medagent_white_card(url):
     return card
 
 
-# Mapping of MCP tool names to FHIR POST operations
-# Used to track FHIR write operations for evaluation
-FHIR_POST_TOOLS = {
-    "record_vital_observation": {
-        "endpoint": "/Observation",
-        "body_builder": lambda args: {
-            "resourceType": args.get("resourceType", "Observation"),
-            "category": args.get("category", []),
-            "code": args.get("code", {}),
-            "effectiveDateTime": args.get("effectiveDateTime", ""),
-            "status": args.get("status", ""),
-            "valueString": args.get("valueString", ""),
-            "subject": args.get("subject", {}),
-        }
-    },
-    "create_medication_request": {
-        "endpoint": "/MedicationRequest",
-        "body_builder": lambda args: {
-            "resourceType": args.get("resourceType", "MedicationRequest"),
-            "medicationCodeableConcept": args.get("medicationCodeableConcept", {}),
-            "authoredOn": args.get("authoredOn", ""),
-            "dosageInstruction": args.get("dosageInstruction", []),
-            "status": args.get("status", ""),
-            "intent": args.get("intent", ""),
-            "subject": args.get("subject", {}),
-        }
-    },
-    "create_service_request": {
-        "endpoint": "/ServiceRequest",
-        "body_builder": lambda args: {
-            k: v for k, v in {
-                "resourceType": args.get("resourceType", "ServiceRequest"),
-                "code": args.get("code", {}),
-                "authoredOn": args.get("authoredOn", ""),
-                "status": args.get("status", ""),
-                "intent": args.get("intent", ""),
-                "priority": args.get("priority", ""),
-                "subject": args.get("subject", {}),
-                "occurrenceDateTime": args.get("occurrenceDateTime"),
-                "note": args.get("note"),
-            }.items() if v is not None
-        }
-    },
-}
-
-
 class MedAgentWhiteExecutor(AgentExecutor):
     """White agent executor with MCP server tool calling support.
     
@@ -103,7 +57,6 @@ class MedAgentWhiteExecutor(AgentExecutor):
     def __init__(self):
         self.ctx_id_to_messages = {}
         self.mcp_server_url = MCP_SERVER_URL
-        self.fhir_api_base = os.environ.get("MCP_FHIR_API_BASE", "http://medagentbench.ddns.net:8080/fhir/").rstrip("/")
 
     async def discover_tools(self, session: ClientSession) -> List[Dict[str, Any]]:
         """Discover available tools from MCP server.
@@ -245,32 +198,11 @@ class MedAgentWhiteExecutor(AgentExecutor):
                     is_error = isinstance(tool_result, dict) and "error" in tool_result
                     logger.info(f"Tool '{function_name}' returned {'error' if is_error else 'success'}")
 
-                    # Track FHIR POST operations for evaluation
-                    # Method 1: Check if fhir_post is in the result (from MCP server)
+                    # Track FHIR POST operations for evaluation (from MCP server response)
                     if isinstance(tool_result, dict) and "fhir_post" in tool_result:
                         fhir_post = tool_result["fhir_post"]
                         fhir_posts.append(fhir_post)
-                        logger.info(f"Tracked FHIR POST (from response) to {fhir_post['fhir_url']}")
-                    
-                    # Method 2: Track based on tool name (backup if fhir_post not in response)
-                    elif function_name in FHIR_POST_TOOLS and not is_error:
-                        tool_config = FHIR_POST_TOOLS[function_name]
-                        fhir_url = f"{self.fhir_api_base}{tool_config['endpoint']}"
-                        payload = tool_config["body_builder"](function_args)
-                        
-                        # Check if the POST was accepted (status code 200 or 201)
-                        accepted = False
-                        if isinstance(tool_result, dict):
-                            status_code = tool_result.get("status_code", 0)
-                            accepted = status_code in (200, 201)
-                        
-                        fhir_post = {
-                            "fhir_url": fhir_url,
-                            "payload": payload,
-                            "accepted": accepted
-                        }
-                        fhir_posts.append(fhir_post)
-                        logger.info(f"Tracked FHIR POST (from tool call) to {fhir_url}, accepted={accepted}")
+                        logger.info(f"Tracked FHIR POST to {fhir_post['fhir_url']}")
 
                     # Add tool result to messages
                     messages.append({

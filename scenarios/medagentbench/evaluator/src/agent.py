@@ -6,7 +6,8 @@ import os
 import re
 import time
 from datetime import datetime, timedelta
-from typing import Any
+from typing import Any, Optional
+from urllib.parse import urlparse
 
 import requests
 from dotenv import load_dotenv
@@ -22,6 +23,9 @@ load_dotenv()
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("medagentbench_evaluator")
+
+# Output directory for runs.jsonl logging
+OUTPUT_DIR = os.environ.get("MEDAGENT_OUTPUT_DIR", "outputs/medagentbench")
 
 
 # ============================================================================
@@ -69,17 +73,111 @@ def send_get_request(url, params=None, headers=None):
     except Exception as e:
         return {"error": str(e)}
 
+
+# ============================================================================
+# File Logging Utilities
+# ============================================================================
+
+def get_output_dir(agent_name: str, domain: str) -> str:
+    """Get the output directory path for a specific agent and domain.
+    
+    Args:
+        agent_name: Name of the agent being evaluated
+        domain: Evaluation domain (e.g., 'medagentbench')
+        
+    Returns:
+        Path to the output directory
+    """
+    return os.path.join(OUTPUT_DIR, agent_name, domain)
+
+
+def write_run_result(
+    output_dir: str,
+    task_id: str,
+    task_result: "TaskResult",
+    task_data: dict,
+    history: list,
+    error: Optional[str] = None,
+) -> None:
+    """Write a single task run result to runs.jsonl or error.jsonl.
+    
+    Args:
+        output_dir: Directory to write the result to
+        task_id: Task identifier
+        task_result: The TaskResult object containing results
+        task_data: Original task data
+        history: Conversation history
+        error: Error message if the task failed
+    """
+    os.makedirs(output_dir, exist_ok=True)
+    
+    timestamp_ms = int(time.time() * 1000)
+    time_str = datetime.fromtimestamp(timestamp_ms / 1000).strftime("%Y-%m-%d %H:%M:%S")
+    
+    # Build the result record
+    record = {
+        "index": task_id,
+        "error": error,
+        "output": {
+            "result": task_result.agent_answer,
+            "status": task_result.status,
+            "correct": task_result.correct,
+            "expected": task_result.expected_answer,
+            "rounds": task_result.rounds,
+            "time_used": task_result.time_used,
+            "history": history,
+        } if task_result else None,
+        "task_data": {
+            "id": task_data.get("id"),
+            "instruction": task_data.get("instruction"),
+            "context": task_data.get("context"),
+        },
+        "time": {"timestamp": timestamp_ms, "str": time_str},
+    }
+    
+    # Write to appropriate file
+    if error:
+        target_file = os.path.join(output_dir, "error.jsonl")
+    else:
+        target_file = os.path.join(output_dir, "runs.jsonl")
+    
+    with open(target_file, "a", encoding="utf-8") as f:
+        f.write(json.dumps(record, ensure_ascii=False) + "\n")
+    
+    logger.info(f"Result written to {target_file}")
+
+
+def write_overall_results(
+    output_dir: str,
+    eval_results: "EvalResults",
+) -> None:
+    """Write overall evaluation results to overall.json.
+    
+    Args:
+        output_dir: Directory to write the results to
+        eval_results: The EvalResults object containing overall metrics
+    """
+    os.makedirs(output_dir, exist_ok=True)
+    
+    output_file = os.path.join(output_dir, "overall.json")
+    with open(output_file, "w", encoding="utf-8") as f:
+        json.dump(eval_results.model_dump(), f, indent=2, ensure_ascii=False)
+    
+    logger.info(f"Overall results written to {output_file}")
+
+
 # ============================================================================
 # Task Evaluation Functions
 # ============================================================================
 
 class TaskOutput:
     """Wrapper for task results to provide history access."""
-    def __init__(self, result: str, history: list, status: str = "completed", rounds: int = 1):
+    def __init__(self, result: str, history: list, status: str = "completed", rounds: int = 1, fhir_ops: list = None):
         self.result = result
         self.history = [HistoryItem(h["role"], h["content"]) for h in history]
         self.status = status
         self.rounds = rounds
+        self.fhir_ops = fhir_ops or []
 
 
 class HistoryItem:
@@ -89,37 +187,22 @@ class HistoryItem:
         self.content = content
 
 def extract_posts(results: TaskOutput):
-    """Extract POST requests from agent history."""
+    """Extract POST requests from fhir_ops.
+    
+    Returns list of (url, payload) tuples for POST operations.
+    """
     posts = []
-    for idx, item in enumerate(results.history):
-        if item.role == 'agent' and 'POST' in item.content:
-            # Discarding POST requests to MCP tools endpoint - these are tool invocations, not FHIR data modifications
-            if '/tools/invoke' in item.content or '/tools' in item.content:
-                continue
-            if (idx < len(results.history) - 1) and ("POST request accepted" in results.history[idx+1].content):
-                try:
-                    r = item.content
-                    lines = r.split('\n')
-                    first_line = lines[0]
-                    if first_line.startswith('POST '):
-                        url = first_line[5:].strip()
-                    else:
-                        url = first_line[4:].strip()
-                    payload = json.loads('\n'.join(lines[1:]))
-                    posts.append((url, payload))
-                except Exception as e:
-                    logger.warning(f"Failed to extract POST: {e}")
+    for op in results.fhir_ops:
+        fhir_url = op.get("fhir_url", "")
+        parameters = op.get("parameters", {})
+        if fhir_url and parameters:
+            posts.append((fhir_url, parameters))
     return posts
 
 
 def check_has_post(results: TaskOutput):
     """Check if agent made any FHIR POST requests."""
-    for item in results.history:
-        if item.role == 'agent' and 'POST' in item.content:
-            if '/tools/invoke' in item.content or '/tools' in item.content:
-                continue
-            return True
-    return False
+    return len(results.fhir_ops) > 0
 
 
 def calculate_age(dob):
@@ -156,15 +239,25 @@ def eval_task2(case_data, results, fhir_api_base):
         return False
 
 
+def normalize_fhir_url(url: str) -> str:
+    """Extract just the path portion of a FHIR URL for comparison.
+    
+    This handles cases where MCP server uses localhost but evaluator expects remote URL.
+    """
+    parsed = urlparse(url.rstrip("/"))
+    return parsed.path
+
+
 def eval_task3(case_data, results, fhir_api_base):
     posts = extract_posts(results)
     if len(posts) != 1:
         return False
     url, payload = posts[0]
     
-    expected_url = f'{fhir_api_base.rstrip("/")}/Observation'
-    actual_url = url.rstrip("/")
-    if actual_url != expected_url:
+    # Compare only the path portion (e.g., /fhir/Observation) to handle localhost vs remote
+    expected_path = normalize_fhir_url(f'{fhir_api_base.rstrip("/")}/Observation')
+    actual_path = normalize_fhir_url(url)
+    if actual_path != expected_path:
         return False
     try:
         assert payload['resourceType'] == 'Observation'
@@ -229,8 +322,8 @@ def eval_task5(case_data, results, fhir_api_base):
         if len(posts) != 1:
             return False
         url, payload = posts[0]
-        expected_url = f'{fhir_api_base.rstrip("/")}/MedicationRequest'
-        if url.rstrip("/") != expected_url:
+        expected_path = normalize_fhir_url(f'{fhir_api_base.rstrip("/")}/MedicationRequest')
+        if normalize_fhir_url(url) != expected_path:
             return False
         try:
             assert payload['resourceType'] == 'MedicationRequest'
@@ -312,8 +405,8 @@ def eval_task8(case_data, results, fhir_api_base):
     if len(posts) != 1:
         return False
     url, payload = posts[0]
-    expected_url = f'{fhir_api_base.rstrip("/")}/ServiceRequest'
-    if url.rstrip("/") != expected_url:
+    expected_path = normalize_fhir_url(f'{fhir_api_base.rstrip("/")}/ServiceRequest')
+    if normalize_fhir_url(url) != expected_path:
         return False
     comment = "Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations."
     try:
@@ -351,8 +444,8 @@ def eval_task9(case_data, results, fhir_api_base):
         if len(posts) != 2:
             return False
         url, payload = posts[0]
-        expected_url = f'{fhir_api_base.rstrip("/")}/MedicationRequest'
-        if url.rstrip("/") != expected_url:
+        expected_path = normalize_fhir_url(f'{fhir_api_base.rstrip("/")}/MedicationRequest')
+        if normalize_fhir_url(url) != expected_path:
             return False
         try:
             assert payload['resourceType'] == 'MedicationRequest'
@@ -371,8 +464,8 @@ def eval_task9(case_data, results, fhir_api_base):
             return False
         
         url, payload = posts[1]
-        expected_url = f'{fhir_api_base.rstrip("/")}/ServiceRequest'
-        if url.rstrip("/") != expected_url:
+        expected_path = normalize_fhir_url(f'{fhir_api_base.rstrip("/")}/ServiceRequest')
+        if normalize_fhir_url(url) != expected_path:
             return False
         try:
             assert payload['resourceType'] == 'ServiceRequest'
@@ -420,8 +513,8 @@ def eval_task10(case_data, results, fhir_api_base):
         if len(posts) != 1: #Should be one for A1C test
             return False
         url, payload = posts[0]
-        expected_url = f'{fhir_api_base.rstrip("/")}/ServiceRequest'
-        if url.rstrip("/") != expected_url:
+        expected_path = normalize_fhir_url(f'{fhir_api_base.rstrip("/")}/ServiceRequest')
+        if normalize_fhir_url(url) != expected_path:
             return False
         try:
             assert (payload['resourceType'] == 'ServiceRequest')
@@ -482,6 +575,25 @@ def evaluate_task(case_data: dict, results: TaskOutput, fhir_api_base: str) -> b
 # MedAgentBench Prompt Template
 # ============================================================================
 
+TOOL_CALL_EXAMPLES = """- search_patients:
+  {"identifier":"EXAMPLE_ID"}
+- list_patient_problems:
+  {"patient":"Patient/EXAMPLE","category":"problem-list-item"}
+- list_lab_observations:
+  {"patient":"Patient/EXAMPLE","code":"EXAMPLE_CODE","date":"2000-01-01"}
+- list_vital_signs:
+  {"patient":"Patient/EXAMPLE","category":"vital-signs","date":"2000-01-01"}
+- record_vital_observation:
+  {"resourceType":"Observation","category":[{"coding":[{"system":"http://hl7.org/fhir/observation-category","code":"vital-signs","display":"Vital Signs"}]}],"code":{"text":"EXAMPLE_FLOW_ID"},"effectiveDateTime":"2000-01-01T00:00:00+00:00","status":"final","valueString":"120/80 mmHg","subject":{"reference":"Patient/EXAMPLE"}}
+- list_medication_requests:
+  {"patient":"Patient/EXAMPLE","category":"inpatient","date":"2000-01-01"}
+- create_medication_request:
+  {"resourceType":"MedicationRequest","medicationCodeableConcept":{"coding":[{"system":"http://hl7.org/fhir/sid/ndc","code":"00000","display":"ExampleMed"}],"text":"ExampleMed 100mg"},"authoredOn":"2000-01-01","dosageInstruction":[{"route":{"text":"oral"},"doseAndRate":[{"doseQuantity":{"value":100,"unit":"mg"}}]}],"status":"active","intent":"order","subject":{"reference":"Patient/EXAMPLE"}}
+- list_patient_procedures:
+  {"patient":"Patient/EXAMPLE","date":"2000-01-01","code":"00000"}
+- create_service_request:
+  {"resourceType":"ServiceRequest","code":{"coding":[{"system":"http://loinc.org","code":"00000","display":"Example Test"}]},"authoredOn":"2000-01-01T00:00:00+00:00","status":"active","intent":"order","priority":"stat","subject":{"reference":"Patient/EXAMPLE"},"occurrenceDateTime":"2000-01-01T01:00:00+00:00","note":{"text":"Example note"}}"""
+
 MEDAGENT_PROMPT = """You are an expert medical AI assistant that uses FHIR functions to assist medical professionals. You are given a question and a set of available FHIR tools. Based on the question, you will need to make one or more function/tool calls to achieve the purpose.
 
 You have access to FHIR tools via the MCP server at: {mcp_server_url}
@@ -491,9 +603,14 @@ Instructions:
 
 2. Read the arguments carefully for each tool before deciding which are the suitable arguments to use. Some arguments are too general and some are more relevant to the question.
 
-3. Make as many tool calls as needed to gather the information required to answer the question.
+3. CRITICAL: You MUST provide ALL required arguments for each tool call. Follow the EXACT format shown in the tool descriptions. Use example URIs exactly as written in the tool descriptions (do not substitute alternatives). Do not rely on your own FHIR knowledge for parameter structures.
 
-4. When you have gathered all necessary information and have the final answer(s), you MUST respond with ONLY the finish format (make sure the list is JSON loadable):
+4. Make as many tool calls as needed to gather the information required to answer the question.
+
+TOOL CALL EXAMPLES:
+{tool_examples}
+
+5. When you have gathered all necessary information and have the final answer(s), you MUST respond with ONLY the finish format (make sure the list is JSON loadable):
 FINISH([answer1, answer2, ...])
 
 IMPORTANT: Your final response MUST be in the FINISH format with no other text. The list inside FINISH() must be valid JSON.
@@ -539,6 +656,23 @@ class Agent:
         evaluation_fields = {'sol', 'eval_MRN'}
         return {k: v for k, v in task_data.items() if k not in evaluation_fields}
 
+    def extract_tool_history(self, response: str) -> tuple[str, list[dict]]:
+        """Extract tool call history from agent response."""
+        tool_history = []
+        clean_response = response
+        
+        pattern = r'<tool_history>\s*(.*?)\s*</tool_history>'
+        match = re.search(pattern, response, re.DOTALL)
+        
+        if match:
+            try:
+                tool_history = json.loads(match.group(1))
+            except json.JSONDecodeError:
+                logger.warning("Failed to parse tool_history JSON")
+            clean_response = re.sub(pattern, '', clean_response, flags=re.DOTALL).strip()
+        
+        return clean_response, tool_history
+
     def extract_fhir_operations(self, response: str) -> tuple[str, list[dict]]:
         """Extract FHIR operations metadata from agent response."""
         fhir_ops = []
@@ -555,21 +689,6 @@ class Agent:
             clean_response = re.sub(pattern, '', response, flags=re.DOTALL).strip()
         
         return clean_response, fhir_ops
-
-    def add_fhir_posts_to_history(self, history: list[dict], fhir_ops: list[dict]) -> None:
-        """Add FHIR POST operations to history for evaluation."""
-        for op in fhir_ops:
-            fhir_url = op.get("fhir_url", "")
-            parameters = op.get("parameters", {})
-            accepted = op.get("accepted", False)
-            
-            post_content = f"POST {fhir_url}\n{json.dumps(parameters)}"
-            history.append({"role": "agent", "content": post_content})
-            
-            if accepted:
-                history.append({"role": "user", "content": "POST request accepted"})
-            else:
-                history.append({"role": "user", "content": "POST request failed"})
 
     def parse_finish_response(self, response: str) -> tuple[str | None, str]:
         """Parse FINISH format from response."""
@@ -603,6 +722,7 @@ class Agent:
         fhir_api_base: str,
         max_rounds: int,
         updater: TaskUpdater,
+        output_dir: Optional[str] = None,
     ) -> TaskResult:
         """Run a single task and return results."""
         start_time = time.time()
@@ -618,7 +738,8 @@ class Agent:
         task_prompt = MEDAGENT_PROMPT.format(
             mcp_server_url=mcp_server_url,
             context=safe_task_data.get('context', 'N/A'),
-            question=safe_task_data['instruction']
+            question=safe_task_data['instruction'],
+            tool_examples=TOOL_CALL_EXAMPLES,
         )
         
         history = [{"role": "user", "content": task_prompt}]
@@ -631,29 +752,56 @@ class Agent:
                 new_conversation=True,
             )
             
-            # Extract FHIR operations
-            clean_response, fhir_ops = self.extract_fhir_operations(response)
-            if fhir_ops:
-                self.add_fhir_posts_to_history(history, fhir_ops)
+            # Extract tool history and FHIR operations
+            response_after_tools, tool_history = self.extract_tool_history(response)
+            clean_response, fhir_ops = self.extract_fhir_operations(response_after_tools)
             
+            # Add tool calls to history
+            for tool_call in tool_history:
+                tool_name = tool_call.get("tool_name", "unknown")
+                arguments = tool_call.get("arguments", {})
+                result = tool_call.get("result", {})
+                is_error = tool_call.get("is_error", False)
+                
+                # Add tool call entry
+                history.append({
+                    "role": "tool_call",
+                    "content": json.dumps({
+                        "tool": tool_name,
+                        "arguments": arguments
+                    })
+                })
+                
+                # Add tool result entry
+                history.append({
+                    "role": "tool_result",
+                    "content": json.dumps({
+                        "tool": tool_name,
+                        "result": result,
+                        "is_error": is_error
+                    })
+                })
+            
+            # Add final response
             history.append({"role": "agent", "content": clean_response})
             
             # Parse response
             answer, _ = self.parse_finish_response(clean_response)
             
             if answer is not None:
-                # Create TaskOutput for evaluation
+                # Create TaskOutput for evaluation (pass fhir_ops directly)
                 task_output = TaskOutput(
                     result=answer,
                     history=history,
                     status="completed",
                     rounds=1,
+                    fhir_ops=fhir_ops,
                 )
                 
                 # Evaluate
                 is_correct = evaluate_task(task_data, task_output, fhir_api_base)
                 
-                return TaskResult(
+                result = TaskResult(
                     task_id=task_id,
                     correct=is_correct,
                     status="completed",
@@ -662,8 +810,14 @@ class Agent:
                     time_used=time.time() - start_time,
                     rounds=1,
                 )
+                
+                # Write to runs.jsonl
+                if output_dir:
+                    write_run_result(output_dir, task_id, result, task_data, history)
+                
+                return result
             else:
-                return TaskResult(
+                result = TaskResult(
                     task_id=task_id,
                     correct=False,
                     status="agent_invalid_action",
@@ -673,9 +827,15 @@ class Agent:
                     rounds=1,
                 )
                 
+                # Write to runs.jsonl
+                if output_dir:
+                    write_run_result(output_dir, task_id, result, task_data, history)
+                
+                return result
+                
         except Exception as e:
             logger.error(f"Task {task_id} failed: {e}")
-            return TaskResult(
+            result = TaskResult(
                 task_id=task_id,
                 correct=False,
                 status="error",
@@ -684,6 +844,12 @@ class Agent:
                 time_used=time.time() - start_time,
                 rounds=0,
             )
+            
+            # Write to error.jsonl
+            if output_dir:
+                write_run_result(output_dir, task_id, result, task_data, history, error=str(e))
+            
+            return result
 
     async def run(self, message: Message, updater: TaskUpdater) -> None:
         """Main entry point for the evaluator."""
@@ -712,6 +878,13 @@ class Agent:
         max_rounds = int(request.config.get("max_rounds", 10))
         mcp_server_url = str(request.config.get("mcp_server_url", "http://localhost:8002"))
         fhir_api_base = str(request.config.get("fhir_api_base", "http://medagentbench.ddns.net:8080/fhir/"))
+        
+        # Get agent name from config or derive from URL
+        agent_name = str(request.config.get("agent_name", "default_agent"))
+        
+        # Set up output directory for logging
+        output_dir = get_output_dir(agent_name, domain)
+        logger.info(f"Results will be written to {output_dir}")
         
         # Load tasks
         tasks_file = os.environ.get(
@@ -748,6 +921,7 @@ class Agent:
                     fhir_api_base=fhir_api_base,
                     max_rounds=max_rounds,
                     updater=updater,
+                    output_dir=output_dir,
                 )
                 task_results[result.task_id] = result
                 if result.correct:
@@ -792,6 +966,9 @@ Task Results:
                 ],
                 name="Result",
             )
+            
+            # Write overall results to file
+            write_overall_results(output_dir, eval_results)
         finally:
             self.messenger.reset()
 

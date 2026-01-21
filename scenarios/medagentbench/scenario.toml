@@ -13,19 +13,19 @@ cmd = "python scenarios/medagentbench/agent/src/server.py --host 0.0.0.0 --port 
 # MCP server must be running at http://localhost:8002
 
 # Number of tasks to run (set to null or remove to run all tasks)
-num_tasks = 5
+#num_tasks = 1
 
 # Specific task IDs to run (optional, overrides num_tasks if provided)
-# task_ids = ["task1_1", "task2_1", "task3_1"]
+task_ids = ["task3_1"]
 
 # Maximum tool-calling rounds per task
-max_rounds = 10
+max_rounds = 8
 
 # Domain for evaluation
 domain = "medagentbench"
 
 # MCP server URL for FHIR tools
-mcp_server_url = "http://medagentbench.ddns.net:8002"
+mcp_server_url = "http://localhost:8002"
 
 # FHIR server base URL (must be reachable from evaluator container)
 fhir_api_base = "http://medagentbench.ddns.net:8080/fhir/"

@@ -4,10 +4,11 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Annotated, Any, Dict, List, Optional
 
 import httpx
 from fastmcp import FastMCP
+from pydantic import Field
 
 # Configuration (defaults for local development)
 FHIR_API_BASE = os.environ.get("MCP_FHIR_API_BASE", "http://localhost:8080/fhir/").rstrip("/")
@@ -57,6 +58,7 @@ def _call_fhir(method: str, path: str, params: Optional[Dict] = None, body: Opti
             result = {"url": url, "method": method}
             if method == "GET":
                 response = client.get(url, params=params)
+                response.raise_for_status()
                 result["status_code"] = response.status_code
                 result["response"] = response.json()
             else:
@@ -66,10 +68,9 @@ def _call_fhir(method: str, path: str, params: Optional[Dict] = None, body: Opti
                 result["response"] = "POST request accepted and executed successfully."
                 result["fhir_post"] = {
                     "fhir_url": url,
-                    "parameters": params,
+                    "parameters": body,  # Use body, not params - POST tools pass data as body
                     "accepted": True
                     }
-            response.raise_for_status() 
             return result
     except httpx.HTTPError as e:
         error_detail = str(e)
@@ -96,21 +97,13 @@ def get_medagentbench_tasks() -> str:
 # Tools
 @mcp.tool()
 def search_patients(
-    identifier: Optional[str] = None,
-    name: Optional[str] = None,
-    family: Optional[str] = None,
-    given: Optional[str] = None,
-    birthdate: Optional[str] = None,
+    identifier: Annotated[Optional[str], Field(description="The patient's identifier (e.g., MRN).")] = None,
+    name: Annotated[Optional[str], Field(description="Any part of the patient's name. Ignored when family or given are used.")] = None,
+    family: Annotated[Optional[str], Field(description="The patient's family (last) name.")] = None,
+    given: Annotated[Optional[str], Field(description="The patient's given name. May include first and middle names.")] = None,
+    birthdate: Annotated[Optional[str], Field(description="The patient's date of birth in YYYY-MM-DD format.")] = None,
 ) -> Dict[str, Any]:
-    """Search for Patient resources by demographics, identifiers, or contact information.
-    
-    Args:
-        identifier: Unique identifier such as MRN.
-        name: Any part of the patient's name.
-        family: Family (last) name.
-        given: Given (first/middle) name.
-        birthdate: Birth date in YYYY-MM-DD format.
-    """
+    """Search for Patient resources by demographics, identifiers, or contact information."""
     params = {}
     if identifier:
         params["identifier"] = identifier
@@ -127,17 +120,11 @@ def search_patients(
 
 @mcp.tool()
 def list_patient_problems(
-    patient: str,
-    category: Optional[str] = None,
-    status: Optional[str] = None,
+    patient: Annotated[str, Field(description="The patient's FHIR resource ID.")],
+    category: Annotated[Optional[str], Field(description="Always 'problem-list-item' for this API.")] = None,
+    status: Annotated[Optional[str], Field(description="Problem status filter (e.g., 'active', 'resolved').")] = None,
 ) -> Dict[str, Any]:
-    """Retrieve Condition resources from a patient's problem list.
-    
-    Args:
-        patient: FHIR patient ID.
-        category: Optional category filter (e.g., 'problem-list-item').
-        status: Optional status (e.g., 'active', 'resolved').
-    """
+    """Retrieve Condition resources from a patient's problem list. Returns data from the patient's problem list across all encounters."""
     params = {"patient": patient}
     if category:
         params["category"] = category
@@ -148,17 +135,11 @@ def list_patient_problems(
 
 @mcp.tool()
 def list_lab_observations(
-    patient: str,
-    code: str,
-    date: Optional[str] = None,
+    patient: Annotated[str, Field(description="The patient's FHIR resource ID.")],
+    code: Annotated[str, Field(description="The observation identifier (base name or LOINC code).")],
+    date: Annotated[Optional[str], Field(description="Date when the specimen was obtained.")] = None,
 ) -> Dict[str, Any]:
-    """Return laboratory Observation resources for a patient.
-    
-    Args:
-        patient: FHIR patient ID.
-        code: Observation code (LOINC or local).
-        date: Optional specimen collection date or range.
-    """
+    """Return laboratory Observation resources for a patient. Returns component level data for lab results."""
     params = {"patient": patient, "code": code}
     if date:
         params["date"] = date
@@ -167,17 +148,11 @@ def list_lab_observations(
 
 @mcp.tool()
 def list_vital_signs(
-    patient: str,
-    category: str,
-    date: Optional[str] = None,
+    patient: Annotated[str, Field(description="The patient's FHIR resource ID.")],
+    category: Annotated[str, Field(description="Use 'vital-signs' to search for vitals observations.")],
+    date: Annotated[Optional[str], Field(description="The date range for when the observation was taken.")] = None,
 ) -> Dict[str, Any]:
-    """Return vital sign Observation resources for a patient.
-    
-    Args:
-        patient: FHIR patient ID.
-        category: Use 'vital-signs' to fetch vitals.
-        date: Optional date or range when vitals were taken.
-    """
+    """Return vital sign Observation resources for a patient. Retrieves vital sign data and other non-duplicable flowsheet data."""
     params = {"patient": patient, "category": category}
     if date:
         params["date"] = date
@@ -186,25 +161,15 @@ def list_vital_signs(
 
 @mcp.tool()
 def record_vital_observation(
-    resourceType: str,
-    category: List[Dict[str, Any]],
-    code: Dict[str, Any],
-    effectiveDateTime: str,
-    status: str,
-    valueString: str,
-    subject: Dict[str, Any],
+    resourceType: Annotated[str, Field(description="Use 'Observation' for vitals observations.")],
+    category: Annotated[List[Dict[str, Any]], Field(description="Array of category objects. Example: [{'coding': [{'system': 'http://hl7.org/fhir/observation-category', 'code': 'vital-signs', 'display': 'Vital Signs'}]}]")],
+    code: Annotated[Dict[str, Any], Field(description="Object with 'text' field for the flowsheet ID. Example: {'text': 'BP'} for blood pressure.")],
+    effectiveDateTime: Annotated[str, Field(description="The date and time the observation was taken, in ISO format (e.g., '2023-11-13T10:15:00+00:00').")],
+    status: Annotated[str, Field(description="The status of the observation. Only 'final' is supported.")],
+    valueString: Annotated[str, Field(description="The measurement value as a string (e.g., '118/77 mmHg').")],
+    subject: Annotated[Dict[str, Any], Field(description="Object with 'reference' field for patient. Example: {'reference': 'Patient/12345'}")],
 ) -> Dict[str, Any]:
-    """Create a vital sign Observation for a patient.
-    
-    Args:
-        resourceType: Use "Observation".
-        category: Observation categories with coding metadata.
-        code: Flowsheet row / vital concept.
-        effectiveDateTime: ISO timestamp of measurement.
-        status: Use "final".
-        valueString: Measurement value.
-        subject: Reference to the patient resource.
-    """
+    """Create a vital sign Observation for a patient. Files to non-duplicable flowsheet rows including vital signs."""
     body = {
         "resourceType": resourceType,
         "category": category,
@@ -219,17 +184,11 @@ def record_vital_observation(
 
 @mcp.tool()
 def list_medication_requests(
-    patient: str,
-    category: Optional[str] = None,
-    status: Optional[str] = None,
+    patient: Annotated[str, Field(description="The patient's FHIR resource ID.")],
+    category: Annotated[Optional[str], Field(description="Category filter: 'inpatient', 'outpatient', 'community', or 'discharge'. By default all categories are searched.")] = None,
+    status: Annotated[Optional[str], Field(description="Status filter (e.g., 'active').")] = None,
 ) -> Dict[str, Any]:
-    """Retrieve MedicationRequest orders for a patient.
-    
-    Args:
-        patient: FHIR patient ID.
-        category: Optional: inpatient, outpatient, community, discharge.
-        status: Optional status such as 'active'.
-    """
+    """Retrieve MedicationRequest orders for a patient. Returns inpatient medications, clinic-administered medications, patient-reported medications, and reconciled medications."""
     params = {"patient": patient}
     if category:
         params["category"] = category
@@ -240,25 +199,15 @@ def list_medication_requests(
 
 @mcp.tool()
 def create_medication_request(
-    resourceType: str,
-    medicationCodeableConcept: Dict[str, Any],
-    authoredOn: str,
-    dosageInstruction: List[Dict[str, Any]],
-    status: str,
-    intent: str,
-    subject: Dict[str, Any],
+    resourceType: Annotated[str, Field(description="Use 'MedicationRequest' for medication requests.")],
+    medicationCodeableConcept: Annotated[Dict[str, Any], Field(description="Object with 'coding' array and 'text'. Example: {'coding': [{'system': 'http://hl7.org/fhir/sid/ndc', 'code': '12345', 'display': 'Aspirin'}], 'text': 'Aspirin 100mg'}")],
+    authoredOn: Annotated[str, Field(description="The date the prescription was written in ISO format.")],
+    dosageInstruction: Annotated[List[Dict[str, Any]], Field(description="Array of dosage instructions. Example: [{'route': {'text': 'oral'}, 'doseAndRate': [{'doseQuantity': {'value': 100, 'unit': 'mg'}}]}]")],
+    status: Annotated[str, Field(description="The status of the medication request. Use 'active'.")],
+    intent: Annotated[str, Field(description="Use 'order'.")],
+    subject: Annotated[Dict[str, Any], Field(description="Object with 'reference' field. Example: {'reference': 'Patient/12345'}")],
 ) -> Dict[str, Any]:
-    """Create a MedicationRequest order for a patient.
-    
-    Args:
-        resourceType: Use "MedicationRequest".
-        medicationCodeableConcept: Medication coding and display name.
-        authoredOn: Date/time when prescription was authored.
-        dosageInstruction: Dose, rate, and route instructions.
-        status: Order status such as "active".
-        intent: Order intent, typically "order".
-        subject: Reference to the patient resource.
-    """
+    """Create a MedicationRequest order for a patient."""
     body = {
         "resourceType": resourceType,
         "medicationCodeableConcept": medicationCodeableConcept,
@@ -273,17 +222,11 @@ def create_medication_request(
 
 @mcp.tool()
 def list_patient_procedures(
-    patient: str,
-    date: str,
-    code: Optional[str] = None,
+    patient: Annotated[str, Field(description="The patient's FHIR resource ID.")],
+    date: Annotated[str, Field(description="Date or period when the procedure was performed, using FHIR date format.")],
+    code: Annotated[Optional[str], Field(description="External CPT codes associated with the procedure.")] = None,
 ) -> Dict[str, Any]:
-    """Retrieve completed Procedure resources for a patient.
-    
-    Args:
-        patient: FHIR patient ID.
-        date: Date or range when procedure occurred.
-        code: Optional CPT or coded value.
-    """
+    """Retrieve completed Procedure resources for a patient. Returns surgeries, procedures, endoscopies, biopsies, counseling, and physiotherapy."""
     params = {"patient": patient, "date": date}
     if code:
         params["code"] = code
@@ -292,29 +235,17 @@ def list_patient_procedures(
 
 @mcp.tool()
 def create_service_request(
-    resourceType: str,
-    code: Dict[str, Any],
-    authoredOn: str,
-    status: str,
-    intent: str,
-    priority: str,
-    subject: Dict[str, Any],
-    occurrenceDateTime: Optional[str] = None,
-    note: Optional[Dict[str, Any]] = None,
+    resourceType: Annotated[str, Field(description="Use 'ServiceRequest' for service requests.")],
+    code: Annotated[Dict[str, Any], Field(description="Object with 'coding' array. Supports LOINC, SNOMED, CPT codes. Example: {'coding': [{'system': 'http://loinc.org', 'code': '12345', 'display': 'Lab Test'}]}")],
+    authoredOn: Annotated[str, Field(description="The order instant in ISO format. Date and time when the order is signed.")],
+    status: Annotated[str, Field(description="The status of the service request. Use 'active'.")],
+    intent: Annotated[str, Field(description="Use 'order'.")],
+    priority: Annotated[str, Field(description="Priority of the request. Use 'stat' for urgent.")],
+    subject: Annotated[Dict[str, Any], Field(description="Object with 'reference' field. Example: {'reference': 'Patient/12345'}")],
+    occurrenceDateTime: Annotated[Optional[str], Field(description="The date and time for the service request to be conducted, in ISO format.")] = None,
+    note: Annotated[Optional[Dict[str, Any]], Field(description="Object with 'text' field for free text comments. Example: {'text': 'Rush order'}")] = None,
 ) -> Dict[str, Any]:
-    """Create a ServiceRequest order (labs, imaging, consults) for a patient.
-    
-    Args:
-        resourceType: Use "ServiceRequest".
-        code: Terminology coding describing the service.
-        authoredOn: Timestamp when order was authored.
-        status: Order status, typically "active".
-        intent: Order intent, typically "order".
-        priority: Priority such as 'stat'.
-        subject: Reference to the patient.
-        occurrenceDateTime: Optional desired time for service.
-        note: Optional clinician instructions or comments.
-    """
+    """Create a ServiceRequest order (labs, imaging, consults) for a patient."""
     body = {
         "resourceType": resourceType,
         "code": code,

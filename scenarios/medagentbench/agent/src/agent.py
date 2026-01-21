@@ -39,55 +39,9 @@ def extract_mcp_server_url(text: str) -> str | None:
     return None
 
 
-# Mapping of MCP tool names to FHIR POST operations for tracking
-FHIR_POST_TOOLS = {
-    "record_vital_observation": {
-        "endpoint": "/Observation",
-        "body_builder": lambda args: {
-            "resourceType": args.get("resourceType", "Observation"),
-            "category": args.get("category", []),
-            "code": args.get("code", {}),
-            "effectiveDateTime": args.get("effectiveDateTime", ""),
-            "status": args.get("status", ""),
-            "valueString": args.get("valueString", ""),
-            "subject": args.get("subject", {}),
-        }
-    },
-    "create_medication_request": {
-        "endpoint": "/MedicationRequest",
-        "body_builder": lambda args: {
-            "resourceType": args.get("resourceType", "MedicationRequest"),
-            "medicationCodeableConcept": args.get("medicationCodeableConcept", {}),
-            "authoredOn": args.get("authoredOn", ""),
-            "dosageInstruction": args.get("dosageInstruction", []),
-            "status": args.get("status", ""),
-            "intent": args.get("intent", ""),
-            "subject": args.get("subject", {}),
-        }
-    },
-    "create_service_request": {
-        "endpoint": "/ServiceRequest",
-        "body_builder": lambda args: {
-            k: v for k, v in {
-                "resourceType": args.get("resourceType", "ServiceRequest"),
-                "code": args.get("code", {}),
-                "authoredOn": args.get("authoredOn", ""),
-                "status": args.get("status", ""),
-                "intent": args.get("intent", ""),
-                "priority": args.get("priority", ""),
-                "subject": args.get("subject", {}),
-                "occurrenceDateTime": args.get("occurrenceDateTime"),
-                "note": args.get("note"),
-            }.items() if v is not None
-        }
-    },
-}
-
-
 class Agent:
     def __init__(self):
         self.mcp_server_url = DEFAULT_MCP_SERVER_URL
-        self.fhir_api_base = DEFAULT_FHIR_API_BASE
         self.model = LLM_MODEL
 
     async def discover_tools(self, session: ClientSession) -> list[dict[str, Any]]:
@@ -156,6 +110,7 @@ class Agent:
         """Run the LLM loop with MCP tools."""
         max_iterations = 10
         fhir_posts: list[dict[str, Any]] = []
+        tool_history: list[dict[str, Any]] = []  # Track all tool calls
         
         for iteration in range(max_iterations):
             logger.info(f"Calling {self.model} with tools (iteration {iteration + 1})")
@@ -172,13 +127,15 @@ class Agent:
 
             tool_calls = message.get("tool_calls")
             if tool_calls:
-                logger.info(f"Model requested {len(tool_calls)} tool calls")
+                logger.info("-" * 60)
+                logger.info(f"TOOL CALLS: Model requested {len(tool_calls)} tool call(s)")
 
                 for tool_call in tool_calls:
                     function_name = tool_call["function"]["name"]
                     function_args = json.loads(tool_call["function"]["arguments"])
 
-                    logger.info(f"Invoking tool '{function_name}'")
+                    logger.info(f"  CALLING TOOL: {function_name}")
+                    logger.info(f"  ARGUMENTS: {json.dumps(function_args, indent=2)}")
 
                     tool_result = await self.invoke_tool(
                         session,
@@ -187,30 +144,23 @@ class Agent:
                     )
                     
                     is_error = isinstance(tool_result, dict) and "error" in tool_result
-                    logger.info(f"Tool '{function_name}' returned {'error' if is_error else 'success'}")
+                    logger.info(f"  TOOL RESULT: {'ERROR' if is_error else 'SUCCESS'}")
+                    result_preview = json.dumps(tool_result)[:300]
+                    logger.info(f"  RESULT DATA: {result_preview}")
 
-                    # Track FHIR POST operations
+                    # Track tool call for history
+                    tool_history.append({
+                        "tool_name": function_name,
+                        "arguments": function_args,
+                        "result": tool_result,
+                        "is_error": is_error,
+                    })
+
+                    # Track FHIR POST operations (from MCP server response)
                     if isinstance(tool_result, dict) and "fhir_post" in tool_result:
                         fhir_post = tool_result["fhir_post"]
                         fhir_posts.append(fhir_post)
                         logger.info(f"Tracked FHIR POST to {fhir_post['fhir_url']}")
-                    elif function_name in FHIR_POST_TOOLS and not is_error:
-                        tool_config = FHIR_POST_TOOLS[function_name]
-                        fhir_url = f"{self.fhir_api_base}{tool_config['endpoint']}"
-                        payload = tool_config["body_builder"](function_args)
-                        
-                        accepted = False
-                        if isinstance(tool_result, dict):
-                            status_code = tool_result.get("status_code", 0)
-                            accepted = status_code in (200, 201)
-                        
-                        fhir_post = {
-                            "fhir_url": fhir_url,
-                            "payload": payload,
-                            "accepted": accepted
-                        }
-                        fhir_posts.append(fhir_post)
-                        logger.info(f"Tracked FHIR POST to {fhir_url}, accepted={accepted}")
 
                     messages.append({
                         "role": "tool",
@@ -223,12 +173,21 @@ class Agent:
 
             content = message.get("content")
             if content:
+                logger.info("-" * 60)
+                logger.info("MODEL RESPONSE (no tool calls):")
+                logger.info(f"  {content[:500]}{'...' if len(content) > 500 else ''}")
+                logger.info("-" * 60)
+                # Embed tool history for evaluator to capture
+                if tool_history:
+                    content = f"{content}\n<tool_history>\n{json.dumps(tool_history)}\n</tool_history>"
                 if fhir_posts:
                     content = f"{content}\n<fhir_operations>\n{json.dumps(fhir_posts)}\n</fhir_operations>"
                 return content
 
         logger.warning(f"Maximum iterations ({max_iterations}) reached")
         result = "FINISH([\"Unable to complete task within maximum iterations\"])"
+        if tool_history:
+            result = f"{result}\n<tool_history>\n{json.dumps(tool_history)}\n</tool_history>"
         if fhir_posts:
             result = f"{result}\n<fhir_operations>\n{json.dumps(fhir_posts)}\n</fhir_operations>"
         return result
@@ -279,10 +238,26 @@ class Agent:
                     logger.info("MCP session initialized successfully")
 
                     mcp_tools = await self.discover_tools(session)
-                    logger.info(f"Discovered {len(mcp_tools)} tools: {[t['name'] for t in mcp_tools]}")
+                    logger.info("=" * 60)
+                    logger.info(f"TOOL DISCOVERY: Found {len(mcp_tools)} tools")
+                    for t in mcp_tools:
+                        logger.info(f"  - {t['name']}: {t['description'][:80]}...")
+                    logger.info("=" * 60)
 
                     if mcp_tools:
                         openai_tools = self.convert_tools_to_openai_format(mcp_tools)
+                        # Log full tool schemas for debugging
+                        logger.info("TOOL SCHEMAS SENT TO LLM:")
+                        for tool in openai_tools:
+                            func = tool.get("function", {})
+                            logger.info(f"  {func.get('name')}:")
+                            params = func.get("parameters", {})
+                            required = params.get("required", [])
+                            props = params.get("properties", {})
+                            logger.info(f"    Required: {required}")
+                            for prop_name, prop_schema in props.items():
+                                logger.info(f"    - {prop_name}: {prop_schema.get('type', 'unknown')} - {prop_schema.get('description', 'no desc')}")
+                        logger.info("=" * 60)
                         final_content = await self._run_with_mcp(
                             messages, session, openai_tools
                         )
@@ -291,8 +266,11 @@ class Agent:
                         final_content = await self._run_without_tools(messages)
 
         except Exception as e:
-            logger.error(f"Failed to connect to MCP server at {sse_url}: {e}", exc_info=True)
-            logger.warning("Falling back to running without tools")
+            logger.error("=" * 60)
+            logger.error(f"MCP CONNECTION FAILED: {sse_url}")
+            logger.error(f"ERROR: {e}")
+            logger.error("FALLBACK: Running WITHOUT tools")
+            logger.error("=" * 60)
             final_content = await self._run_without_tools(messages)
 
         if final_content:
