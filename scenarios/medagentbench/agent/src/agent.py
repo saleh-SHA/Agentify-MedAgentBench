@@ -145,7 +145,7 @@ class Agent:
                     
                     is_error = isinstance(tool_result, dict) and "error" in tool_result
                     logger.info(f"  TOOL RESULT: {'ERROR' if is_error else 'SUCCESS'}")
-                    result_preview = json.dumps(tool_result)[:300]
+                    result_preview = json.dumps(tool_result)
                     logger.info(f"  RESULT DATA: {result_preview}")
 
                     # Track tool call for history

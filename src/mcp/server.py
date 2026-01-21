@@ -4,11 +4,136 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
-from typing import Annotated, Any, Dict, List, Optional
+from typing import Annotated, Any, Dict, List, Optional, Literal
 
 import httpx
 from fastmcp import FastMCP
-from pydantic import Field
+from pydantic import BaseModel, Field
+
+
+# ============================================================================
+# Pydantic models for FHIR resource structures
+# These provide explicit schemas that help LLMs understand the expected format
+# ============================================================================
+
+# -----------------------------------------------------------------------------
+# Common/Shared Models
+# -----------------------------------------------------------------------------
+
+class SubjectReference(BaseModel):
+    """Subject reference object pointing to a patient."""
+    reference: str = Field(description="The patient FHIR ID for whom the resource is about (e.g., 'Patient/12345')")
+
+
+class TextObject(BaseModel):
+    """Generic object with text field."""
+    text: str = Field(description="Free text value")
+
+
+# -----------------------------------------------------------------------------
+# Observation (Vitals) Models - POST {api_base}/Observation
+# -----------------------------------------------------------------------------
+
+class VitalsCategoryCoding(BaseModel):
+    """Coding element for vital signs category."""
+    system: str = Field(
+        default="http://hl7.org/fhir/observation-category",
+        description="Use 'http://hl7.org/fhir/observation-category'"
+    )
+    code: str = Field(
+        default="vital-signs",
+        description="Use 'vital-signs'"
+    )
+    display: str = Field(
+        default="Vital Signs",
+        description="Use 'Vital Signs'"
+    )
+
+
+class VitalsCategoryElement(BaseModel):
+    """Category element for vital signs observation."""
+    coding: List[VitalsCategoryCoding] = Field(
+        description="Array of coding objects for the category"
+    )
+
+
+class VitalsCodeObject(BaseModel):
+    """Code object for vital signs - specifies what is being measured."""
+    text: str = Field(
+        description="The flowsheet ID, encoded flowsheet ID, or LOINC codes to flowsheet mapping. What is being measured (e.g., 'BP', 'Temp', 'HR', 'SpO2')"
+    )
+
+
+# -----------------------------------------------------------------------------
+# MedicationRequest Models - POST {api_base}/MedicationRequest
+# -----------------------------------------------------------------------------
+
+class MedicationCoding(BaseModel):
+    """Coding for medication."""
+    system: str = Field(
+        default="http://hl7.org/fhir/sid/ndc",
+        description="Coding system such as 'http://hl7.org/fhir/sid/ndc'"
+    )
+    code: str = Field(description="The actual medication code")
+    display: str = Field(description="Display name of the medication")
+
+
+class MedicationCodeableConcept(BaseModel):
+    """Medication codeable concept with coding and text."""
+    coding: List[MedicationCoding] = Field(description="Array of medication coding objects")
+    text: str = Field(description="The order display name of the medication, otherwise the record name")
+
+
+class DoseQuantity(BaseModel):
+    """Dose quantity with value and unit."""
+    value: float = Field(description="Numeric dose value")
+    unit: str = Field(description="Unit for the dose such as 'g', 'mg', 'mL'")
+
+
+class RateQuantity(BaseModel):
+    """Rate quantity with value and unit (for IV medications)."""
+    value: float = Field(description="Numeric rate value")
+    unit: str = Field(description="Unit for the rate such as 'h' (per hour)")
+
+
+class DoseAndRate(BaseModel):
+    """Dose and rate specification. Include doseQuantity for discrete doses, rateQuantity for IV rates."""
+    doseQuantity: Optional[DoseQuantity] = Field(default=None, description="The dose quantity (for discrete doses)")
+    rateQuantity: Optional[RateQuantity] = Field(default=None, description="The rate quantity (for IV medications)")
+
+
+class RouteText(BaseModel):
+    """Route of administration."""
+    text: str = Field(description="The medication route (e.g., 'oral', 'intravenous', 'subcutaneous', 'topical')")
+
+
+class DosageInstruction(BaseModel):
+    """Dosage instruction with route and dose/rate."""
+    route: RouteText = Field(description="Route of administration")
+    doseAndRate: List[DoseAndRate] = Field(description="Array of dose and rate specifications")
+
+
+# -----------------------------------------------------------------------------
+# ServiceRequest Models - POST {api_base}/ServiceRequest
+# -----------------------------------------------------------------------------
+
+class ServiceRequestCoding(BaseModel):
+    """Coding for service request - supports LOINC, SNOMED, CPT, CBV, THL, or Kuntalitto codes."""
+    system: str = Field(description="Coding system such as 'http://loinc.org', 'http://snomed.info/sct', or CPT")
+    code: str = Field(description="The actual code")
+    display: str = Field(description="Display name")
+
+
+class ServiceRequestCode(BaseModel):
+    """Code object for service request - the standard terminology codes mapped to the procedure."""
+    coding: List[ServiceRequestCoding] = Field(
+        description="Array of coding objects. Supports LOINC, SNOMED, CPT, CBV, THL, or Kuntalitto codes"
+    )
+
+
+class NoteObject(BaseModel):
+    """Note object with text field for comments."""
+    text: str = Field(description="Free text comment")
 
 # Configuration (defaults for local development)
 FHIR_API_BASE = os.environ.get("MCP_FHIR_API_BASE", "http://localhost:8080/fhir/").rstrip("/")
@@ -97,13 +222,20 @@ def get_medagentbench_tasks() -> str:
 # Tools
 @mcp.tool()
 def search_patients(
-    identifier: Annotated[Optional[str], Field(description="The patient's identifier (e.g., MRN).")] = None,
-    name: Annotated[Optional[str], Field(description="Any part of the patient's name. Ignored when family or given are used.")] = None,
+    identifier: Annotated[Optional[str], Field(description="The patient's identifier.")] = None,
+    name: Annotated[Optional[str], Field(description="Any part of the patient's name. When discrete name parameters are used, such as family or given, this parameter is ignored.")] = None,
     family: Annotated[Optional[str], Field(description="The patient's family (last) name.")] = None,
     given: Annotated[Optional[str], Field(description="The patient's given name. May include first and middle names.")] = None,
-    birthdate: Annotated[Optional[str], Field(description="The patient's date of birth in YYYY-MM-DD format.")] = None,
+    birthdate: Annotated[Optional[str], Field(description="The patient's date of birth in the format YYYY-MM-DD.")] = None,
+    gender: Annotated[Optional[str], Field(description="The patient's legal sex. The legal-sex parameter is preferred.")] = None,
+    legal_sex: Annotated[Optional[str], Field(description="The patient's legal sex. Takes precedence over the gender search parameter.")] = None,
+    address: Annotated[Optional[str], Field(description="The patient's street address.")] = None,
+    address_city: Annotated[Optional[str], Field(description="The city for patient's home address.")] = None,
+    address_state: Annotated[Optional[str], Field(description="The state for the patient's home address.")] = None,
+    address_postalcode: Annotated[Optional[str], Field(description="The postal code for patient's home address.")] = None,
+    telecom: Annotated[Optional[str], Field(description="The patient's phone number or email.")] = None,
 ) -> Dict[str, Any]:
-    """Search for Patient resources by demographics, identifiers, or contact information."""
+    """Patient.Search - Filter or search for patients based on demographics, identifiers, or contact information. Retrieves patient demographic information from a patient's chart for each matching patient record."""
     params = {}
     if identifier:
         params["identifier"] = identifier
@@ -115,31 +247,42 @@ def search_patients(
         params["given"] = given
     if birthdate:
         params["birthdate"] = birthdate
+    if gender:
+        params["gender"] = gender
+    if legal_sex:
+        params["legal-sex"] = legal_sex
+    if address:
+        params["address"] = address
+    if address_city:
+        params["address-city"] = address_city
+    if address_state:
+        params["address-state"] = address_state
+    if address_postalcode:
+        params["address-postalcode"] = address_postalcode
+    if telecom:
+        params["telecom"] = telecom
     return _call_fhir("GET", "/Patient", params=params)
 
 
 @mcp.tool()
 def list_patient_problems(
-    patient: Annotated[str, Field(description="The patient's FHIR resource ID.")],
+    patient: Annotated[str, Field(description="Reference to a patient resource the condition is for.")],
     category: Annotated[Optional[str], Field(description="Always 'problem-list-item' for this API.")] = None,
-    status: Annotated[Optional[str], Field(description="Problem status filter (e.g., 'active', 'resolved').")] = None,
 ) -> Dict[str, Any]:
-    """Retrieve Condition resources from a patient's problem list. Returns data from the patient's problem list across all encounters."""
+    """Condition.Search (Problems) - Retrieve problems from a patient's chart. This includes any data found in the patient's problem list across all encounters. Note that this resource retrieves only data stored in problem list records. Medical history data documented outside of a patient's problem list isn't available unless retrieved using another method."""
     params = {"patient": patient}
     if category:
         params["category"] = category
-    if status:
-        params["status"] = status
     return _call_fhir("GET", "/Condition", params=params)
 
 
 @mcp.tool()
 def list_lab_observations(
-    patient: Annotated[str, Field(description="The patient's FHIR resource ID.")],
-    code: Annotated[str, Field(description="The observation identifier (base name or LOINC code).")],
+    patient: Annotated[str, Field(description="Reference to a patient resource the observation is for.")],
+    code: Annotated[str, Field(description="The observation identifier (base name).")],
     date: Annotated[Optional[str], Field(description="Date when the specimen was obtained.")] = None,
 ) -> Dict[str, Any]:
-    """Return laboratory Observation resources for a patient. Returns component level data for lab results."""
+    """Observation.Search (Labs) - Return component level data for lab results."""
     params = {"patient": patient, "code": code}
     if date:
         params["date"] = date
@@ -148,11 +291,11 @@ def list_lab_observations(
 
 @mcp.tool()
 def list_vital_signs(
-    patient: Annotated[str, Field(description="The patient's FHIR resource ID.")],
+    patient: Annotated[str, Field(description="Reference to a patient resource the observation is for.")],
     category: Annotated[str, Field(description="Use 'vital-signs' to search for vitals observations.")],
     date: Annotated[Optional[str], Field(description="The date range for when the observation was taken.")] = None,
 ) -> Dict[str, Any]:
-    """Return vital sign Observation resources for a patient. Retrieves vital sign data and other non-duplicable flowsheet data."""
+    """Observation.Search (Vitals) - Retrieve vital sign data from a patient's chart, as well as any other non-duplicable data found in the patient's flowsheets across all encounters. This resource requires the use of encoded flowsheet IDs which are different for each organization and between production and non-production environments."""
     params = {"patient": patient, "category": category}
     if date:
         params["date"] = date
@@ -162,71 +305,71 @@ def list_vital_signs(
 @mcp.tool()
 def record_vital_observation(
     resourceType: Annotated[str, Field(description="Use 'Observation' for vitals observations.")],
-    category: Annotated[List[Dict[str, Any]], Field(description="Array of category objects. Example: [{'coding': [{'system': 'http://hl7.org/fhir/observation-category', 'code': 'vital-signs', 'display': 'Vital Signs'}]}]")],
-    code: Annotated[Dict[str, Any], Field(description="Object with 'text' field for the flowsheet ID. Example: {'text': 'BP'} for blood pressure.")],
+    category: Annotated[List[VitalsCategoryElement], Field(description="Array of category objects. Each must contain coding with system='http://hl7.org/fhir/observation-category', code='vital-signs', display='Vital Signs'.")],
+    code: Annotated[VitalsCodeObject, Field(description="Code object specifying what is being measured.")],
     effectiveDateTime: Annotated[str, Field(description="The date and time the observation was taken, in ISO format (e.g., '2023-11-13T10:15:00+00:00').")],
-    status: Annotated[str, Field(description="The status of the observation. Only 'final' is supported.")],
-    valueString: Annotated[str, Field(description="The measurement value as a string (e.g., '118/77 mmHg').")],
-    subject: Annotated[Dict[str, Any], Field(description="Object with 'reference' field for patient. Example: {'reference': 'Patient/12345'}")],
+    status: Annotated[str, Field(description="The status of the observation. Only 'final' is supported. We do not support filing data that isn't finalized.")],
+    valueString: Annotated[str, Field(description="Measurement value as a string (e.g., '118/77' for BP, '98.6' for temp).")],
+    subject: Annotated[SubjectReference, Field(description="The patient this observation is about.")],
 ) -> Dict[str, Any]:
-    """Create a vital sign Observation for a patient. Files to non-duplicable flowsheet rows including vital signs."""
+    """Observation.Create (Vitals) - File vital signs to all non-duplicable flowsheet rows. This resource can file vital signs for all flowsheets."""
     body = {
         "resourceType": resourceType,
-        "category": category,
-        "code": code,
+        "category": [cat.model_dump() for cat in category],
+        "code": code.model_dump(),
         "effectiveDateTime": effectiveDateTime,
         "status": status,
         "valueString": valueString,
-        "subject": subject,
+        "subject": subject.model_dump(),
     }
     return _call_fhir("POST", "/Observation", body=body)
 
 
 @mcp.tool()
 def list_medication_requests(
-    patient: Annotated[str, Field(description="The patient's FHIR resource ID.")],
-    category: Annotated[Optional[str], Field(description="Category filter: 'inpatient', 'outpatient', 'community', or 'discharge'. By default all categories are searched.")] = None,
-    status: Annotated[Optional[str], Field(description="Status filter (e.g., 'active').")] = None,
+    patient: Annotated[str, Field(description="The FHIR patient ID.")],
+    category: Annotated[Optional[str], Field(description="The category of medication orders to search for. By default all categories are searched. Supported: 'Inpatient', 'Outpatient' (clinic-administered CAMS), 'Community' (prescriptions), 'Discharge'.")] = None,
+    date: Annotated[Optional[str], Field(description="The medication administration date. Corresponds to dosageInstruction.timing.repeat.boundsPeriod. Use caution when filtering by date as it may filter out important active medications.")] = None,
 ) -> Dict[str, Any]:
-    """Retrieve MedicationRequest orders for a patient. Returns inpatient medications, clinic-administered medications, patient-reported medications, and reconciled medications."""
+    """MedicationRequest.Search (Signed Medication Order) - Query for medication orders based on a patient and optionally status or category. Returns inpatient-ordered medications, clinic-administered medications (CAMS), patient-reported medications, and reconciled medications from Care Everywhere and other external sources. Patient-reported medications have reportedBoolean=True."""
     params = {"patient": patient}
     if category:
         params["category"] = category
-    if status:
-        params["status"] = status
+    if date:
+        params["date"] = date
     return _call_fhir("GET", "/MedicationRequest", params=params)
 
 
 @mcp.tool()
 def create_medication_request(
     resourceType: Annotated[str, Field(description="Use 'MedicationRequest' for medication requests.")],
-    medicationCodeableConcept: Annotated[Dict[str, Any], Field(description="Object with 'coding' array and 'text'. Example: {'coding': [{'system': 'http://hl7.org/fhir/sid/ndc', 'code': '12345', 'display': 'Aspirin'}], 'text': 'Aspirin 100mg'}")],
-    authoredOn: Annotated[str, Field(description="The date the prescription was written in ISO format.")],
-    dosageInstruction: Annotated[List[Dict[str, Any]], Field(description="Array of dosage instructions. Example: [{'route': {'text': 'oral'}, 'doseAndRate': [{'doseQuantity': {'value': 100, 'unit': 'mg'}}]}]")],
+    medicationCodeableConcept: Annotated[MedicationCodeableConcept, Field(description="Medication codeable concept with coding array and text.")],
+    authoredOn: Annotated[str, Field(description="The date the prescription was written, in ISO format.")],
+    dosageInstruction: Annotated[List[DosageInstruction], Field(description="Array of dosage instructions with route and doseAndRate (containing doseQuantity and/or rateQuantity).")],
     status: Annotated[str, Field(description="The status of the medication request. Use 'active'.")],
     intent: Annotated[str, Field(description="Use 'order'.")],
-    subject: Annotated[Dict[str, Any], Field(description="Object with 'reference' field. Example: {'reference': 'Patient/12345'}")],
+    subject: Annotated[SubjectReference, Field(description="The patient for whom the medication request is for.")],
 ) -> Dict[str, Any]:
-    """Create a MedicationRequest order for a patient."""
+    """MedicationRequest.Create - Create a medication order for a patient."""
     body = {
         "resourceType": resourceType,
-        "medicationCodeableConcept": medicationCodeableConcept,
+        "medicationCodeableConcept": medicationCodeableConcept.model_dump(exclude_none=True),
         "authoredOn": authoredOn,
-        "dosageInstruction": dosageInstruction,
+        "dosageInstruction": [di.model_dump(exclude_none=True) for di in dosageInstruction],
         "status": status,
         "intent": intent,
-        "subject": subject,
+        "subject": subject.model_dump(),
     }
     return _call_fhir("POST", "/MedicationRequest", body=body)
 
 
 @mcp.tool()
 def list_patient_procedures(
-    patient: Annotated[str, Field(description="The patient's FHIR resource ID.")],
-    date: Annotated[str, Field(description="Date or period when the procedure was performed, using FHIR date format.")],
+    patient: Annotated[str, Field(description="Reference to a patient resource the procedure is for.")],
+    date: Annotated[str, Field(description="Date or period that the procedure was performed, using the FHIR date parameter format.")],
     code: Annotated[Optional[str], Field(description="External CPT codes associated with the procedure.")] = None,
 ) -> Dict[str, Any]:
-    """Retrieve completed Procedure resources for a patient. Returns surgeries, procedures, endoscopies, biopsies, counseling, and physiotherapy."""
+    """Procedure.Search (Orders) - Retrieve completed procedures for a patient. Returns surgeries and procedures performed, including endoscopies and biopsies, as well as less invasive actions like counseling and physiotherapy. Only completed procedures are returned. This resource is designed for high-level summarization around the occurrence of a procedure."""
     params = {"patient": patient, "date": date}
     if code:
         params["code"] = code
@@ -236,29 +379,29 @@ def list_patient_procedures(
 @mcp.tool()
 def create_service_request(
     resourceType: Annotated[str, Field(description="Use 'ServiceRequest' for service requests.")],
-    code: Annotated[Dict[str, Any], Field(description="Object with 'coding' array. Supports LOINC, SNOMED, CPT codes. Example: {'coding': [{'system': 'http://loinc.org', 'code': '12345', 'display': 'Lab Test'}]}")],
-    authoredOn: Annotated[str, Field(description="The order instant in ISO format. Date and time when the order is signed.")],
+    code: Annotated[ServiceRequestCode, Field(description="The standard terminology codes mapped to the procedure (LOINC, SNOMED, CPT, CBV, THL, or Kuntalitto codes).")],
+    authoredOn: Annotated[str, Field(description="The order instant in ISO format. This is the date and time when the order is signed or signed and held.")],
     status: Annotated[str, Field(description="The status of the service request. Use 'active'.")],
     intent: Annotated[str, Field(description="Use 'order'.")],
-    priority: Annotated[str, Field(description="Priority of the request. Use 'stat' for urgent.")],
-    subject: Annotated[Dict[str, Any], Field(description="Object with 'reference' field. Example: {'reference': 'Patient/12345'}")],
+    priority: Annotated[Literal["stat"], Field(description="Priority of the request. Must be 'stat'.")],
+    subject: Annotated[SubjectReference, Field(description="The patient for whom the service request is for.")],
     occurrenceDateTime: Annotated[Optional[str], Field(description="The date and time for the service request to be conducted, in ISO format.")] = None,
-    note: Annotated[Optional[Dict[str, Any]], Field(description="Object with 'text' field for free text comments. Example: {'text': 'Rush order'}")] = None,
+    note: Annotated[Optional[NoteObject], Field(description="Free text comment for the request.")] = None,
 ) -> Dict[str, Any]:
-    """Create a ServiceRequest order (labs, imaging, consults) for a patient."""
+    """ServiceRequest.Create - Create an order for labs, imaging, or consults for a patient."""
     body = {
         "resourceType": resourceType,
-        "code": code,
+        "code": code.model_dump(),
         "authoredOn": authoredOn,
         "status": status,
         "intent": intent,
         "priority": priority,
-        "subject": subject,
+        "subject": subject.model_dump(),
     }
     if occurrenceDateTime:
         body["occurrenceDateTime"] = occurrenceDateTime
     if note:
-        body["note"] = note
+        body["note"] = note.model_dump()
     return _call_fhir("POST", "/ServiceRequest", body=body)
 
 
