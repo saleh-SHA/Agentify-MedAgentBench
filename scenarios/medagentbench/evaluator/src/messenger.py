@@ -1,4 +1,6 @@
+import asyncio
 import json
+import logging
 from uuid import uuid4
 
 import httpx
@@ -17,7 +19,11 @@ from a2a.types import (
 )
 
 
-DEFAULT_TIMEOUT = 300
+DEFAULT_TIMEOUT = 600  # 10 minutes to handle longer LLM inference times
+DEFAULT_MAX_RETRIES = 3  # Maximum retry attempts for transient errors
+DEFAULT_RETRY_DELAY = 5  # Initial delay between retries (seconds)
+
+logger = logging.getLogger("messenger")
 
 
 def create_message(*, role: Role = Role.user, text: str, context_id: str | None = None) -> Message:
@@ -87,8 +93,10 @@ async def send_message(
 
 
 class Messenger:
-    def __init__(self):
+    def __init__(self, max_retries: int = DEFAULT_MAX_RETRIES, retry_delay: int = DEFAULT_RETRY_DELAY):
         self._context_ids: dict[str, str | None] = {}
+        self._max_retries = max_retries
+        self._retry_delay = retry_delay
 
     async def talk_to_agent(
         self,
@@ -97,16 +105,45 @@ class Messenger:
         new_conversation: bool = False,
         timeout: int = DEFAULT_TIMEOUT,
     ) -> str:
-        outputs = await send_message(
-            message=message,
-            base_url=url,
-            context_id=None if new_conversation else self._context_ids.get(url),
-            timeout=timeout,
-        )
-        if outputs.get("status", "completed") != "completed":
-            raise RuntimeError(f"{url} responded with: {outputs}")
-        self._context_ids[url] = outputs.get("context_id")
-        return str(outputs["response"])
+        """Send message to agent with retry logic for transient errors.
+
+        Retries on timeout and connection errors with exponential backoff.
+        """
+        last_error = None
+
+        for attempt in range(self._max_retries):
+            try:
+                outputs = await send_message(
+                    message=message,
+                    base_url=url,
+                    context_id=None if new_conversation else self._context_ids.get(url),
+                    timeout=timeout,
+                )
+                if outputs.get("status", "completed") != "completed":
+                    raise RuntimeError(f"{url} responded with: {outputs}")
+                self._context_ids[url] = outputs.get("context_id")
+                return str(outputs["response"])
+
+            except (httpx.TimeoutException, httpx.ConnectError, httpx.ReadError) as e:
+                last_error = e
+                if attempt < self._max_retries - 1:
+                    # Exponential backoff: delay * 2^attempt
+                    wait_time = self._retry_delay * (2 ** attempt)
+                    logger.warning(
+                        f"Attempt {attempt + 1}/{self._max_retries} failed for {url}: {type(e).__name__}. "
+                        f"Retrying in {wait_time}s..."
+                    )
+                    await asyncio.sleep(wait_time)
+                else:
+                    logger.error(f"All {self._max_retries} attempts failed for {url}: {e}")
+                    raise
+            except Exception as e:
+                # Non-retryable errors - raise immediately
+                logger.error(f"Non-retryable error for {url}: {e}")
+                raise
+
+        # Should not reach here, but just in case
+        raise last_error or RuntimeError(f"Failed to communicate with {url}")
 
     def reset(self) -> None:
         self._context_ids = {}
