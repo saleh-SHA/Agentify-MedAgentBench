@@ -1,8 +1,10 @@
 """FastMCP server for MedAgentBench FHIR tools."""
 from __future__ import annotations
 
+import argparse
 import json
 import os
+import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -332,13 +334,68 @@ def create_service_request(
 
 
 def main() -> None:
-    """Entrypoint used by `python -m src.mcp.server`."""
-    print(f"Starting MedAgentBench FastMCP Server")
-    print(f"FHIR API base: {FHIR_API_BASE}")
-    print(f"Tasks file: {TASKS_FILE}")
-    print(f"Loaded {len(_TASKS)} tasks")
-    # Run with SSE transport on port 8002 for HTTP access
-    mcp.run(transport="sse", host="0.0.0.0", port=8002)
+    """Entrypoint used by `python -m src.mcp.server`.
+
+    Supports two transport modes:
+    - stdio: For MCP Inspector and CLI tools (default when --stdio flag is passed)
+    - streamable-http: For network access (default, runs on port 8002)
+
+    Usage:
+        # For MCP Inspector (stdio transport):
+        npx @modelcontextprotocol/inspector python -m src.mcp.server --stdio
+
+        # For network access (streamable-http transport):
+        python -m src.mcp.server
+        python -m src.mcp.server --transport streamable-http --port 8002
+    """
+    parser = argparse.ArgumentParser(description="MedAgentBench MCP Server")
+    parser.add_argument(
+        "--stdio",
+        action="store_true",
+        help="Use stdio transport (for MCP Inspector and CLI tools)"
+    )
+    parser.add_argument(
+        "--transport",
+        choices=["stdio", "streamable-http"],
+        default=None,
+        help="Transport type (default: streamable-http, or stdio if --stdio is passed)"
+    )
+    parser.add_argument(
+        "--host",
+        default="0.0.0.0",
+        help="Host to bind to for streamable-http transport (default: 0.0.0.0)"
+    )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=8002,
+        help="Port to bind to for streamable-http transport (default: 8002)"
+    )
+
+    args = parser.parse_args()
+
+    # Determine transport: --stdio flag takes precedence, then --transport, then default
+    if args.stdio:
+        transport = "stdio"
+    elif args.transport:
+        transport = args.transport
+    else:
+        transport = "streamable-http"
+
+    # For stdio, suppress print statements to avoid corrupting the protocol stream
+    if transport == "stdio":
+        # Run with stdio transport for MCP Inspector / CLI
+        mcp.run(transport="stdio")
+    else:
+        # Print startup info only for non-stdio transport
+        print(f"Starting MedAgentBench FastMCP Server")
+        print(f"FHIR API base: {FHIR_API_BASE}")
+        print(f"Tasks file: {TASKS_FILE}")
+        print(f"Loaded {len(_TASKS)} tasks")
+        print(f"Transport: {transport}")
+        print(f"Listening on {args.host}:{args.port}")
+        # Run with streamable-http transport for network access
+        mcp.run(transport="streamable-http", host=args.host, port=args.port)
 
 
 if __name__ == "__main__":

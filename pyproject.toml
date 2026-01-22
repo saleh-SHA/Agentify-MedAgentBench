@@ -27,22 +27,21 @@ agent = [
     "litellm>=1.53.8",
     "mcp>=1.0.0",
 ]
-# Full development setup (includes original launcher, MCP server, etc.)
-dev = [
-    "fastmcp>=2.0.0",
-    "litellm>=1.53.8",
-    "mcp>=1.0.0",
-    "requests>=2.31.0",
-    "typer>=0.19.2",
-]
 
 [project.scripts]
 agentbeats-run = "agentbeats.run_scenario:main"
 
 [tool.uv]
 package = true
-dev-dependencies = [
+
+[dependency-groups]
+dev = [
+    "fastmcp>=2.0.0",
+    "litellm>=1.53.8",
+    "mcp>=1.0.0",
     "mypy>=1.18.1",
+    "requests>=2.31.0",
+    "typer>=0.19.2",
 ]
 
 [tool.hatch.metadata]
