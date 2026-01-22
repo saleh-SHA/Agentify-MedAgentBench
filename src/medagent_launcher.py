@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Dict, Any, List, Optional
 
 from mcp import ClientSession
-from mcp.client.sse import sse_client
+from mcp.client.streamable_http import streamablehttp_client
 from src.green_agent.medagent import start_medagent_green, OUTPUT_DIR
 from src.white_agent.medagent import start_medagent_white
 from src.my_util import my_a2a, logging_config
@@ -234,11 +234,11 @@ async def load_medagent_tasks(mcp_server_url: str):
     Returns:
         List of MedAgentBench Task Inputs
     """
-    sse_url = f"{mcp_server_url}/sse"
-    logger.info(f"Connecting to MCP server at {sse_url} to load tasks...")
-    
+    mcp_url = f"{mcp_server_url}/mcp"
+    logger.info(f"Connecting to MCP server at {mcp_url} to load tasks...")
+
     try:
-        async with sse_client(sse_url) as (read_stream, write_stream):
+        async with streamablehttp_client(mcp_url) as (read_stream, write_stream):
             async with ClientSession(read_stream, write_stream) as session:
                 await session.initialize()
                 

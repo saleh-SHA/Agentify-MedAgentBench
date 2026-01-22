@@ -14,7 +14,7 @@ from a2a.types import AgentSkill, AgentCard, AgentCapabilities
 from a2a.utils import new_agent_text_message
 from litellm import completion
 from mcp import ClientSession
-from mcp.client.sse import sse_client
+from mcp.client.streamable_http import streamablehttp_client
 from src.my_util import logging_config
 
 dotenv.load_dotenv()
@@ -272,14 +272,14 @@ class MedAgentWhiteExecutor(AgentExecutor):
         })
 
         # Connect to MCP server and run the entire tool-calling loop within the context
-        sse_url = f"{self.mcp_server_url}/sse"
-        logger.info(f"Connecting to MCP server at {sse_url}")
+        mcp_url = f"{self.mcp_server_url}/mcp"
+        logger.info(f"Connecting to MCP server at {mcp_url}")
 
         final_content: Optional[str] = None
 
         try:
             # Use proper async with blocks to keep the connection alive
-            async with sse_client(sse_url) as (read_stream, write_stream):
+            async with streamablehttp_client(mcp_url) as (read_stream, write_stream):
                 async with ClientSession(read_stream, write_stream) as session:
                     await session.initialize()
                     logger.info("MCP session initialized")
