@@ -17,7 +17,7 @@ from a2a.server.tasks import TaskUpdater
 from a2a.types import DataPart, Message, Part, TaskState, TextPart
 from a2a.utils import get_message_text, new_agent_text_message
 
-from messenger import Messenger
+from messenger import AgentResponse, Messenger
 
 load_dotenv()
 
@@ -671,8 +671,12 @@ class Agent:
         evaluation_fields = {'sol', 'eval_MRN'}
         return {k: v for k, v in task_data.items() if k not in evaluation_fields}
 
-    def extract_tool_history(self, response: str) -> tuple[str, list[dict]]:
-        """Extract tool call history from agent response."""
+    def extract_tool_history_from_text(self, response: str) -> tuple[str, list[dict]]:
+        """Extract tool call history from agent response text (legacy fallback).
+        
+        This is kept for backward compatibility with agents that embed XML tags.
+        New agents should use DataPart instead.
+        """
         tool_history = []
         clean_response = response
         
@@ -688,8 +692,12 @@ class Agent:
         
         return clean_response, tool_history
 
-    def extract_fhir_operations(self, response: str) -> tuple[str, list[dict]]:
-        """Extract FHIR operations metadata from agent response."""
+    def extract_fhir_operations_from_text(self, response: str) -> tuple[str, list[dict]]:
+        """Extract FHIR operations metadata from agent response text (legacy fallback).
+        
+        This is kept for backward compatibility with agents that embed XML tags.
+        New agents should use DataPart instead.
+        """
         fhir_ops = []
         clean_response = response
         
@@ -759,16 +767,24 @@ class Agent:
         history = [{"role": "user", "content": task_prompt}]
         
         try:
-            # Send to agent
-            response = await self.messenger.talk_to_agent(
+            # Send to agent and get structured response
+            agent_response: AgentResponse = await self.messenger.talk_to_agent(
                 message=task_prompt,
                 url=agent_url,
                 new_conversation=True,
             )
             
-            # Extract tool history and FHIR operations
-            response_after_tools, tool_history = self.extract_tool_history(response)
-            clean_response, fhir_ops = self.extract_fhir_operations(response_after_tools)
+            # Extract metadata from structured response (preferred) or fallback to text parsing
+            response_text = agent_response.text
+            tool_history = agent_response.tool_history
+            fhir_ops = agent_response.fhir_operations
+            
+            # Fallback: If no structured metadata, try extracting from text (backward compatibility)
+            if not tool_history and not fhir_ops:
+                response_text, tool_history = self.extract_tool_history_from_text(response_text)
+                response_text, fhir_ops = self.extract_fhir_operations_from_text(response_text)
+            
+            clean_response = response_text
             
             # Add tool calls to history
             for tool_call in tool_history:

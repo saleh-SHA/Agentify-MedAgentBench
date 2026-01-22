@@ -13,10 +13,10 @@ cmd = "python scenarios/medagentbench/agent/src/server.py --host 0.0.0.0 --port 
 # MCP server must be running at http://localhost:8002
 
 # Number of tasks to run (set to null or remove to run all tasks)
-#num_tasks = 1
+#num_tasks = 30
 
 # Specific task IDs to run (optional, overrides num_tasks if provided)
-task_ids = ["task10_1"]
+task_ids = ["task10_21", "task10_22", "task10_23", "task10_24", "task10_25", "task10_26", "task10_27", "task10_28", "task10_29", "task10_30"]
 
 # Maximum tool-calling rounds per task
 max_rounds = 8

@@ -12,7 +12,7 @@ from mcp import ClientSession
 from mcp.client.streamable_http import streamablehttp_client
 
 from a2a.server.tasks import TaskUpdater
-from a2a.types import Message, Part, TaskState, TextPart
+from a2a.types import DataPart, Message, Part, TaskState, TextPart
 from a2a.utils import get_message_text, new_agent_text_message
 
 
@@ -24,7 +24,7 @@ logger = logging.getLogger("medagentbench_agent")
 # Configuration from environment (defaults for local development)
 DEFAULT_MCP_SERVER_URL = os.environ.get("mcp_server_url", "http://localhost:8002")
 DEFAULT_FHIR_API_BASE = os.environ.get("fhir_api_base", "http://localhost:8080/fhir/").rstrip("/")
-LLM_MODEL = os.environ.get("MEDAGENT_LLM_MODEL", "openai/gpt-5")
+LLM_MODEL = os.environ.get("MEDAGENT_LLM_MODEL", "openai/gpt-4o-mini")
 
 
 def extract_mcp_server_url(text: str) -> str | None:
@@ -106,8 +106,13 @@ class Agent:
         messages: list[dict[str, Any]],
         session: ClientSession,
         openai_tools: list[dict[str, Any]],
-    ) -> str:
-        """Run the LLM loop with MCP tools."""
+    ) -> tuple[str, dict[str, Any]]:
+        """Run the LLM loop with MCP tools.
+        
+        Returns:
+            Tuple of (response_text, metadata_dict) where metadata contains
+            tool_history and fhir_operations for evaluation.
+        """
         max_iterations = 10
         fhir_posts: list[dict[str, Any]] = []
         tool_history: list[dict[str, Any]] = []  # Track all tool calls
@@ -177,23 +182,27 @@ class Agent:
                 logger.info("MODEL RESPONSE (no tool calls):")
                 logger.info(f"  {content[:500]}{'...' if len(content) > 500 else ''}")
                 logger.info("-" * 60)
-                # Embed tool history for evaluator to capture
-                if tool_history:
-                    content = f"{content}\n<tool_history>\n{json.dumps(tool_history)}\n</tool_history>"
-                if fhir_posts:
-                    content = f"{content}\n<fhir_operations>\n{json.dumps(fhir_posts)}\n</fhir_operations>"
-                return content
+                # Return content and metadata separately (no XML embedding)
+                metadata = {
+                    "tool_history": tool_history,
+                    "fhir_operations": fhir_posts,
+                }
+                return content, metadata
 
         logger.warning(f"Maximum iterations ({max_iterations}) reached")
         result = "FINISH([\"Unable to complete task within maximum iterations\"])"
-        if tool_history:
-            result = f"{result}\n<tool_history>\n{json.dumps(tool_history)}\n</tool_history>"
-        if fhir_posts:
-            result = f"{result}\n<fhir_operations>\n{json.dumps(fhir_posts)}\n</fhir_operations>"
-        return result
+        metadata = {
+            "tool_history": tool_history,
+            "fhir_operations": fhir_posts,
+        }
+        return result, metadata
 
-    async def _run_without_tools(self, messages: list[dict[str, Any]]) -> str:
-        """Run LLM without tools."""
+    async def _run_without_tools(self, messages: list[dict[str, Any]]) -> tuple[str, dict[str, Any]]:
+        """Run LLM without tools.
+        
+        Returns:
+            Tuple of (response_text, metadata_dict) - metadata will be empty for no-tool runs.
+        """
         logger.info(f"Calling {self.model} without tools")
         response = completion(
             messages=messages,
@@ -202,7 +211,12 @@ class Agent:
         )
         message = response.choices[0].message.model_dump()
         messages.append(message)
-        return message.get("content", "")
+        content = message.get("content", "")
+        metadata = {
+            "tool_history": [],
+            "fhir_operations": [],
+        }
+        return content, metadata
 
     async def run(self, message: Message, updater: TaskUpdater) -> None:
         """Execute the agent task with MCP tool support."""
@@ -228,6 +242,7 @@ class Agent:
         logger.info(f"Connecting to MCP server at {mcp_url}")
 
         final_content: str | None = None
+        metadata: dict[str, Any] = {"tool_history": [], "fhir_operations": []}
 
         try:
             logger.info(f"Attempting streamable-http connection to {mcp_url}...")
@@ -258,12 +273,12 @@ class Agent:
                             for prop_name, prop_schema in props.items():
                                 logger.info(f"    - {prop_name}: {prop_schema.get('type', 'unknown')} - {prop_schema.get('description', 'no desc')}")
                         logger.info("=" * 60)
-                        final_content = await self._run_with_mcp(
+                        final_content, metadata = await self._run_with_mcp(
                             messages, session, openai_tools
                         )
                     else:
                         logger.warning("No tools discovered from MCP server, running without tools")
-                        final_content = await self._run_without_tools(messages)
+                        final_content, metadata = await self._run_without_tools(messages)
 
         except Exception as e:
             logger.error("=" * 60)
@@ -271,18 +286,25 @@ class Agent:
             logger.error(f"ERROR: {e}")
             logger.error("FALLBACK: Running WITHOUT tools")
             logger.error("=" * 60)
-            final_content = await self._run_without_tools(messages)
+            final_content, metadata = await self._run_without_tools(messages)
 
         if final_content:
             preview = final_content[:200] + "..." if len(final_content) > 200 else final_content
             logger.info(f"Sending response: {preview}")
+            # Return both TextPart (answer) and DataPart (metadata) for clean extraction
             await updater.add_artifact(
-                parts=[Part(root=TextPart(text=final_content))],
+                parts=[
+                    Part(root=TextPart(text=final_content)),
+                    Part(root=DataPart(data=metadata)),
+                ],
                 name="Response",
             )
         else:
             await updater.add_artifact(
-                parts=[Part(root=TextPart(text="FINISH([\"No response generated\"])"))],
+                parts=[
+                    Part(root=TextPart(text="FINISH([\"No response generated\"])")),
+                    Part(root=DataPart(data=metadata)),
+                ],
                 name="Response",
             )
 
