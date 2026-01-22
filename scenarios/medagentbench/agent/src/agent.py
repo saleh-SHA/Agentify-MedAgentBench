@@ -9,7 +9,7 @@ from typing import Any
 from dotenv import load_dotenv
 from litellm import completion
 from mcp import ClientSession
-from mcp.client.sse import sse_client
+from mcp.client.streamable_http import streamablehttp_client
 
 from a2a.server.tasks import TaskUpdater
 from a2a.types import Message, Part, TaskState, TextPart
@@ -224,15 +224,15 @@ class Agent:
         messages = [{"role": "user", "content": user_input}]
 
         # Connect to MCP server
-        sse_url = f"{self.mcp_server_url}/sse"
-        logger.info(f"Connecting to MCP server at {sse_url}")
+        mcp_url = f"{self.mcp_server_url}/mcp"
+        logger.info(f"Connecting to MCP server at {mcp_url}")
 
         final_content: str | None = None
 
         try:
-            logger.info(f"Attempting SSE connection to {sse_url}...")
-            async with sse_client(sse_url) as (read_stream, write_stream):
-                logger.info("SSE connection established, initializing MCP session...")
+            logger.info(f"Attempting streamable-http connection to {mcp_url}...")
+            async with streamablehttp_client(mcp_url) as (read_stream, write_stream, _):
+                logger.info("MCP connection established, initializing session...")
                 async with ClientSession(read_stream, write_stream) as session:
                     await session.initialize()
                     logger.info("MCP session initialized successfully")
@@ -267,7 +267,7 @@ class Agent:
 
         except Exception as e:
             logger.error("=" * 60)
-            logger.error(f"MCP CONNECTION FAILED: {sse_url}")
+            logger.error(f"MCP CONNECTION FAILED: {mcp_url}")
             logger.error(f"ERROR: {e}")
             logger.error("FALLBACK: Running WITHOUT tools")
             logger.error("=" * 60)
