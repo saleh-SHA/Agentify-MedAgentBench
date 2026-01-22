@@ -140,6 +140,7 @@ class NoteObject(BaseModel):
 # Configuration (defaults for local development)
 FHIR_API_BASE = os.environ.get("MCP_FHIR_API_BASE", "http://localhost:8080/fhir/").rstrip("/")
 TASKS_FILE = os.environ.get("MCP_TASKS_FILE", "src/mcp/resources/tasks/tasks.json")
+SYSTEM_PROMPT_FILE = os.environ.get("MCP_SYSTEM_PROMPT_FILE", "src/mcp/resources/prompts/system_prompt.txt")
 
 # Create FastMCP server
 mcp = FastMCP(
@@ -166,8 +167,26 @@ def _load_tasks() -> List[Dict[str, Any]]:
         return []
 
 
-# Initialize tasks
+def _load_system_prompt() -> str:
+    """Load system prompt template from file."""
+    prompt_path = Path(SYSTEM_PROMPT_FILE)
+    if not prompt_path.exists():
+        print(f"Warning: System prompt file '{SYSTEM_PROMPT_FILE}' not found.")
+        return ""
+    
+    try:
+        with open(prompt_path, 'r', encoding='utf-8') as f:
+            prompt = f.read()
+        print(f"Loaded system prompt from {SYSTEM_PROMPT_FILE}")
+        return prompt
+    except Exception as e:
+        print(f"Error loading system prompt from '{SYSTEM_PROMPT_FILE}': {e}")
+        return ""
+
+
+# Initialize tasks and prompt
 _TASKS = _load_tasks()
+_SYSTEM_PROMPT = _load_system_prompt()
 
 
 # FHIR helper function
@@ -219,6 +238,19 @@ def get_medagentbench_tasks() -> str:
         "total_tasks": len(_TASKS),
         "tasks": _TASKS,
     }, indent=2)
+
+
+@mcp.resource("medagentbench://prompts/system")
+def get_system_prompt() -> str:
+    """System prompt template for MedAgentBench evaluation.
+    
+    This is the master prompt template used to instruct medical AI agents.
+    Contains placeholders for: {mcp_server_url}, {context}, {question}
+    
+    The evaluator fetches this template, fills in the placeholders, and sends
+    the complete prompt to the agent being evaluated.
+    """
+    return _SYSTEM_PROMPT
 
 
 # Tools

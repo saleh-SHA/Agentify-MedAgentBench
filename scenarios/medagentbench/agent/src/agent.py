@@ -27,10 +27,28 @@ DEFAULT_FHIR_API_BASE = os.environ.get("fhir_api_base", "http://localhost:8080/f
 LLM_MODEL = os.environ.get("MEDAGENT_LLM_MODEL", "openai/gpt-4o-mini")
 
 
-def extract_mcp_server_url(text: str) -> str | None:
-    """Extract MCP server URL from task prompt.
+def extract_config_from_message(message: Message) -> dict[str, Any]:
+    """Extract structured config from message DataPart.
+    
+    The evaluator sends config (e.g., mcp_server_url) via DataPart alongside
+    the text prompt. This function extracts that config.
+    
+    Returns:
+        Config dict, or empty dict if no DataPart found.
+    """
+    for part in message.parts:
+        if isinstance(part.root, DataPart):
+            data = part.root.data
+            if isinstance(data, dict):
+                return data
+    return {}
+
+
+def extract_mcp_server_url_from_text(text: str) -> str | None:
+    """Extract MCP server URL from task prompt text (legacy fallback).
     
     Looks for pattern: 'MCP server at: <url>'
+    This is kept for backward compatibility with older evaluators.
     """
     pattern = r'MCP server at:\s*(https?://[^\s]+)'
     match = re.search(pattern, text)
@@ -227,13 +245,21 @@ class Agent:
             new_agent_text_message("Processing request..."),
         )
 
-        # Extract MCP server URL from the task prompt (sent by green agent)
-        mcp_url = extract_mcp_server_url(user_input)
-        if mcp_url:
-            self.mcp_server_url = mcp_url
-            logger.info(f"Extracted MCP server URL from prompt: {mcp_url}")
+        # Extract config from DataPart (preferred) or fallback to text regex
+        config = extract_config_from_message(message)
+        
+        if "mcp_server_url" in config:
+            # New approach: mcp_server_url from structured DataPart
+            self.mcp_server_url = config["mcp_server_url"]
+            logger.info(f"Extracted MCP server URL from DataPart config: {self.mcp_server_url}")
         else:
-            logger.info(f"Using default MCP server URL: {self.mcp_server_url}")
+            # Fallback: try regex extraction from prompt text (backward compatibility)
+            mcp_url = extract_mcp_server_url_from_text(user_input)
+            if mcp_url:
+                self.mcp_server_url = mcp_url
+                logger.info(f"Extracted MCP server URL from prompt text (fallback): {mcp_url}")
+            else:
+                logger.info(f"Using default MCP server URL: {self.mcp_server_url}")
 
         messages = [{"role": "user", "content": user_input}]
 

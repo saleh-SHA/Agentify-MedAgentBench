@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 from typing import Any, Optional
 from urllib.parse import urlparse
 
+import httpx
 import requests
 from dotenv import load_dotenv
 from pydantic import BaseModel, HttpUrl, ValidationError
@@ -611,10 +612,10 @@ def evaluate_task(case_data: dict, results: TaskOutput, fhir_api_base: str) -> b
 # MedAgentBench Prompt Template
 # ============================================================================
 
-
-MEDAGENT_PROMPT = """You are an expert medical AI assistant that uses FHIR functions to assist medical professionals. You are given a question and a set of available FHIR tools. Based on the question, you will need to make one or more function/tool calls to achieve the purpose.
-
-You have access to FHIR tools via the MCP server at: {mcp_server_url}
+# Fallback prompt template (used if MCP server is unreachable)
+# The canonical version lives in the MCP server at: medagentbench://prompts/system
+# Note: mcp_server_url is passed via DataPart, not embedded in the prompt
+FALLBACK_MEDAGENT_PROMPT = """You are an expert medical AI assistant that uses FHIR functions to assist medical professionals. You are given a question and a set of available FHIR tools. Based on the question, you will need to make one or more function/tool calls to achieve the purpose.
 
 Instructions:
 1. Use the provided FHIR tools to query patient data, retrieve medical records, create orders, and perform other medical record operations as needed.
@@ -635,6 +636,53 @@ Task Context: {context}
 Question: {question}"""
 
 
+async def fetch_system_prompt_from_mcp(mcp_server_url: str) -> str | None:
+    """Fetch the system prompt template from MCP server.
+    
+    Args:
+        mcp_server_url: Base URL of the MCP server (e.g., http://localhost:8002)
+        
+    Returns:
+        The prompt template string, or None if fetch fails.
+    """
+    # MCP resources are accessed via the /mcp endpoint with JSON-RPC
+    mcp_endpoint = f"{mcp_server_url.rstrip('/')}/mcp"
+    
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            # Use MCP JSON-RPC protocol to read the resource
+            response = await client.post(
+                mcp_endpoint,
+                json={
+                    "jsonrpc": "2.0",
+                    "id": 1,
+                    "method": "resources/read",
+                    "params": {
+                        "uri": "medagentbench://prompts/system"
+                    }
+                },
+                headers={"Content-Type": "application/json"}
+            )
+            response.raise_for_status()
+            result = response.json()
+            
+            if "result" in result and "contents" in result["result"]:
+                contents = result["result"]["contents"]
+                if contents and len(contents) > 0:
+                    # Extract text from the first content item
+                    first_content = contents[0]
+                    if "text" in first_content:
+                        logger.info(f"Successfully fetched system prompt from MCP server")
+                        return first_content["text"]
+            
+            logger.warning(f"Unexpected MCP response format: {result}")
+            return None
+            
+    except Exception as e:
+        logger.warning(f"Failed to fetch system prompt from MCP server: {e}")
+        return None
+
+
 # ============================================================================
 # Agent Class
 # ============================================================================
@@ -646,6 +694,35 @@ class Agent:
     def __init__(self):
         self.messenger = Messenger()
         self.tasks: list[dict] = []
+        self._cached_prompt: str | None = None  # Cached prompt template from MCP
+    
+    async def get_system_prompt(self, mcp_server_url: str) -> str:
+        """Get the system prompt template, fetching from MCP server if not cached.
+        
+        The prompt template is fetched from the MCP server (medagentbench://prompts/system)
+        on first call and cached for subsequent uses. Falls back to hardcoded prompt
+        if MCP server is unreachable.
+        
+        Args:
+            mcp_server_url: Base URL of the MCP server
+            
+        Returns:
+            The system prompt template string with placeholders.
+        """
+        if self._cached_prompt is not None:
+            return self._cached_prompt
+        
+        # Try to fetch from MCP server
+        prompt = await fetch_system_prompt_from_mcp(mcp_server_url)
+        
+        if prompt:
+            self._cached_prompt = prompt
+            logger.info("Using system prompt from MCP server")
+        else:
+            self._cached_prompt = FALLBACK_MEDAGENT_PROMPT
+            logger.warning("Using fallback system prompt (MCP fetch failed)")
+        
+        return self._cached_prompt
 
     def validate_request(self, request: EvalRequest) -> tuple[bool, str]:
         missing_roles = set(self.required_roles) - set(request.participants.keys())
@@ -756,22 +833,30 @@ class Agent:
             new_agent_text_message(f"Running task {task_id}..."),
         )
         
-        # Build prompt
+        # Get system prompt (fetched from MCP server or fallback)
+        prompt_template = await self.get_system_prompt(mcp_server_url)
+        
+        # Build prompt with task-specific values (mcp_server_url is sent via DataPart, not in prompt)
         safe_task_data = self.sanitize_task_data(task_data)
-        task_prompt = MEDAGENT_PROMPT.format(
-            mcp_server_url=mcp_server_url,
+        task_prompt = prompt_template.format(
             context=safe_task_data.get('context', 'N/A'),
             question=safe_task_data['instruction'],
         )
         
+        # Config sent via DataPart - agent reads mcp_server_url from here, not from prompt text
+        agent_config = {
+            "mcp_server_url": mcp_server_url,
+        }
+        
         history = [{"role": "user", "content": task_prompt}]
         
         try:
-            # Send to agent and get structured response
+            # Send to agent with structured config via DataPart
             agent_response: AgentResponse = await self.messenger.talk_to_agent(
                 message=task_prompt,
                 url=agent_url,
                 new_conversation=True,
+                config=agent_config,
             )
             
             # Extract metadata from structured response (preferred) or fallback to text parsing

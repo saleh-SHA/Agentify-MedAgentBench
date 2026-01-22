@@ -20,11 +20,31 @@ from a2a.types import (
 DEFAULT_TIMEOUT = 300
 
 
-def create_message(*, role: Role = Role.user, text: str, context_id: str | None = None) -> Message:
+def create_message(
+    *,
+    role: Role = Role.user,
+    text: str,
+    config: dict | None = None,
+    context_id: str | None = None,
+) -> Message:
+    """Create a message with text and optional structured config.
+    
+    Args:
+        role: Message role (user/agent)
+        text: The text content (prompt for LLM)
+        config: Optional structured config (e.g., mcp_server_url) sent via DataPart
+        context_id: Conversation context ID
+    """
+    parts = [Part(TextPart(kind="text", text=text))]
+    
+    # Add DataPart with config if provided
+    if config is not None:
+        parts.append(Part(DataPart(kind="data", data=config)))
+    
     return Message(
         kind="message",
         role=role,
-        parts=[Part(TextPart(kind="text", text=text))],
+        parts=parts,
         message_id=uuid4().hex,
         context_id=context_id,
     )
@@ -54,6 +74,7 @@ async def send_message(
     message: str,
     base_url: str,
     context_id: str | None = None,
+    config: dict | None = None,
     streaming: bool = False,
     timeout: int = DEFAULT_TIMEOUT,
     consumer: Consumer | None = None,
@@ -61,16 +82,16 @@ async def send_message(
     async with httpx.AsyncClient(timeout=timeout) as httpx_client:
         resolver = A2ACardResolver(httpx_client=httpx_client, base_url=base_url)
         agent_card = await resolver.get_agent_card()
-        config = ClientConfig(
+        client_config = ClientConfig(
             httpx_client=httpx_client,
             streaming=streaming,
         )
-        factory = ClientFactory(config)
+        factory = ClientFactory(client_config)
         client = factory.create(agent_card)
         if consumer:
             await client.add_event_consumer(consumer)
 
-        outbound_msg = create_message(text=message, context_id=context_id)
+        outbound_msg = create_message(text=message, config=config, context_id=context_id)
         last_event = None
         outputs: dict[str, object] = {"response": "", "context_id": None, "metadata": None}
 
@@ -131,9 +152,17 @@ class Messenger:
         message: str,
         url: str,
         new_conversation: bool = False,
+        config: dict | None = None,
         timeout: int = DEFAULT_TIMEOUT,
     ) -> AgentResponse:
         """Send message to agent and return structured response.
+        
+        Args:
+            message: The text message (prompt for LLM)
+            url: Agent URL
+            new_conversation: Whether to start a new conversation
+            config: Optional structured config sent via DataPart (e.g., {"mcp_server_url": "..."})
+            timeout: Request timeout
         
         Returns:
             AgentResponse containing text and structured metadata (tool_history, fhir_operations).
@@ -142,6 +171,7 @@ class Messenger:
             message=message,
             base_url=url,
             context_id=None if new_conversation else self._context_ids.get(url),
+            config=config,
             timeout=timeout,
         )
         if outputs.get("status", "completed") != "completed":
