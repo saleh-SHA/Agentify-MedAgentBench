@@ -30,13 +30,12 @@ mcp_server_url = "http://localhost:8002"
 # FHIR server base URL (must be reachable from evaluator container)
 fhir_api_base = "http://localhost:8080/fhir/"
 
-# ============================================================================
-# Parallel Execution Configuration
-# ============================================================================
-# Maximum number of tasks to execute simultaneously.
-# - Set to 1 for sequential execution (default, safest)
+# Multi-Worker Parallel Execution Configuration
+# Number of agent worker processes to spawn for true parallelism.
+# Each worker runs as a separate process on a different port (9019, 9020, etc.)
+# Tasks are distributed across workers, enabling independent parallel execution.
+# - Set to 1 for sequential execution (default, single worker)
 # - Set to 5-10 for moderate parallelism
-# - Higher values may overwhelm the agent or FHIR server
-# - Consider your agent's rate limits and FHIR server capacity
-max_concurrent_tasks = 1
-
+# - Set to 20 for high parallelism 
+# Higher values require more system resources (CPU, memory, network connections).
+num_workers = 10
