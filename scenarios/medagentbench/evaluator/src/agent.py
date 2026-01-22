@@ -1325,9 +1325,10 @@ class Agent:
             question=safe_task_data['instruction'],
         )
         
-        # Config sent via DataPart - agent reads mcp_server_url from here, not from prompt text
+        # Config sent via DataPart - agent reads mcp_server_url and max_iterations from here
         agent_config = {
             "mcp_server_url": mcp_server_url,
+            "max_iterations": max_rounds,
         }
         
         history = [{"role": "user", "content": task_prompt}]

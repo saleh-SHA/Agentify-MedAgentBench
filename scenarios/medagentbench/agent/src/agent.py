@@ -25,6 +25,9 @@ logger = logging.getLogger("medagentbench_agent")
 DEFAULT_MCP_SERVER_URL = os.environ.get("mcp_server_url", "http://localhost:8002")
 DEFAULT_FHIR_API_BASE = os.environ.get("fhir_api_base", "http://localhost:8080/fhir/").rstrip("/")
 LLM_MODEL = os.environ.get("MEDAGENT_LLM_MODEL", "openai/gpt-4o-mini")
+# LLM provider for litellm (e.g., "openai", "anthropic", "google", "azure", etc.)
+# Set to None to let litellm auto-detect from the model string prefix
+LLM_PROVIDER = os.environ.get("MEDAGENT_LLM_PROVIDER", None) or None  # Convert empty string to None
 
 
 def extract_config_from_message(message: Message) -> dict[str, Any]:
@@ -61,6 +64,8 @@ class Agent:
     def __init__(self):
         self.mcp_server_url = DEFAULT_MCP_SERVER_URL
         self.model = LLM_MODEL
+        self.llm_provider = LLM_PROVIDER  # None means auto-detect from model string
+        self.max_iterations = 10  # Default, can be overridden via config
 
     async def discover_tools(self, session: ClientSession) -> list[dict[str, Any]]:
         """Discover available tools from MCP server."""
@@ -131,19 +136,21 @@ class Agent:
             Tuple of (response_text, metadata_dict) where metadata contains
             tool_history and fhir_operations for evaluation.
         """
-        max_iterations = 10
         fhir_posts: list[dict[str, Any]] = []
         tool_history: list[dict[str, Any]] = []  # Track all tool calls
         
-        for iteration in range(max_iterations):
+        for iteration in range(self.max_iterations):
             logger.info(f"Calling {self.model} with tools (iteration {iteration + 1})")
-            response = completion(
-                messages=messages,
-                model=self.model,
-                custom_llm_provider="openai",
-                tools=openai_tools,
-                tool_choice="auto"
-            )
+            # Build completion kwargs - only include custom_llm_provider if explicitly set
+            completion_kwargs = {
+                "messages": messages,
+                "model": self.model,
+                "tools": openai_tools,
+                "tool_choice": "auto",
+            }
+            if self.llm_provider:
+                completion_kwargs["custom_llm_provider"] = self.llm_provider
+            response = completion(**completion_kwargs)
 
             message = response.choices[0].message.model_dump()
             messages.append(message)
@@ -208,12 +215,12 @@ class Agent:
                 }
                 return content, metadata
 
-        logger.warning(f"Maximum iterations ({max_iterations}) reached")
+        logger.warning(f"Maximum iterations ({self.max_iterations}) reached")
         result = "FINISH([\"Unable to complete task within maximum iterations\"])"
         metadata = {
             "tool_history": tool_history,
             "fhir_operations": fhir_posts,
-            "rounds": max_iterations,
+            "rounds": self.max_iterations,
         }
         return result, metadata
 
@@ -224,11 +231,14 @@ class Agent:
             Tuple of (response_text, metadata_dict) - metadata will be empty for no-tool runs.
         """
         logger.info(f"Calling {self.model} without tools")
-        response = completion(
-            messages=messages,
-            model=self.model,
-            custom_llm_provider="openai",
-        )
+        # Build completion kwargs - only include custom_llm_provider if explicitly set
+        completion_kwargs = {
+            "messages": messages,
+            "model": self.model,
+        }
+        if self.llm_provider:
+            completion_kwargs["custom_llm_provider"] = self.llm_provider
+        response = completion(**completion_kwargs)
         message = response.choices[0].message.model_dump()
         messages.append(message)
         content = message.get("content", "")
@@ -254,6 +264,10 @@ class Agent:
             # New approach: mcp_server_url from structured DataPart
             self.mcp_server_url = config["mcp_server_url"]
             logger.info(f"Extracted MCP server URL from DataPart config: {self.mcp_server_url}")
+        
+        if "max_iterations" in config:
+            self.max_iterations = int(config["max_iterations"])
+            logger.info(f"Extracted max_iterations from DataPart config: {self.max_iterations}")
         else:
             # Fallback: try regex extraction from prompt text (backward compatibility)
             mcp_url = extract_mcp_server_url_from_text(user_input)
