@@ -38,4 +38,5 @@ fhir_api_base = "http://localhost:8080/fhir/"
 # - Set to 5-10 for moderate parallelism
 # - Higher values may overwhelm the agent or FHIR server
 # - Consider your agent's rate limits and FHIR server capacity
-max_concurrent_tasks = 20
+max_concurrent_tasks = 1
+

@@ -5,7 +5,9 @@ import json
 import logging
 import os
 import re
+import threading
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
 from typing import Any, Optional
 from urllib.parse import urlparse
@@ -168,24 +170,24 @@ def write_overall_results(
 
 
 # ============================================================================
-# Async File Writer for Parallel Execution
+# Thread-Safe File Writer for Parallel Execution
 # ============================================================================
 
-class AsyncFileWriter:
-    """Thread-safe async file writer using locks for parallel task execution."""
+class ThreadSafeFileWriter:
+    """Thread-safe file writer using threading.Lock for true parallel execution."""
 
     def __init__(self):
-        self._locks: dict[str, asyncio.Lock] = {}
-        self._master_lock = asyncio.Lock()
+        self._locks: dict[str, threading.Lock] = {}
+        self._master_lock = threading.Lock()
 
-    async def _get_lock(self, filepath: str) -> asyncio.Lock:
+    def _get_lock(self, filepath: str) -> threading.Lock:
         """Get or create a lock for a specific file path."""
-        async with self._master_lock:
+        with self._master_lock:
             if filepath not in self._locks:
-                self._locks[filepath] = asyncio.Lock()
+                self._locks[filepath] = threading.Lock()
             return self._locks[filepath]
 
-    async def write_run_result(
+    def write_run_result(
         self,
         output_dir: str,
         task_id: str,
@@ -236,9 +238,9 @@ class AsyncFileWriter:
         else:
             target_file = os.path.join(output_dir, "runs.jsonl")
 
-        # Use async lock for thread-safe file writes
-        lock = await self._get_lock(target_file)
-        async with lock:
+        # Use threading lock for thread-safe file writes
+        lock = self._get_lock(target_file)
+        with lock:
             with open(target_file, "a", encoding="utf-8") as f:
                 f.write(json.dumps(record, ensure_ascii=False) + "\n")
 
@@ -725,7 +727,7 @@ class Agent:
     def __init__(self):
         self.messenger = Messenger()
         self.tasks: list[dict] = []
-        self.file_writer = AsyncFileWriter()  # Thread-safe file writer for parallel execution
+        self.file_writer = ThreadSafeFileWriter()  # Thread-safe file writer for parallel execution
 
     def validate_request(self, request: EvalRequest) -> tuple[bool, str]:
         missing_roles = set(self.required_roles) - set(request.participants.keys())
@@ -913,9 +915,9 @@ class Agent:
                     rounds=1,
                 )
                 
-                # Write to runs.jsonl using async file writer for thread safety
+                # Write to runs.jsonl using thread-safe file writer
                 if output_dir:
-                    await self.file_writer.write_run_result(output_dir, task_id, result, task_data, history)
+                    self.file_writer.write_run_result(output_dir, task_id, result, task_data, history)
 
                 return result
             else:
@@ -929,9 +931,9 @@ class Agent:
                     rounds=1,
                 )
 
-                # Write to runs.jsonl using async file writer for thread safety
+                # Write to runs.jsonl using thread-safe file writer
                 if output_dir:
-                    await self.file_writer.write_run_result(output_dir, task_id, result, task_data, history)
+                    self.file_writer.write_run_result(output_dir, task_id, result, task_data, history)
 
                 return result
 
@@ -947,9 +949,9 @@ class Agent:
                 rounds=0,
             )
 
-            # Write to error.jsonl using async file writer for thread safety
+            # Write to error.jsonl using thread-safe file writer
             if output_dir:
-                await self.file_writer.write_run_result(output_dir, task_id, result, task_data, history, error=str(e))
+                self.file_writer.write_run_result(output_dir, task_id, result, task_data, history, error=str(e))
 
             return result
 
@@ -1028,20 +1030,26 @@ class Agent:
         correct_count = 0
 
         try:
-            # Create semaphore to limit concurrency
-            semaphore = asyncio.Semaphore(max_concurrent_tasks)
-
-            # Progress tracking with thread-safe counter
-            progress_lock = asyncio.Lock()
+            # Thread-safe progress tracking
+            progress_lock = threading.Lock()
             completed_count = 0
 
-            async def run_task_with_semaphore(task: dict, index: int) -> TaskResult:
-                """Run a single task with semaphore-based concurrency control."""
+            def run_task_in_thread(task: dict, index: int) -> TaskResult:
+                """Run a single task in its own thread with a dedicated event loop.
+
+                This provides true parallelism by running each task in a separate thread,
+                each with its own asyncio event loop.
+                """
                 nonlocal completed_count
 
-                async with semaphore:
-                    try:
-                        result = await self.run_single_task(
+                # Create a new event loop for this thread
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+
+                try:
+                    # Run the async task in this thread's event loop
+                    result = loop.run_until_complete(
+                        self.run_single_task(
                             agent_url=agent_url,
                             task_data=task,
                             mcp_server_url=mcp_server_url,
@@ -1050,24 +1058,53 @@ class Agent:
                             updater=updater,
                             output_dir=output_dir,
                         )
+                    )
 
-                        # Update progress (thread-safe)
-                        async with progress_lock:
-                            completed_count += 1
-                            status_emoji = "[PASS]" if result.correct else "[FAIL]"
-                            await updater.update_status(
-                                TaskState.working,
-                                new_agent_text_message(
-                                    f"[{completed_count}/{len(tasks)}] Task {result.task_id}: {status_emoji} ({result.time_used:.1f}s)"
-                                ),
-                            )
+                    # Update progress (thread-safe)
+                    with progress_lock:
+                        completed_count += 1
+                        status_emoji = "[PASS]" if result.correct else "[FAIL]"
+                        logger.info(
+                            f"[{completed_count}/{len(tasks)}] Task {result.task_id}: {status_emoji} ({result.time_used:.1f}s)"
+                        )
 
-                        return result
+                    return result
 
+                except Exception as e:
+                    logger.error(f"Task {task.get('id', 'unknown')} failed with exception: {e}")
+                    # Return error result instead of raising to allow other tasks to continue
+                    return TaskResult(
+                        task_id=task.get('id', 'unknown'),
+                        correct=False,
+                        status="error",
+                        agent_answer=str(e),
+                        expected_answer=task.get('sol'),
+                        time_used=0,
+                        rounds=0,
+                    )
+                finally:
+                    loop.close()
+
+            # Execute all tasks with ThreadPoolExecutor for true parallelism
+            logger.info(f"Starting ThreadPoolExecutor with {max_concurrent_tasks} workers")
+            results = []
+
+            with ThreadPoolExecutor(max_workers=max_concurrent_tasks) as executor:
+                # Submit all tasks to the thread pool
+                futures = {
+                    executor.submit(run_task_in_thread, task, idx): task
+                    for idx, task in enumerate(tasks)
+                }
+
+                # Collect results as they complete
+                for future in as_completed(futures):
+                    task = futures[future]
+                    try:
+                        result = future.result()
+                        results.append(result)
                     except Exception as e:
-                        logger.error(f"Task {task.get('id', 'unknown')} failed with exception: {e}")
-                        # Return error result instead of raising to allow other tasks to continue
-                        return TaskResult(
+                        logger.error(f"Task {task.get('id', 'unknown')} raised exception: {e}")
+                        results.append(TaskResult(
                             task_id=task.get('id', 'unknown'),
                             correct=False,
                             status="error",
@@ -1075,16 +1112,7 @@ class Agent:
                             expected_answer=task.get('sol'),
                             time_used=0,
                             rounds=0,
-                        )
-
-            # Create all task coroutines
-            task_coroutines = [
-                run_task_with_semaphore(task, idx)
-                for idx, task in enumerate(tasks)
-            ]  # idx available for future use (e.g., logging task position)
-
-            # Execute all tasks with controlled concurrency using asyncio.gather
-            results = await asyncio.gather(*task_coroutines, return_exceptions=True)
+                        ))
 
             # Process results
             for result in results:
