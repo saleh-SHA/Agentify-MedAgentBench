@@ -141,6 +141,11 @@ class AgentResponse:
     def fhir_operations(self) -> list:
         """Get FHIR operations from metadata."""
         return self.metadata.get("fhir_operations", [])
+    
+    @property
+    def rounds(self) -> int:
+        """Get number of rounds/iterations from metadata."""
+        return self.metadata.get("rounds", 1)
 
 
 class Messenger:

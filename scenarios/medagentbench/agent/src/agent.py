@@ -204,6 +204,7 @@ class Agent:
                 metadata = {
                     "tool_history": tool_history,
                     "fhir_operations": fhir_posts,
+                    "rounds": iteration + 1,
                 }
                 return content, metadata
 
@@ -212,6 +213,7 @@ class Agent:
         metadata = {
             "tool_history": tool_history,
             "fhir_operations": fhir_posts,
+            "rounds": max_iterations,
         }
         return result, metadata
 

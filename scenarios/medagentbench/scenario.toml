@@ -16,6 +16,7 @@ cmd = "python scenarios/medagentbench/agent/src/server.py --host 0.0.0.0 --port 
 #num_tasks = 30
 
 # Specific task IDs to run (optional, overrides num_tasks if provided)
+#task_ids = ["task1_1", "task1_2", "task1_3", "task1_4", "task1_5", "task1_6", "task1_7", "task1_8", "task1_9", "task1_10"]
 task_ids = ["task10_21", "task10_22", "task10_23", "task10_24", "task10_25", "task10_26", "task10_27", "task10_28", "task10_29", "task10_30"]
 
 # Maximum tool-calling rounds per task

@@ -5,7 +5,10 @@ import logging
 import os
 import re
 import time
+from collections import Counter
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta
+from enum import Enum
 from typing import Any, Optional
 from urllib.parse import urlparse
 
@@ -30,6 +33,126 @@ OUTPUT_DIR = os.environ.get("MEDAGENT_OUTPUT_DIR", "outputs/medagentbench")
 
 
 # ============================================================================
+# Failure Type Definitions
+# ============================================================================
+
+class FailureType(str, Enum):
+    """Primary failure categories for task evaluation.
+    
+    These are mutually exclusive categories used for overall failure breakdown.
+    Order matters - earlier types take precedence when determining primary failure.
+    """
+    # System/format failures (highest precedence)
+    SYSTEM_ERROR = "system_error"
+    INVALID_FINISH_FORMAT = "invalid_finish_format"
+    INVALID_JSON_RESULT = "invalid_json_result"
+    
+    # Operation type failures
+    READONLY_VIOLATION = "readonly_violation"
+    WRONG_POST_COUNT = "wrong_post_count"
+    WRONG_ENDPOINT = "wrong_endpoint"
+    
+    # Payload validation failures
+    PAYLOAD_VALIDATION_ERROR = "payload_validation_error"
+    
+    # Answer comparison failures (lowest precedence)
+    ANSWER_MISMATCH = "answer_mismatch"
+
+
+class DetailedFailure(str, Enum):
+    """Detailed failure reasons for task-level diagnostics.
+    
+    These provide fine-grained information about what went wrong.
+    A task can have multiple detailed failures.
+    """
+    # Format failures
+    INVALID_JSON = "invalid_json"
+    NO_FINISH_FORMAT = "no_finish_format"
+    
+    # Operation failures
+    MADE_POST_ON_READONLY = "made_post_on_readonly"
+    WRONG_NUMBER_OF_POSTS = "wrong_number_of_posts"
+    WRONG_FHIR_ENDPOINT = "wrong_fhir_endpoint"
+    
+    # Resource type failures
+    WRONG_RESOURCE_TYPE = "wrong_resource_type"
+    
+    # Observation-specific failures
+    WRONG_CATEGORY_COUNT = "wrong_category_count"
+    WRONG_CODING_COUNT = "wrong_coding_count"
+    WRONG_CATEGORY_SYSTEM = "wrong_category_system"
+    WRONG_CATEGORY_CODE = "wrong_category_code"
+    WRONG_CATEGORY_DISPLAY = "wrong_category_display"
+    WRONG_CODE_TEXT = "wrong_code_text"
+    WRONG_EFFECTIVE_DATETIME = "wrong_effective_datetime"
+    WRONG_STATUS = "wrong_status"
+    WRONG_VALUE_STRING = "wrong_value_string"
+    WRONG_SUBJECT = "wrong_subject"
+    
+    # MedicationRequest-specific failures
+    WRONG_MEDICATION_SYSTEM = "wrong_medication_system"
+    WRONG_MEDICATION_CODE = "wrong_medication_code"
+    WRONG_AUTHORED_ON = "wrong_authored_on"
+    WRONG_ROUTE = "wrong_route"
+    WRONG_DOSE_VALUE = "wrong_dose_value"
+    WRONG_DOSE_UNIT = "wrong_dose_unit"
+    WRONG_RATE_VALUE = "wrong_rate_value"
+    WRONG_RATE_UNIT = "wrong_rate_unit"
+    WRONG_INTENT = "wrong_intent"
+    
+    # ServiceRequest-specific failures
+    WRONG_CODE_SYSTEM = "wrong_code_system"
+    WRONG_CODE_CODE = "wrong_code_code"
+    WRONG_PRIORITY = "wrong_priority"
+    MISSING_NOTE = "missing_note"
+    WRONG_NOTE_CONTENT = "wrong_note_content"
+    WRONG_OCCURRENCE_DATETIME = "wrong_occurrence_datetime"
+    
+    # Answer comparison failures
+    ANSWER_VALUE_MISMATCH = "answer_value_mismatch"
+    ANSWER_LENGTH_MISMATCH = "answer_length_mismatch"
+    VALUE_TOLERANCE_EXCEEDED = "value_tolerance_exceeded"
+
+
+@dataclass
+class EvalOutcome:
+    """Result of evaluating a task with detailed failure information.
+    
+    Attributes:
+        passed: Whether the task passed evaluation
+        primary_failure: The main failure category (for overall breakdown)
+        failure_details: List of specific failure reasons (for task-level diagnostics)
+    """
+    passed: bool
+    primary_failure: str | None = None
+    failure_details: list[str] = field(default_factory=list)
+    
+    @classmethod
+    def success(cls) -> "EvalOutcome":
+        """Create a successful evaluation outcome."""
+        return cls(passed=True)
+    
+    @classmethod
+    def failure(
+        cls, 
+        primary: FailureType | str, 
+        details: list[DetailedFailure | str] | None = None
+    ) -> "EvalOutcome":
+        """Create a failed evaluation outcome.
+        
+        Args:
+            primary: The primary failure category
+            details: List of detailed failure reasons
+        """
+        primary_str = primary.value if isinstance(primary, FailureType) else primary
+        details_list = []
+        if details:
+            for d in details:
+                details_list.append(d.value if isinstance(d, DetailedFailure) else d)
+        return cls(passed=False, primary_failure=primary_str, failure_details=details_list)
+
+
+# ============================================================================
 # Request/Response Models
 # ============================================================================
 
@@ -46,6 +169,9 @@ class TaskResult(BaseModel):
     expected_answer: list | None
     time_used: float
     rounds: int
+    # Failure tracking fields (only populated when correct=False)
+    primary_failure: str | None = None
+    failure_details: list[str] | None = None
 
 
 class EvalResults(BaseModel):
@@ -53,6 +179,7 @@ class EvalResults(BaseModel):
     total_tasks: int
     correct_count: int
     pass_rate: float
+    failure_breakdown: dict[str, float] | None = None  # Percentage breakdown of failure types
     task_results: dict[str, TaskResult]
     time_used: float
 
@@ -115,11 +242,10 @@ def write_run_result(
     timestamp_ms = int(time.time() * 1000)
     time_str = datetime.fromtimestamp(timestamp_ms / 1000).strftime("%Y-%m-%d %H:%M:%S")
     
-    # Build the result record
-    record = {
-        "index": task_id,
-        "error": error,
-        "output": {
+    # Build the output section
+    output_section = None
+    if task_result:
+        output_section = {
             "result": task_result.agent_answer,
             "status": task_result.status,
             "correct": task_result.correct,
@@ -127,7 +253,17 @@ def write_run_result(
             "rounds": task_result.rounds,
             "time_used": task_result.time_used,
             "history": history,
-        } if task_result else None,
+        }
+        # Add failure information if task failed
+        if not task_result.correct:
+            output_section["primary_failure"] = task_result.primary_failure
+            output_section["failure_details"] = task_result.failure_details
+    
+    # Build the result record
+    record = {
+        "index": task_id,
+        "error": error,
+        "output": output_section,
         "task_data": {
             "id": task_data.get("id"),
             "instruction": task_data.get("instruction"),
@@ -216,28 +352,69 @@ def calculate_age(dob):
 
 
 # Task evaluation functions
-def eval_task1(case_data, results, fhir_api_base):
+def eval_task1(case_data, results, fhir_api_base) -> EvalOutcome:
+    """Task 1: Basic Query (Read-Only) - Find patient MRN."""
+    # Check for read-only violation
     if check_has_post(results):
-        return False
+        return EvalOutcome.failure(
+            FailureType.READONLY_VIOLATION,
+            [DetailedFailure.MADE_POST_ON_READONLY]
+        )
+    
     ref_sol = case_data['sol']
+    
+    # Check JSON parsing
     try:
-        return ref_sol == json.loads(results.result)
-    except:
-        return False
+        agent_result = json.loads(results.result)
+    except (json.JSONDecodeError, TypeError):
+        return EvalOutcome.failure(
+            FailureType.INVALID_JSON_RESULT,
+            [DetailedFailure.INVALID_JSON]
+        )
+    
+    # Check answer match
+    if ref_sol == agent_result:
+        return EvalOutcome.success()
+    else:
+        return EvalOutcome.failure(
+            FailureType.ANSWER_MISMATCH,
+            [DetailedFailure.ANSWER_VALUE_MISMATCH]
+        )
 
 
-def eval_task2(case_data, results, fhir_api_base):
+def eval_task2(case_data, results, fhir_api_base) -> EvalOutcome:
+    """Task 2: Patient Age Calculation (Read-Only)."""
+    # Check for read-only violation
     if check_has_post(results):
-        return False
+        return EvalOutcome.failure(
+            FailureType.READONLY_VIOLATION,
+            [DetailedFailure.MADE_POST_ON_READONLY]
+        )
+    
+    # Calculate reference solution
     url = f"{fhir_api_base}Patient?identifier={case_data['eval_MRN']}&_format=json"
     get_res = json.loads(send_get_request(url)['data'])
     dob_str = get_res['entry'][0]['resource']['birthDate']
     parsed_date = datetime.strptime(dob_str, "%Y-%m-%d")
     ref_sol = [calculate_age(parsed_date)]
+    
+    # Check JSON parsing
     try:
-        return ref_sol == json.loads(results.result)
-    except:
-        return False
+        agent_result = json.loads(results.result)
+    except (json.JSONDecodeError, TypeError):
+        return EvalOutcome.failure(
+            FailureType.INVALID_JSON_RESULT,
+            [DetailedFailure.INVALID_JSON]
+        )
+    
+    # Check answer match
+    if ref_sol == agent_result:
+        return EvalOutcome.success()
+    else:
+        return EvalOutcome.failure(
+            FailureType.ANSWER_MISMATCH,
+            [DetailedFailure.ANSWER_VALUE_MISMATCH]
+        )
 
 
 def normalize_fhir_url(url: str) -> str:
@@ -249,37 +426,92 @@ def normalize_fhir_url(url: str) -> str:
     return parsed.path
 
 
-def eval_task3(case_data, results, fhir_api_base):
+def eval_task3(case_data, results, fhir_api_base) -> EvalOutcome:
+    """Task 3: Blood Pressure Observation POST."""
     posts = extract_posts(results)
+    
+    # Check POST count
     if len(posts) != 1:
-        return False
+        return EvalOutcome.failure(
+            FailureType.WRONG_POST_COUNT,
+            [DetailedFailure.WRONG_NUMBER_OF_POSTS]
+        )
+    
     url, payload = posts[0]
     
-    # Compare only the path portion (e.g., /fhir/Observation) to handle localhost vs remote
+    # Check endpoint
     expected_path = normalize_fhir_url(f'{fhir_api_base.rstrip("/")}/Observation')
     actual_path = normalize_fhir_url(url)
     if actual_path != expected_path:
-        return False
-    try:
-        assert payload['resourceType'] == 'Observation'
-        assert len(payload['category']) == 1
-        assert len(payload['category'][0]['coding']) == 1
-        
-        assert payload['category'][0]['coding'][0] == {'system': "http://hl7.org/fhir/observation-category", "code": "vital-signs", "display": "Vital Signs"}
-        assert payload['code']== {'text': 'BP'}
-        
-        assert payload['effectiveDateTime'] == '2023-11-13T10:15:00+00:00'
-        assert payload['status'] == 'final'
-        assert payload['valueString'] == '118/77 mmHg'
-        assert payload['subject'] == {'reference': f"Patient/{case_data['eval_MRN']}"}
-    except:
-        return False
-    return True
+        return EvalOutcome.failure(
+            FailureType.WRONG_ENDPOINT,
+            [DetailedFailure.WRONG_FHIR_ENDPOINT]
+        )
+    
+    # Validate payload - collect all failures
+    failures = []
+    
+    # Resource type
+    if payload.get('resourceType') != 'Observation':
+        failures.append(DetailedFailure.WRONG_RESOURCE_TYPE)
+    
+    # Category validation
+    category = payload.get('category', [])
+    if len(category) != 1:
+        failures.append(DetailedFailure.WRONG_CATEGORY_COUNT)
+    elif len(category[0].get('coding', [])) != 1:
+        failures.append(DetailedFailure.WRONG_CODING_COUNT)
+    else:
+        coding = category[0]['coding'][0]
+        expected_coding = {
+            'system': "http://hl7.org/fhir/observation-category",
+            "code": "vital-signs",
+            "display": "Vital Signs"
+        }
+        if coding.get('system') != expected_coding['system']:
+            failures.append(DetailedFailure.WRONG_CATEGORY_SYSTEM)
+        if coding.get('code') != expected_coding['code']:
+            failures.append(DetailedFailure.WRONG_CATEGORY_CODE)
+        if coding.get('display') != expected_coding['display']:
+            failures.append(DetailedFailure.WRONG_CATEGORY_DISPLAY)
+    
+    # Code text
+    if payload.get('code') != {'text': 'BP'}:
+        failures.append(DetailedFailure.WRONG_CODE_TEXT)
+    
+    # Effective datetime
+    if payload.get('effectiveDateTime') != '2023-11-13T10:15:00+00:00':
+        failures.append(DetailedFailure.WRONG_EFFECTIVE_DATETIME)
+    
+    # Status
+    if payload.get('status') != 'final':
+        failures.append(DetailedFailure.WRONG_STATUS)
+    
+    # Value string
+    if payload.get('valueString') != '118/77 mmHg':
+        failures.append(DetailedFailure.WRONG_VALUE_STRING)
+    
+    # Subject reference
+    expected_subject = {'reference': f"Patient/{case_data['eval_MRN']}"}
+    if payload.get('subject') != expected_subject:
+        failures.append(DetailedFailure.WRONG_SUBJECT)
+    
+    if failures:
+        return EvalOutcome.failure(FailureType.PAYLOAD_VALIDATION_ERROR, failures)
+    
+    return EvalOutcome.success()
 
 
-def eval_task4(case_data, results, fhir_api_base):
+def eval_task4(case_data, results, fhir_api_base) -> EvalOutcome:
+    """Task 4: Last Magnesium Value (Read-Only)."""
+    # Check for read-only violation
     if check_has_post(results):
-        return False
+        return EvalOutcome.failure(
+            FailureType.READONLY_VIOLATION,
+            [DetailedFailure.MADE_POST_ON_READONLY]
+        )
+    
+    # Calculate reference solution
     url = f"{fhir_api_base}Observation?patient={case_data['eval_MRN']}&code=MG&_count=5000&_format=json"
     get_res = json.loads(send_get_request(url)['data'])
     cutoff = datetime.fromisoformat("2023-11-13T10:15:00+00:00")
@@ -292,13 +524,29 @@ def eval_task4(case_data, results, fhir_api_base):
                 last_meas = effective_time
                 last_value = value
     ref_sol = [last_value if last_value is not None else -1]
+    
+    # Check JSON parsing
     try:
-        return ref_sol == json.loads(results.result)
-    except:
-        return False
+        agent_result = json.loads(results.result)
+    except (json.JSONDecodeError, TypeError):
+        return EvalOutcome.failure(
+            FailureType.INVALID_JSON_RESULT,
+            [DetailedFailure.INVALID_JSON]
+        )
+    
+    # Check answer match
+    if ref_sol == agent_result:
+        return EvalOutcome.success()
+    else:
+        return EvalOutcome.failure(
+            FailureType.ANSWER_MISMATCH,
+            [DetailedFailure.ANSWER_VALUE_MISMATCH]
+        )
 
 
-def eval_task5(case_data, results, fhir_api_base):
+def eval_task5(case_data, results, fhir_api_base) -> EvalOutcome:
+    """Task 5: Magnesium Check with Conditional MedicationRequest."""
+    # Get magnesium data
     url = f"{fhir_api_base}Observation?patient={case_data['eval_MRN']}&code=MG&_count=5000&_format=json"
     get_res = json.loads(send_get_request(url)['data'])
     cutoff = datetime.fromisoformat("2023-11-13T10:15:00+00:00")
@@ -311,55 +559,111 @@ def eval_task5(case_data, results, fhir_api_base):
                 last_meas = effective_time
                 last_value = value
     
+    # Case 1: No magnesium data - should NOT make POST
     if last_value is None:
         if check_has_post(results):
-            return False
-        return True
+            return EvalOutcome.failure(
+                FailureType.READONLY_VIOLATION,
+                [DetailedFailure.MADE_POST_ON_READONLY]
+            )
+    # Case 2: Mg >= 1.9 - should NOT make POST (no medication needed)
     elif last_value > 1.9:
         if check_has_post(results):
-            return False
+            return EvalOutcome.failure(
+                FailureType.READONLY_VIOLATION,
+                [DetailedFailure.MADE_POST_ON_READONLY]
+            )
+    # Case 3: Mg < 1.9 - MUST make MedicationRequest POST
     else:
         posts = extract_posts(results)
         if len(posts) != 1:
-            return False
+            return EvalOutcome.failure(
+                FailureType.WRONG_POST_COUNT,
+                [DetailedFailure.WRONG_NUMBER_OF_POSTS]
+            )
+        
         url, payload = posts[0]
         expected_path = normalize_fhir_url(f'{fhir_api_base.rstrip("/")}/MedicationRequest')
         if normalize_fhir_url(url) != expected_path:
-            return False
-        try:
-            assert payload['resourceType'] == 'MedicationRequest'
-            assert payload['medicationCodeableConcept']['coding'][0]['system'] == "http://hl7.org/fhir/sid/ndc"
-            assert payload['medicationCodeableConcept']['coding'][0]['code'] == "0338-1715-40"
-            assert '2023-11-13T10:15' in payload['authoredOn']
-            
-            assert payload['dosageInstruction'][0]['route'] == 'IV'
-            
-            if last_value < 1:
-                dose, rate = 4, 4
-            elif last_value < 1.5:
-                dose, rate = 2, 2
-            else:
-                dose, rate = 1, 1
-            assert payload['dosageInstruction'][0]['doseAndRate'][0]['doseQuantity'] == {'value': dose, 'unit': 'g'}
-            assert payload['dosageInstruction'][0]['doseAndRate'][0]['rateQuantity'] == {'value': rate, 'unit': 'h'}
-            assert payload['status'] == 'active'
-            assert payload['intent'] == 'order'
-            assert payload['subject'] == {'reference': f"Patient/{case_data['eval_MRN']}"}
-        except:
-            return False
+            return EvalOutcome.failure(
+                FailureType.WRONG_ENDPOINT,
+                [DetailedFailure.WRONG_FHIR_ENDPOINT]
+            )
+        
+        # Validate payload
+        failures = []
+        
+        if payload.get('resourceType') != 'MedicationRequest':
+            failures.append(DetailedFailure.WRONG_RESOURCE_TYPE)
+        
+        # Medication coding
+        med_coding = payload.get('medicationCodeableConcept', {}).get('coding', [{}])[0]
+        if med_coding.get('system') != "http://hl7.org/fhir/sid/ndc":
+            failures.append(DetailedFailure.WRONG_MEDICATION_SYSTEM)
+        if med_coding.get('code') != "0338-1715-40":
+            failures.append(DetailedFailure.WRONG_MEDICATION_CODE)
+        
+        # AuthoredOn
+        if '2023-11-13T10:15' not in payload.get('authoredOn', ''):
+            failures.append(DetailedFailure.WRONG_AUTHORED_ON)
+        
+        # Route
+        dosage = payload.get('dosageInstruction', [{}])[0]
+        if dosage.get('route') != 'IV':
+            failures.append(DetailedFailure.WRONG_ROUTE)
+        
+        # Calculate expected dose and rate
+        if last_value < 1:
+            dose, rate = 4, 4
+        elif last_value < 1.5:
+            dose, rate = 2, 2
+        else:
+            dose, rate = 1, 1
+        
+        dose_and_rate = dosage.get('doseAndRate', [{}])[0]
+        if dose_and_rate.get('doseQuantity') != {'value': dose, 'unit': 'g'}:
+            failures.append(DetailedFailure.WRONG_DOSE_VALUE)
+        if dose_and_rate.get('rateQuantity') != {'value': rate, 'unit': 'h'}:
+            failures.append(DetailedFailure.WRONG_RATE_VALUE)
+        
+        if payload.get('status') != 'active':
+            failures.append(DetailedFailure.WRONG_STATUS)
+        if payload.get('intent') != 'order':
+            failures.append(DetailedFailure.WRONG_INTENT)
+        if payload.get('subject') != {'reference': f"Patient/{case_data['eval_MRN']}"}:
+            failures.append(DetailedFailure.WRONG_SUBJECT)
+        
+        if failures:
+            return EvalOutcome.failure(FailureType.PAYLOAD_VALIDATION_ERROR, failures)
     
+    # Check answer
     ref_sol = [last_value if last_value is not None else -1]
     try:
-        if (ref_sol == json.loads(results.result)) or ([] == json.loads(results.result)): #We only ask the model to check, so it's fine if model returns []
-            return True
-        return False
-    except:
-        return False
+        agent_result = json.loads(results.result)
+        # Accept exact match or empty list
+        if ref_sol == agent_result or [] == agent_result:
+            return EvalOutcome.success()
+        return EvalOutcome.failure(
+            FailureType.ANSWER_MISMATCH,
+            [DetailedFailure.ANSWER_VALUE_MISMATCH]
+        )
+    except (json.JSONDecodeError, TypeError):
+        return EvalOutcome.failure(
+            FailureType.INVALID_JSON_RESULT,
+            [DetailedFailure.INVALID_JSON]
+        )
 
 
-def eval_task6(case_data, results, fhir_api_base):
+def eval_task6(case_data, results, fhir_api_base) -> EvalOutcome:
+    """Task 6: Average Glucose (Read-Only)."""
+    # Check for read-only violation
     if check_has_post(results):
-        return False
+        return EvalOutcome.failure(
+            FailureType.READONLY_VIOLATION,
+            [DetailedFailure.MADE_POST_ON_READONLY]
+        )
+    
+    # Calculate reference solution
     url = f"{fhir_api_base}Observation?patient={case_data['eval_MRN']}&code=GLU&_count=5000&_format=json"
     get_res = json.loads(send_get_request(url)['data'])
     cutoff = datetime.fromisoformat("2023-11-13T10:15:00+00:00")
@@ -372,11 +676,30 @@ def eval_task6(case_data, results, fhir_api_base):
             glu_count += 1
     
     ref_sol = [glu_sum/glu_count if glu_count != 0 else -1]
+    
+    # Check JSON parsing
     try:
-        l = json.loads(results.result)
-        return len(l) == 1 and abs(l[0] - ref_sol[0]) < 0.1
-    except:
-        return False
+        agent_result = json.loads(results.result)
+    except (json.JSONDecodeError, TypeError):
+        return EvalOutcome.failure(
+            FailureType.INVALID_JSON_RESULT,
+            [DetailedFailure.INVALID_JSON]
+        )
+    
+    # Check answer
+    if not isinstance(agent_result, list) or len(agent_result) != 1:
+        return EvalOutcome.failure(
+            FailureType.ANSWER_MISMATCH,
+            [DetailedFailure.ANSWER_LENGTH_MISMATCH]
+        )
+    
+    if abs(agent_result[0] - ref_sol[0]) < 0.1:
+        return EvalOutcome.success()
+    else:
+        return EvalOutcome.failure(
+            FailureType.ANSWER_MISMATCH,
+            [DetailedFailure.VALUE_TOLERANCE_EXCEEDED]
+        )
 
 
 def extract_numeric_value(value):
@@ -399,9 +722,16 @@ def extract_numeric_value(value):
     return None
 
 
-def eval_task7(case_data, results, fhir_api_base):
+def eval_task7(case_data, results, fhir_api_base) -> EvalOutcome:
+    """Task 7: Last Glucose Value (Read-Only)."""
+    # Check for read-only violation
     if check_has_post(results):
-        return False
+        return EvalOutcome.failure(
+            FailureType.READONLY_VIOLATION,
+            [DetailedFailure.MADE_POST_ON_READONLY]
+        )
+    
+    # Calculate reference solution
     url = f"{fhir_api_base}Observation?patient={case_data['eval_MRN']}&code=GLU&_format=json"
     get_res = json.loads(send_get_request(url)['data'])
     last_meas, last_value = None, None
@@ -413,49 +743,102 @@ def eval_task7(case_data, results, fhir_api_base):
             last_value = value
     ref_sol = [last_value if last_value is not None else -1]
     print(case_data['id'], ref_sol, results.result, flush=True)
+    
+    # Check JSON parsing
     try:
         agent_result = json.loads(results.result)
-        # Handle case where agent returns string with units like ["191 mg/dL"]
-        if isinstance(agent_result, list) and len(agent_result) == 1:
-            agent_value = extract_numeric_value(agent_result[0])
-            ref_value = ref_sol[0] if ref_sol else None
-            if agent_value is not None and ref_value is not None:
-                # Compare with small tolerance for floating point
-                if abs(agent_value - ref_value) < 0.1:
-                    return True
-        # Also try direct comparison for backward compatibility
-        if ref_sol == agent_result:
-            return True
-        return False
-    except:
-        return False
+    except (json.JSONDecodeError, TypeError):
+        return EvalOutcome.failure(
+            FailureType.INVALID_JSON_RESULT,
+            [DetailedFailure.INVALID_JSON]
+        )
+    
+    # Handle case where agent returns string with units like ["191 mg/dL"]
+    if isinstance(agent_result, list) and len(agent_result) == 1:
+        agent_value = extract_numeric_value(agent_result[0])
+        ref_value = ref_sol[0] if ref_sol else None
+        if agent_value is not None and ref_value is not None:
+            if abs(agent_value - ref_value) < 0.1:
+                return EvalOutcome.success()
+    
+    # Direct comparison for backward compatibility
+    if ref_sol == agent_result:
+        return EvalOutcome.success()
+    
+    return EvalOutcome.failure(
+        FailureType.ANSWER_MISMATCH,
+        [DetailedFailure.VALUE_TOLERANCE_EXCEEDED]
+    )
 
 
-def eval_task8(case_data, results, fhir_api_base):
+def eval_task8(case_data, results, fhir_api_base) -> EvalOutcome:
+    """Task 8: ServiceRequest for Orthopedic Consult."""
     posts = extract_posts(results)
+    
+    # Check POST count
     if len(posts) != 1:
-        return False
+        return EvalOutcome.failure(
+            FailureType.WRONG_POST_COUNT,
+            [DetailedFailure.WRONG_NUMBER_OF_POSTS]
+        )
+    
     url, payload = posts[0]
+    
+    # Check endpoint
     expected_path = normalize_fhir_url(f'{fhir_api_base.rstrip("/")}/ServiceRequest')
     if normalize_fhir_url(url) != expected_path:
-        return False
+        return EvalOutcome.failure(
+            FailureType.WRONG_ENDPOINT,
+            [DetailedFailure.WRONG_FHIR_ENDPOINT]
+        )
+    
+    # Validate payload
+    failures = []
     comment = "Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations."
-    try:
-        assert payload['resourceType'] == 'ServiceRequest'
-        assert payload['code']['coding'][0]['system'] == 'http://snomed.info/sct'
-        assert payload['code']['coding'][0]['code'] == '306181000000106'
-        assert payload['authoredOn'] == '2023-11-13T10:15:00+00:00'
-        assert payload['status'] == 'active'
-        assert payload['intent'] == 'order'
-        assert payload['priority'] == 'stat'
-        assert comment in payload['note']['text']
-        assert payload['subject'] == {'reference': f"Patient/{case_data['eval_MRN']}"}
-    except:
-        return False
-    return True
+    
+    if payload.get('resourceType') != 'ServiceRequest':
+        failures.append(DetailedFailure.WRONG_RESOURCE_TYPE)
+    
+    # Code coding
+    code_coding = payload.get('code', {}).get('coding', [{}])[0]
+    if code_coding.get('system') != 'http://snomed.info/sct':
+        failures.append(DetailedFailure.WRONG_CODE_SYSTEM)
+    if code_coding.get('code') != '306181000000106':
+        failures.append(DetailedFailure.WRONG_CODE_CODE)
+    
+    if payload.get('authoredOn') != '2023-11-13T10:15:00+00:00':
+        failures.append(DetailedFailure.WRONG_AUTHORED_ON)
+    
+    if payload.get('status') != 'active':
+        failures.append(DetailedFailure.WRONG_STATUS)
+    
+    if payload.get('intent') != 'order':
+        failures.append(DetailedFailure.WRONG_INTENT)
+    
+    if payload.get('priority') != 'stat':
+        failures.append(DetailedFailure.WRONG_PRIORITY)
+    
+    # Note validation
+    note = payload.get('note', {})
+    note_text = note.get('text', '') if isinstance(note, dict) else ''
+    if comment not in note_text:
+        if not note_text:
+            failures.append(DetailedFailure.MISSING_NOTE)
+        else:
+            failures.append(DetailedFailure.WRONG_NOTE_CONTENT)
+    
+    if payload.get('subject') != {'reference': f"Patient/{case_data['eval_MRN']}"}:
+        failures.append(DetailedFailure.WRONG_SUBJECT)
+    
+    if failures:
+        return EvalOutcome.failure(FailureType.PAYLOAD_VALIDATION_ERROR, failures)
+    
+    return EvalOutcome.success()
 
 
-def eval_task9(case_data, results, fhir_api_base):
+def eval_task9(case_data, results, fhir_api_base) -> EvalOutcome:
+    """Task 9: Potassium Check with Conditional MedicationRequest + ServiceRequest."""
+    # Get potassium data
     url = f"{fhir_api_base}Observation?patient={case_data['eval_MRN']}&code=K&_count=5000&_format=json"
     get_res = json.loads(send_get_request(url)['data'])
     cutoff = datetime.fromisoformat("2023-11-13T10:15:00+00:00")
@@ -467,61 +850,118 @@ def eval_task9(case_data, results, fhir_api_base):
             last_meas = effective_time
             last_value = value
     
+    # Case 1: No K data or K >= 3.5 - should NOT make POST
     if last_value is None or last_value >= 3.5:
         if check_has_post(results):
-            return False
+            return EvalOutcome.failure(
+                FailureType.READONLY_VIOLATION,
+                [DetailedFailure.MADE_POST_ON_READONLY]
+            )
+    # Case 2: K < 3.5 - MUST make MedicationRequest + ServiceRequest (2 POSTs)
     else:
         posts = extract_posts(results)
         if len(posts) != 2:
-            return False
+            return EvalOutcome.failure(
+                FailureType.WRONG_POST_COUNT,
+                [DetailedFailure.WRONG_NUMBER_OF_POSTS]
+            )
+        
+        failures = []
+        
+        # Validate first POST (MedicationRequest)
         url, payload = posts[0]
         expected_path = normalize_fhir_url(f'{fhir_api_base.rstrip("/")}/MedicationRequest')
         if normalize_fhir_url(url) != expected_path:
-            return False
-        try:
-            assert payload['resourceType'] == 'MedicationRequest'
-            assert payload['medicationCodeableConcept']['coding'][0]['system'] == "http://hl7.org/fhir/sid/ndc"
-            assert payload['medicationCodeableConcept']['coding'][0]['code'] == "40032-917-01"
-            assert '2023-11-13T10:15' in payload['authoredOn']
-            assert payload['dosageInstruction'][0]['route'].lower().strip() == 'oral'
-            dose = (3.5 - last_value) / 0.1 * 10
-            actual_dose = payload['dosageInstruction'][0]['doseAndRate'][0]['doseQuantity']['value']
-            assert abs(actual_dose - dose) <= 0.1
-            assert payload['dosageInstruction'][0]['doseAndRate'][0]['doseQuantity']['unit'] == 'mEq'
-            assert payload['status'] == 'active'
-            assert payload['intent'] == 'order'
-            assert payload['subject'] == {'reference': f"Patient/{case_data['eval_MRN']}"}
-        except:
-            return False
+            return EvalOutcome.failure(
+                FailureType.WRONG_ENDPOINT,
+                [DetailedFailure.WRONG_FHIR_ENDPOINT]
+            )
         
+        if payload.get('resourceType') != 'MedicationRequest':
+            failures.append(DetailedFailure.WRONG_RESOURCE_TYPE)
+        
+        med_coding = payload.get('medicationCodeableConcept', {}).get('coding', [{}])[0]
+        if med_coding.get('system') != "http://hl7.org/fhir/sid/ndc":
+            failures.append(DetailedFailure.WRONG_MEDICATION_SYSTEM)
+        if med_coding.get('code') != "40032-917-01":
+            failures.append(DetailedFailure.WRONG_MEDICATION_CODE)
+        
+        if '2023-11-13T10:15' not in payload.get('authoredOn', ''):
+            failures.append(DetailedFailure.WRONG_AUTHORED_ON)
+        
+        dosage = payload.get('dosageInstruction', [{}])[0]
+        route = dosage.get('route', '').lower().strip() if dosage.get('route') else ''
+        if route != 'oral':
+            failures.append(DetailedFailure.WRONG_ROUTE)
+        
+        # Calculate expected dose
+        expected_dose = (3.5 - last_value) / 0.1 * 10
+        dose_and_rate = dosage.get('doseAndRate', [{}])[0]
+        actual_dose = dose_and_rate.get('doseQuantity', {}).get('value', 0)
+        if abs(actual_dose - expected_dose) > 0.1:
+            failures.append(DetailedFailure.WRONG_DOSE_VALUE)
+        if dose_and_rate.get('doseQuantity', {}).get('unit') != 'mEq':
+            failures.append(DetailedFailure.WRONG_DOSE_UNIT)
+        
+        if payload.get('status') != 'active':
+            failures.append(DetailedFailure.WRONG_STATUS)
+        if payload.get('intent') != 'order':
+            failures.append(DetailedFailure.WRONG_INTENT)
+        if payload.get('subject') != {'reference': f"Patient/{case_data['eval_MRN']}"}:
+            failures.append(DetailedFailure.WRONG_SUBJECT)
+        
+        # Validate second POST (ServiceRequest)
         url, payload = posts[1]
         expected_path = normalize_fhir_url(f'{fhir_api_base.rstrip("/")}/ServiceRequest')
         if normalize_fhir_url(url) != expected_path:
-            return False
-        try:
-            assert payload['resourceType'] == 'ServiceRequest'
-            assert payload['code']['coding'][0]['system'] == 'http://loinc.org'
-            assert payload['code']['coding'][0]['code'] == '2823-3'
-            assert payload['authoredOn'] == '2023-11-13T10:15:00+00:00'
-            assert payload['status'] == 'active'
-            assert payload['intent'] == 'order'
-            assert payload['priority'] == 'stat'
-            assert payload['subject'] == {'reference': f"Patient/{case_data['eval_MRN']}"}
-            assert '2023-11-14T08:' in payload.get('occurrenceDateTime', '')
-        except:
-            return False
-
+            failures.append(DetailedFailure.WRONG_FHIR_ENDPOINT)
+        
+        if payload.get('resourceType') != 'ServiceRequest':
+            failures.append(DetailedFailure.WRONG_RESOURCE_TYPE)
+        
+        code_coding = payload.get('code', {}).get('coding', [{}])[0]
+        if code_coding.get('system') != 'http://loinc.org':
+            failures.append(DetailedFailure.WRONG_CODE_SYSTEM)
+        if code_coding.get('code') != '2823-3':
+            failures.append(DetailedFailure.WRONG_CODE_CODE)
+        
+        if payload.get('authoredOn') != '2023-11-13T10:15:00+00:00':
+            failures.append(DetailedFailure.WRONG_AUTHORED_ON)
+        if payload.get('status') != 'active':
+            failures.append(DetailedFailure.WRONG_STATUS)
+        if payload.get('intent') != 'order':
+            failures.append(DetailedFailure.WRONG_INTENT)
+        if payload.get('priority') != 'stat':
+            failures.append(DetailedFailure.WRONG_PRIORITY)
+        if payload.get('subject') != {'reference': f"Patient/{case_data['eval_MRN']}"}:
+            failures.append(DetailedFailure.WRONG_SUBJECT)
+        if '2023-11-14T08:' not in payload.get('occurrenceDateTime', ''):
+            failures.append(DetailedFailure.WRONG_OCCURRENCE_DATETIME)
+        
+        if failures:
+            return EvalOutcome.failure(FailureType.PAYLOAD_VALIDATION_ERROR, failures)
+    
+    # Check answer
     ref_sol = [last_value if last_value is not None else -1]
     print(case_data['id'], ref_sol, results.result, flush=True)
     try:
-        if (ref_sol == json.loads(results.result)) or ([] == json.loads(results.result)): #We only ask the model to check, so it's fine if model returns []
-            return True
-        return False
-    except:
-        return False
+        agent_result = json.loads(results.result)
+        if ref_sol == agent_result or [] == agent_result:
+            return EvalOutcome.success()
+        return EvalOutcome.failure(
+            FailureType.ANSWER_MISMATCH,
+            [DetailedFailure.ANSWER_VALUE_MISMATCH]
+        )
+    except (json.JSONDecodeError, TypeError):
+        return EvalOutcome.failure(
+            FailureType.INVALID_JSON_RESULT,
+            [DetailedFailure.INVALID_JSON]
+        )
 
 
-def eval_task10(case_data, results, fhir_api_base):
+def eval_task10(case_data, results, fhir_api_base) -> EvalOutcome:
+    """Task 10: A1C Check with Conditional ServiceRequest."""
+    # Get A1C data
     url = f"{fhir_api_base}Observation?patient={case_data['eval_MRN']}&code=A1C&_count=5000&_format=json"
     get_res = json.loads(send_get_request(url)['data'])
     cutoff = datetime.fromisoformat("2023-11-13T10:15:00+00:00")
@@ -534,49 +974,81 @@ def eval_task10(case_data, results, fhir_api_base):
             last_time = i['resource']['effectiveDateTime']
             last_value = value
     
-    if (last_value is None):
+    if last_value is None:
         ref_sol = [-1]
-    else: 
+    else:
         ref_sol = [last_value, last_time]
     
-    if (last_value is None) or (last_meas < datetime.fromisoformat("2022-11-13T10:15:00+00:00")): #Order needed
+    # Case 1: No A1C data OR A1C older than 1 year - MUST order A1C test
+    if (last_value is None) or (last_meas < datetime.fromisoformat("2022-11-13T10:15:00+00:00")):
         posts = extract_posts(results)
-        if len(posts) != 1: #Should be one for A1C test
-            return False
+        if len(posts) != 1:
+            return EvalOutcome.failure(
+                FailureType.WRONG_POST_COUNT,
+                [DetailedFailure.WRONG_NUMBER_OF_POSTS]
+            )
+        
         url, payload = posts[0]
         expected_path = normalize_fhir_url(f'{fhir_api_base.rstrip("/")}/ServiceRequest')
         if normalize_fhir_url(url) != expected_path:
-            return False
-        try:
-            assert (payload['resourceType'] == 'ServiceRequest')
-            assert payload['code']['coding'][0]['system'] == 'http://loinc.org'
-            assert payload['code']['coding'][0]['code'] == '4548-4'
-            assert payload['authoredOn'] == '2023-11-13T10:15:00+00:00'
-            assert payload['status'] == 'active'
-            assert payload['intent'] == 'order'
-            assert payload['priority'] == 'stat'
-            assert payload['subject'] == {'reference': f"Patient/{case_data['eval_MRN']}"}
-        except Exception as e:
-            print(e, flush=True)
-            return False
-    else:#No order needed
-        if check_has_post(results) is True:
-            return False
-
-
+            return EvalOutcome.failure(
+                FailureType.WRONG_ENDPOINT,
+                [DetailedFailure.WRONG_FHIR_ENDPOINT]
+            )
+        
+        # Validate payload
+        failures = []
+        
+        if payload.get('resourceType') != 'ServiceRequest':
+            failures.append(DetailedFailure.WRONG_RESOURCE_TYPE)
+        
+        code_coding = payload.get('code', {}).get('coding', [{}])[0]
+        if code_coding.get('system') != 'http://loinc.org':
+            failures.append(DetailedFailure.WRONG_CODE_SYSTEM)
+        if code_coding.get('code') != '4548-4':
+            failures.append(DetailedFailure.WRONG_CODE_CODE)
+        
+        if payload.get('authoredOn') != '2023-11-13T10:15:00+00:00':
+            failures.append(DetailedFailure.WRONG_AUTHORED_ON)
+        if payload.get('status') != 'active':
+            failures.append(DetailedFailure.WRONG_STATUS)
+        if payload.get('intent') != 'order':
+            failures.append(DetailedFailure.WRONG_INTENT)
+        if payload.get('priority') != 'stat':
+            failures.append(DetailedFailure.WRONG_PRIORITY)
+        if payload.get('subject') != {'reference': f"Patient/{case_data['eval_MRN']}"}:
+            failures.append(DetailedFailure.WRONG_SUBJECT)
+        
+        if failures:
+            print(f"Task 10 failures: {failures}", flush=True)
+            return EvalOutcome.failure(FailureType.PAYLOAD_VALIDATION_ERROR, failures)
+    # Case 2: Recent A1C exists - should NOT make POST
+    else:
+        if check_has_post(results):
+            return EvalOutcome.failure(
+                FailureType.READONLY_VIOLATION,
+                [DetailedFailure.MADE_POST_ON_READONLY]
+            )
+    
+    # Check answer
     print(case_data['id'], ref_sol, results.result, flush=True)
     try:
         agent_result = json.loads(results.result)
         # Accept exact match or empty list
-        if (ref_sol == agent_result) or ([] == agent_result):
-            return True
-        # When no measurement exists (ref_sol == [-1]), also accept [-1, -1] 
-        # (agent returning -1 for both value and date)
+        if ref_sol == agent_result or [] == agent_result:
+            return EvalOutcome.success()
+        # When no measurement exists (ref_sol == [-1]), also accept [-1, -1]
         if ref_sol == [-1] and agent_result == [-1, -1]:
-            return True
-        return False
-    except:
-        return False
+            return EvalOutcome.success()
+        return EvalOutcome.failure(
+            FailureType.ANSWER_MISMATCH,
+            [DetailedFailure.ANSWER_VALUE_MISMATCH]
+        )
+    except (json.JSONDecodeError, TypeError):
+        return EvalOutcome.failure(
+            FailureType.INVALID_JSON_RESULT,
+            [DetailedFailure.INVALID_JSON]
+        )
 
 
 # Task evaluation dispatcher
@@ -594,18 +1066,28 @@ TASK_EVALUATORS = {
 }
 
 
-def evaluate_task(case_data: dict, results: TaskOutput, fhir_api_base: str) -> bool:
-    """Evaluate a task using the appropriate grading function."""
+def evaluate_task(case_data: dict, results: TaskOutput, fhir_api_base: str) -> EvalOutcome:
+    """Evaluate a task using the appropriate grading function.
+    
+    Returns:
+        EvalOutcome with pass/fail status and detailed failure information.
+    """
     task_id = case_data['id'].split('_')[0]
     evaluator = TASK_EVALUATORS.get(task_id)
     if evaluator:
         try:
-            return evaluator(case_data, results, fhir_api_base) is True
+            return evaluator(case_data, results, fhir_api_base)
         except Exception as e:
             logger.error(f"Evaluation error for {task_id}: {e}")
-            return False
+            return EvalOutcome.failure(
+                FailureType.SYSTEM_ERROR,
+                [f"evaluation_exception: {str(e)}"]
+            )
     logger.warning(f"No evaluator found for task type: {task_id}")
-    return False
+    return EvalOutcome.failure(
+        FailureType.SYSTEM_ERROR,
+        ["no_evaluator_found"]
+    )
 
 
 # ============================================================================
@@ -863,6 +1345,7 @@ class Agent:
             response_text = agent_response.text
             tool_history = agent_response.tool_history
             fhir_ops = agent_response.fhir_operations
+            rounds = agent_response.rounds
             
             # Fallback: If no structured metadata, try extracting from text (backward compatibility)
             if not tool_history and not fhir_ops:
@@ -909,21 +1392,23 @@ class Agent:
                     result=answer,
                     history=history,
                     status="completed",
-                    rounds=1,
+                    rounds=rounds,
                     fhir_ops=fhir_ops,
                 )
                 
-                # Evaluate
-                is_correct = evaluate_task(task_data, task_output, fhir_api_base)
+                # Evaluate and get detailed outcome
+                eval_outcome = evaluate_task(task_data, task_output, fhir_api_base)
                 
                 result = TaskResult(
                     task_id=task_id,
-                    correct=is_correct,
+                    correct=eval_outcome.passed,
                     status="completed",
                     agent_answer=answer,
                     expected_answer=task_data.get('sol'),
                     time_used=time.time() - start_time,
-                    rounds=1,
+                    rounds=rounds,
+                    primary_failure=eval_outcome.primary_failure if not eval_outcome.passed else None,
+                    failure_details=eval_outcome.failure_details if not eval_outcome.passed else None,
                 )
                 
                 # Write to runs.jsonl
@@ -932,6 +1417,7 @@ class Agent:
                 
                 return result
             else:
+                # Agent didn't return valid FINISH format
                 result = TaskResult(
                     task_id=task_id,
                     correct=False,
@@ -939,7 +1425,9 @@ class Agent:
                     agent_answer=clean_response[:200] if clean_response else None,
                     expected_answer=task_data.get('sol'),
                     time_used=time.time() - start_time,
-                    rounds=1,
+                    rounds=rounds,
+                    primary_failure=FailureType.INVALID_FINISH_FORMAT.value,
+                    failure_details=[DetailedFailure.NO_FINISH_FORMAT.value],
                 )
                 
                 # Write to runs.jsonl
@@ -958,6 +1446,8 @@ class Agent:
                 expected_answer=task_data.get('sol'),
                 time_used=time.time() - start_time,
                 rounds=0,
+                primary_failure=FailureType.SYSTEM_ERROR.value,
+                failure_details=[f"exception: {str(e)}"],
             )
             
             # Write to error.jsonl
@@ -1050,12 +1540,30 @@ class Agent:
 
             time_used = time.time() - start_time
             pass_rate = (correct_count / len(tasks) * 100) if tasks else 0
+            
+            # Calculate failure breakdown (percentage of each failure type among failed tasks)
+            failure_breakdown: dict[str, float] | None = None
+            failed_count = len(tasks) - correct_count
+            if failed_count > 0 and tasks:
+                # Count primary failures
+                failure_counts: Counter[str] = Counter()
+                for result in task_results.values():
+                    if not result.correct and result.primary_failure:
+                        failure_counts[result.primary_failure] += 1
+                
+                # Convert to percentages (of failed tasks only)
+                # This way all percentages add up to 100%
+                failure_breakdown = {
+                    failure_type: (count / failed_count) * 100
+                    for failure_type, count in failure_counts.items()
+                }
 
             eval_results = EvalResults(
                 domain=domain,
                 total_tasks=len(tasks),
                 correct_count=correct_count,
                 pass_rate=pass_rate,
+                failure_breakdown=failure_breakdown,
                 task_results=task_results,
                 time_used=time_used,
             )
