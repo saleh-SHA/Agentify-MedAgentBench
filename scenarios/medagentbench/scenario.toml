@@ -16,7 +16,7 @@ cmd = "python scenarios/medagentbench/agent/src/server.py --host 0.0.0.0 --port 
 #num_tasks = 1
 
 # Specific task IDs to run (optional, overrides num_tasks if provided)
-task_ids = ["task10_1"]
+#task_ids = ["task10_1"]
 
 # Maximum tool-calling rounds per task
 max_rounds = 8
@@ -29,3 +29,13 @@ mcp_server_url = "http://localhost:8002"
 
 # FHIR server base URL (must be reachable from evaluator container)
 fhir_api_base = "http://localhost:8080/fhir/"
+
+# ============================================================================
+# Parallel Execution Configuration
+# ============================================================================
+# Maximum number of tasks to execute simultaneously.
+# - Set to 1 for sequential execution (default, safest)
+# - Set to 5-10 for moderate parallelism
+# - Higher values may overwhelm the agent or FHIR server
+# - Consider your agent's rate limits and FHIR server capacity
+max_concurrent_tasks = 20

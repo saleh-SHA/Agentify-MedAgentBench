@@ -1,5 +1,6 @@
 """MedAgentBench evaluator (green agent) - orchestrates and evaluates medical AI agents."""
 
+import asyncio
 import json
 import logging
 import os
@@ -152,18 +153,96 @@ def write_overall_results(
     eval_results: "EvalResults",
 ) -> None:
     """Write overall evaluation results to overall.json.
-    
+
     Args:
         output_dir: Directory to write the results to
         eval_results: The EvalResults object containing overall metrics
     """
     os.makedirs(output_dir, exist_ok=True)
-    
+
     output_file = os.path.join(output_dir, "overall.json")
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(eval_results.model_dump(), f, indent=2, ensure_ascii=False)
-    
+
     logger.info(f"Overall results written to {output_file}")
+
+
+# ============================================================================
+# Async File Writer for Parallel Execution
+# ============================================================================
+
+class AsyncFileWriter:
+    """Thread-safe async file writer using locks for parallel task execution."""
+
+    def __init__(self):
+        self._locks: dict[str, asyncio.Lock] = {}
+        self._master_lock = asyncio.Lock()
+
+    async def _get_lock(self, filepath: str) -> asyncio.Lock:
+        """Get or create a lock for a specific file path."""
+        async with self._master_lock:
+            if filepath not in self._locks:
+                self._locks[filepath] = asyncio.Lock()
+            return self._locks[filepath]
+
+    async def write_run_result(
+        self,
+        output_dir: str,
+        task_id: str,
+        task_result: "TaskResult",
+        task_data: dict,
+        history: list,
+        error: Optional[str] = None,
+    ) -> None:
+        """Thread-safe write of a single task run result to runs.jsonl or error.jsonl.
+
+        Args:
+            output_dir: Directory to write the result to
+            task_id: Task identifier
+            task_result: The TaskResult object containing results
+            task_data: Original task data
+            history: Conversation history
+            error: Error message if the task failed
+        """
+        os.makedirs(output_dir, exist_ok=True)
+
+        timestamp_ms = int(time.time() * 1000)
+        time_str = datetime.fromtimestamp(timestamp_ms / 1000).strftime("%Y-%m-%d %H:%M:%S")
+
+        # Build the result record
+        record = {
+            "index": task_id,
+            "error": error,
+            "output": {
+                "result": task_result.agent_answer,
+                "status": task_result.status,
+                "correct": task_result.correct,
+                "expected": task_result.expected_answer,
+                "rounds": task_result.rounds,
+                "time_used": task_result.time_used,
+                "history": history,
+            } if task_result else None,
+            "task_data": {
+                "id": task_data.get("id"),
+                "instruction": task_data.get("instruction"),
+                "context": task_data.get("context"),
+            },
+            "time": {"timestamp": timestamp_ms, "str": time_str},
+        }
+
+        # Write to appropriate file
+        if error:
+            target_file = os.path.join(output_dir, "error.jsonl")
+        else:
+            target_file = os.path.join(output_dir, "runs.jsonl")
+
+        # Use async lock for thread-safe file writes
+        lock = await self._get_lock(target_file)
+        async with lock:
+            with open(target_file, "a", encoding="utf-8") as f:
+                f.write(json.dumps(record, ensure_ascii=False) + "\n")
+
+        logger.info(f"Result written to {target_file}")
 
 
 # ============================================================================
@@ -646,6 +725,7 @@ class Agent:
     def __init__(self):
         self.messenger = Messenger()
         self.tasks: list[dict] = []
+        self.file_writer = AsyncFileWriter()  # Thread-safe file writer for parallel execution
 
     def validate_request(self, request: EvalRequest) -> tuple[bool, str]:
         missing_roles = set(self.required_roles) - set(request.participants.keys())
@@ -739,15 +819,23 @@ class Agent:
         updater: TaskUpdater,
         output_dir: Optional[str] = None,
     ) -> TaskResult:
-        """Run a single task and return results."""
+        """Run a single task and return results.
+
+        Note: Creates a dedicated Messenger per task to support parallel execution
+        without context_id conflicts.
+        """
         start_time = time.time()
         task_id = task_data['id']
-        
+
+        # Create a dedicated messenger for this task to avoid context_id conflicts
+        # when running multiple tasks in parallel
+        task_messenger = Messenger()
+
         await updater.update_status(
             TaskState.working,
             new_agent_text_message(f"Running task {task_id}..."),
         )
-        
+
         # Build prompt
         safe_task_data = self.sanitize_task_data(task_data)
         task_prompt = MEDAGENT_PROMPT.format(
@@ -755,12 +843,12 @@ class Agent:
             context=safe_task_data.get('context', 'N/A'),
             question=safe_task_data['instruction'],
         )
-        
+
         history = [{"role": "user", "content": task_prompt}]
-        
+
         try:
-            # Send to agent
-            response = await self.messenger.talk_to_agent(
+            # Send to agent using task-specific messenger
+            response = await task_messenger.talk_to_agent(
                 message=task_prompt,
                 url=agent_url,
                 new_conversation=True,
@@ -825,10 +913,10 @@ class Agent:
                     rounds=1,
                 )
                 
-                # Write to runs.jsonl
+                # Write to runs.jsonl using async file writer for thread safety
                 if output_dir:
-                    write_run_result(output_dir, task_id, result, task_data, history)
-                
+                    await self.file_writer.write_run_result(output_dir, task_id, result, task_data, history)
+
                 return result
             else:
                 result = TaskResult(
@@ -840,13 +928,13 @@ class Agent:
                     time_used=time.time() - start_time,
                     rounds=1,
                 )
-                
-                # Write to runs.jsonl
+
+                # Write to runs.jsonl using async file writer for thread safety
                 if output_dir:
-                    write_run_result(output_dir, task_id, result, task_data, history)
-                
+                    await self.file_writer.write_run_result(output_dir, task_id, result, task_data, history)
+
                 return result
-                
+
         except Exception as e:
             logger.error(f"Task {task_id} failed: {e}")
             result = TaskResult(
@@ -858,11 +946,11 @@ class Agent:
                 time_used=time.time() - start_time,
                 rounds=0,
             )
-            
-            # Write to error.jsonl
+
+            # Write to error.jsonl using async file writer for thread safety
             if output_dir:
-                write_run_result(output_dir, task_id, result, task_data, history, error=str(e))
-            
+                await self.file_writer.write_run_result(output_dir, task_id, result, task_data, history, error=str(e))
+
             return result
 
     async def run(self, message: Message, updater: TaskUpdater) -> None:
@@ -892,7 +980,10 @@ class Agent:
         max_rounds = int(request.config.get("max_rounds", 10))
         mcp_server_url = str(request.config.get("mcp_server_url", "http://localhost:8002"))
         fhir_api_base = str(request.config.get("fhir_api_base", "http://medagentbench.ddns.net:8080/fhir/"))
-        
+
+        # Parallel execution configuration
+        max_concurrent_tasks = int(request.config.get("max_concurrent_tasks", 1))
+
         # Get agent name from config or derive from URL
         agent_name = str(request.config.get("agent_name", "default_agent"))
         
@@ -916,36 +1007,93 @@ class Agent:
             tasks = all_tasks
 
         logger.info(f"Running {len(tasks)} tasks for domain {domain}")
-        
-        await updater.update_status(
-            TaskState.working,
-            new_agent_text_message(f"Evaluating {len(tasks)} tasks in {domain} domain"),
-        )
+
+        # Log parallel execution mode
+        if max_concurrent_tasks > 1:
+            logger.info(f"Parallel execution enabled: max_concurrent_tasks={max_concurrent_tasks}")
+            await updater.update_status(
+                TaskState.working,
+                new_agent_text_message(
+                    f"Starting parallel evaluation: {len(tasks)} tasks with max {max_concurrent_tasks} concurrent"
+                ),
+            )
+        else:
+            await updater.update_status(
+                TaskState.working,
+                new_agent_text_message(f"Evaluating {len(tasks)} tasks in {domain} domain"),
+            )
 
         start_time = time.time()
         task_results: dict[str, TaskResult] = {}
         correct_count = 0
 
         try:
-            for task in tasks:
-                result = await self.run_single_task(
-                    agent_url=agent_url,
-                    task_data=task,
-                    mcp_server_url=mcp_server_url,
-                    fhir_api_base=fhir_api_base,
-                    max_rounds=max_rounds,
-                    updater=updater,
-                    output_dir=output_dir,
-                )
+            # Create semaphore to limit concurrency
+            semaphore = asyncio.Semaphore(max_concurrent_tasks)
+
+            # Progress tracking with thread-safe counter
+            progress_lock = asyncio.Lock()
+            completed_count = 0
+
+            async def run_task_with_semaphore(task: dict, index: int) -> TaskResult:
+                """Run a single task with semaphore-based concurrency control."""
+                nonlocal completed_count
+
+                async with semaphore:
+                    try:
+                        result = await self.run_single_task(
+                            agent_url=agent_url,
+                            task_data=task,
+                            mcp_server_url=mcp_server_url,
+                            fhir_api_base=fhir_api_base,
+                            max_rounds=max_rounds,
+                            updater=updater,
+                            output_dir=output_dir,
+                        )
+
+                        # Update progress (thread-safe)
+                        async with progress_lock:
+                            completed_count += 1
+                            status_emoji = "[PASS]" if result.correct else "[FAIL]"
+                            await updater.update_status(
+                                TaskState.working,
+                                new_agent_text_message(
+                                    f"[{completed_count}/{len(tasks)}] Task {result.task_id}: {status_emoji} ({result.time_used:.1f}s)"
+                                ),
+                            )
+
+                        return result
+
+                    except Exception as e:
+                        logger.error(f"Task {task.get('id', 'unknown')} failed with exception: {e}")
+                        # Return error result instead of raising to allow other tasks to continue
+                        return TaskResult(
+                            task_id=task.get('id', 'unknown'),
+                            correct=False,
+                            status="error",
+                            agent_answer=str(e),
+                            expected_answer=task.get('sol'),
+                            time_used=0,
+                            rounds=0,
+                        )
+
+            # Create all task coroutines
+            task_coroutines = [
+                run_task_with_semaphore(task, idx)
+                for idx, task in enumerate(tasks)
+            ]  # idx available for future use (e.g., logging task position)
+
+            # Execute all tasks with controlled concurrency using asyncio.gather
+            results = await asyncio.gather(*task_coroutines, return_exceptions=True)
+
+            # Process results
+            for result in results:
+                if isinstance(result, Exception):
+                    logger.error(f"Task failed with unhandled exception: {result}")
+                    continue
                 task_results[result.task_id] = result
                 if result.correct:
                     correct_count += 1
-                
-                status_emoji = "✓" if result.correct else "✗"
-                await updater.update_status(
-                    TaskState.working,
-                    new_agent_text_message(f"Task {result.task_id}: {status_emoji} ({result.time_used:.1f}s)"),
-                )
 
             time_used = time.time() - start_time
             pass_rate = (correct_count / len(tasks) * 100) if tasks else 0
@@ -961,7 +1109,7 @@ class Agent:
 
             # Build summary
             task_results_str = "\n".join(
-                f"  {tid}: {'✓' if r.correct else '✗'} ({r.status})"
+                f"  {tid}: {'[PASS]' if r.correct else '[FAIL]'} ({r.status})"
                 for tid, r in task_results.items()
             )
             summary = f"""MedAgentBench Results
@@ -969,6 +1117,7 @@ Domain: {domain}
 Tasks: {len(tasks)}
 Pass Rate: {pass_rate:.1f}% ({correct_count}/{len(tasks)})
 Time: {time_used:.1f}s
+Concurrency: {max_concurrent_tasks}
 
 Task Results:
 {task_results_str}"""
@@ -980,9 +1129,10 @@ Task Results:
                 ],
                 name="Result",
             )
-            
+
             # Write overall results to file
             write_overall_results(output_dir, eval_results)
         finally:
-            self.messenger.reset()
+            # Note: Each task now uses its own Messenger, so no shared state to reset
+            pass
 
