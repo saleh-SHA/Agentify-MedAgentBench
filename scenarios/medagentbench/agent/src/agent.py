@@ -9,7 +9,7 @@ from typing import Any
 from dotenv import load_dotenv
 from litellm import completion
 from mcp import ClientSession
-from mcp.client.streamable_http import streamablehttp_client
+from mcp.client.streamable_http import streamable_http_client
 
 from a2a.server.tasks import TaskUpdater
 from a2a.types import DataPart, Message, Part, TaskState, TextPart
@@ -24,9 +24,13 @@ logger = logging.getLogger("medagentbench_agent")
 # Configuration from environment (defaults for local development)
 DEFAULT_MCP_SERVER_URL = os.environ.get("mcp_server_url", "http://localhost:8002")
 DEFAULT_FHIR_API_BASE = os.environ.get("fhir_api_base", "http://localhost:8080/fhir/").rstrip("/")
+
+# LLM configuration
+# LLM_MODEL: The model identifier in LiteLLM format (e.g., "openai/gpt-4o-mini", "anthropic/claude-3.5-sonnet")
 LLM_MODEL = os.environ.get("MEDAGENT_LLM_MODEL", "openai/gpt-4o-mini")
-# LLM provider for litellm (e.g., "openai", "anthropic", "google", "azure", etc.)
-# Set to None to let litellm auto-detect from the model string prefix
+
+# LLM_PROVIDER: Optional provider override (e.g., "openai", "anthropic", "google", "azure")
+# Set to None (or leave empty) to let LiteLLM auto-detect from the model string prefix
 LLM_PROVIDER = os.environ.get("MEDAGENT_LLM_PROVIDER", None) or None  # Convert empty string to None
 
 
@@ -288,7 +292,7 @@ class Agent:
 
         try:
             logger.info(f"Attempting streamable-http connection to {mcp_url}...")
-            async with streamablehttp_client(mcp_url) as (read_stream, write_stream, _):
+            async with streamable_http_client(mcp_url) as (read_stream, write_stream, _):
                 logger.info("MCP connection established, initializing session...")
                 async with ClientSession(read_stream, write_stream) as session:
                     await session.initialize()
@@ -319,16 +323,33 @@ class Agent:
                             messages, session, openai_tools
                         )
                     else:
-                        logger.warning("No tools discovered from MCP server, running without tools")
-                        final_content, metadata = await self._run_without_tools(messages)
+                        # No tools discovered - return error instead of fallback
+                        logger.error("=" * 60)
+                        logger.error("NO TOOLS DISCOVERED from MCP server")
+                        logger.error("Cannot proceed without tools - returning error")
+                        logger.error("=" * 60)
+                        final_content = "FINISH([\"ERROR: no_tools_discovered - MCP server returned zero tools\"])"
+                        metadata = {
+                            "tool_history": [],
+                            "fhir_operations": [],
+                            "error_type": "no_tools_discovered",
+                            "error_message": "MCP server returned zero tools",
+                        }
 
         except Exception as e:
+            # MCP connection failed - return error instead of fallback
             logger.error("=" * 60)
             logger.error(f"MCP CONNECTION FAILED: {mcp_url}")
             logger.error(f"ERROR: {e}")
-            logger.error("FALLBACK: Running WITHOUT tools")
+            logger.error("Cannot proceed without MCP connection - returning error")
             logger.error("=" * 60)
-            final_content, metadata = await self._run_without_tools(messages)
+            final_content = f"FINISH([\"ERROR: mcp_connection_failed - {str(e)}\"])"
+            metadata = {
+                "tool_history": [],
+                "fhir_operations": [],
+                "error_type": "mcp_connection_failed",
+                "error_message": str(e),
+            }
 
         if final_content:
             preview = final_content[:200] + "..." if len(final_content) > 200 else final_content
