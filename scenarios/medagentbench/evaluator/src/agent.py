@@ -180,6 +180,9 @@ class EvalResults(BaseModel):
     correct_count: int
     pass_rate: float
     failure_breakdown: dict[str, float] | None = None  # Percentage breakdown of failure types
+    min_rounds: int | None = None  # Minimum rounds across all tasks
+    max_rounds: int | None = None  # Maximum rounds across all tasks
+    avg_rounds: float | None = None  # Average rounds across all tasks
     task_results: dict[str, TaskResult]
     time_used: float
 
@@ -1558,6 +1561,16 @@ class Agent:
                     failure_type: (count / failed_count) * 100
                     for failure_type, count in failure_counts.items()
                 }
+            
+            # Calculate rounds statistics
+            min_rounds: int | None = None
+            max_rounds: int | None = None
+            avg_rounds: float | None = None
+            if task_results:
+                all_rounds = [r.rounds for r in task_results.values()]
+                min_rounds = min(all_rounds)
+                max_rounds = max(all_rounds)
+                avg_rounds = round(sum(all_rounds) / len(all_rounds), 2)
 
             eval_results = EvalResults(
                 domain=domain,
@@ -1565,6 +1578,9 @@ class Agent:
                 correct_count=correct_count,
                 pass_rate=pass_rate,
                 failure_breakdown=failure_breakdown,
+                min_rounds=min_rounds,
+                max_rounds=max_rounds,
+                avg_rounds=avg_rounds,
                 task_results=task_results,
                 time_used=time_used,
             )
