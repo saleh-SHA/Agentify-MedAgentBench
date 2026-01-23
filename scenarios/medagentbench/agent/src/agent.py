@@ -225,6 +225,7 @@ class Agent:
             "tool_history": tool_history,
             "fhir_operations": fhir_posts,
             "rounds": self.max_iterations,
+            "max_rounds_reached": True,  # Flag for evaluator to detect early termination
         }
         return result, metadata
 

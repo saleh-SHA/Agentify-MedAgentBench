@@ -46,6 +46,7 @@ class FailureType(str, Enum):
     SYSTEM_ERROR = "system_error"
     INVALID_FINISH_FORMAT = "invalid_finish_format"
     INVALID_JSON_RESULT = "invalid_json_result"
+    MAX_ROUNDS_REACHED = "max_rounds_reached"  # Agent hit iteration limit
     
     # Operation type failures
     READONLY_VIOLATION = "readonly_violation"
@@ -68,6 +69,7 @@ class DetailedFailure(str, Enum):
     # Format failures
     INVALID_JSON = "invalid_json"
     NO_FINISH_FORMAT = "no_finish_format"
+    MAX_ITERATIONS_EXCEEDED = "max_iterations_exceeded"
     
     # Operation failures
     MADE_POST_ON_READONLY = "made_post_on_readonly"
@@ -1350,6 +1352,7 @@ class Agent:
             tool_history = agent_response.tool_history
             fhir_ops = agent_response.fhir_operations
             rounds = agent_response.rounds
+            max_rounds_reached = agent_response.max_rounds_reached
             
             # Fallback: If no structured metadata, try extracting from text (backward compatibility)
             if not tool_history and not fhir_ops:
@@ -1391,6 +1394,26 @@ class Agent:
             answer, _ = self.parse_finish_response(clean_response)
             
             if answer is not None:
+                # Check if agent hit max rounds limit (detected via DataPart metadata)
+                if max_rounds_reached:
+                    result = TaskResult(
+                        task_id=task_id,
+                        correct=False,
+                        status="max_rounds_reached",
+                        agent_answer=answer,
+                        expected_answer=task_data.get('sol'),
+                        time_used=time.time() - start_time,
+                        rounds=rounds,
+                        primary_failure=FailureType.MAX_ROUNDS_REACHED.value,
+                        failure_details=[DetailedFailure.MAX_ITERATIONS_EXCEEDED.value],
+                    )
+                    
+                    # Write to runs.jsonl
+                    if output_dir:
+                        write_run_result(output_dir, task_id, result, task_data, history)
+                    
+                    return result
+                
                 # Create TaskOutput for evaluation (pass fhir_ops directly)
                 task_output = TaskOutput(
                     result=answer,

@@ -146,6 +146,11 @@ class AgentResponse:
     def rounds(self) -> int:
         """Get number of rounds/iterations from metadata."""
         return self.metadata.get("rounds", 1)
+    
+    @property
+    def max_rounds_reached(self) -> bool:
+        """Check if agent hit maximum iterations limit."""
+        return self.metadata.get("max_rounds_reached", False)
 
 
 class Messenger:
