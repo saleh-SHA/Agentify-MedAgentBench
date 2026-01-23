@@ -5,6 +5,7 @@ import argparse
 import json
 import os
 import sys
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Annotated, Any, Dict, List, Optional, Literal
 
@@ -437,6 +438,73 @@ def create_service_request(
     if note:
         body["note"] = note.model_dump()
     return _call_fhir("POST", "/ServiceRequest", body=body)
+
+
+# -----------------------------------------------------------------------------
+# Utility Tools - Date Comparison
+# -----------------------------------------------------------------------------
+
+@mcp.tool()
+def check_date_within_period(
+    date_to_check: Annotated[str, Field(description="The date to check, in ISO format (e.g., '2023-11-09T03:05:00+00:00').")],
+    reference_date: Annotated[str, Field(description="The reference date to compare against, in ISO format (e.g., '2023-11-13T10:15:00+00:00').")],
+    period_days: Annotated[int, Field(description="The number of days for the period. Use 365 for 1 year, 30 for 1 month, 7 for 1 week, etc.")],
+) -> Dict[str, Any]:
+    """Date Utility - Check if a date is within a specified period from a reference date. 
+    
+    Returns whether the date_to_check is within period_days BEFORE the reference_date.
+    Use this to determine if a lab result is recent enough (within the required period) 
+    or if a new order should be placed.
+    
+    Example: To check if an HbA1C from '2023-11-09' is within 1 year of '2023-11-13':
+    - date_to_check: '2023-11-09T03:05:00+00:00'
+    - reference_date: '2023-11-13T10:15:00+00:00' 
+    - period_days: 365
+    - Result: is_within_period=True (Nov 9 is within 365 days before Nov 13)
+    
+    DECISION GUIDE:
+    - If is_within_period is TRUE: The date is RECENT - do NOT order a new test
+    - If is_within_period is FALSE: The date is OLD - you should order a new test
+    """
+    try:
+        # Parse dates - handle various ISO formats
+        def parse_iso_date(date_str: str) -> datetime:
+            # Remove 'Z' suffix and handle timezone
+            date_str = date_str.replace('Z', '+00:00')
+            # Try parsing with timezone
+            try:
+                return datetime.fromisoformat(date_str)
+            except ValueError:
+                # Try without timezone
+                return datetime.fromisoformat(date_str.split('+')[0].split('-')[0])
+        
+        check_date = parse_iso_date(date_to_check)
+        ref_date = parse_iso_date(reference_date)
+        
+        # Calculate cutoff date (reference_date minus period_days)
+        cutoff_date = ref_date - timedelta(days=period_days)
+        
+        # Check if date_to_check is within the period (i.e., on or after the cutoff)
+        is_within = check_date >= cutoff_date
+        
+        # Calculate days difference
+        days_diff = (ref_date - check_date).days
+        
+        return {
+            "date_to_check": date_to_check,
+            "reference_date": reference_date,
+            "period_days": period_days,
+            "cutoff_date": cutoff_date.isoformat(),
+            "is_within_period": is_within,
+            "days_since_date": days_diff,
+        }
+    except Exception as e:
+        return {
+            "error": f"Failed to parse dates: {str(e)}",
+            "date_to_check": date_to_check,
+            "reference_date": reference_date,
+            "period_days": period_days,
+        }
 
 
 def main() -> None:

@@ -1,196 +1,196 @@
 [
   {
     "id": "task1_1",
-    "instruction": "What\u2019s the MRN of the patient with name Peter Stafford and DOB of 1932-12-29? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What’s the MRN of the patient with name Peter Stafford and DOB of 1932-12-29? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
     "sol": ["S6534835"],
     "eval_MRN": "S6534835"
   },
   {
     "id": "task1_2",
-    "instruction": "What\u2019s the MRN of the patient with name Maria Alvarez and DOB of 1940-03-05? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What’s the MRN of the patient with name Maria Alvarez and DOB of 1940-03-05? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
     "sol": ["S6426560"],
     "eval_MRN": "S6426560"
   },
   {
     "id": "task1_3",
-    "instruction": "What\u2019s the MRN of the patient with name Dana Sandoval and DOB of 1989-04-19? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What’s the MRN of the patient with name Dana Sandoval and DOB of 1989-04-19? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
     "sol": ["S1986380"],
     "eval_MRN": "S1986380"
   },
   {
     "id": "task1_4",
-    "instruction": "What\u2019s the MRN of the patient with name James Snyder and DOB of 1953-08-03? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What’s the MRN of the patient with name James Snyder and DOB of 1953-08-03? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
     "sol": ["S6484983"],
     "eval_MRN": "S6484983"
   },
   {
     "id": "task1_5",
-    "instruction": "What\u2019s the MRN of the patient with name Justin Gould and DOB of 1943-05-19? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What’s the MRN of the patient with name Justin Gould and DOB of 1943-05-19? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
     "sol": ["S2703270"],
     "eval_MRN": "S2703270"
   },
   {
     "id": "task1_6",
-    "instruction": "What\u2019s the MRN of the patient with name Andrew Bishop and DOB of 1963-01-29? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What’s the MRN of the patient with name Andrew Bishop and DOB of 1963-01-29? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
     "sol": ["S2874099"],
     "eval_MRN": "S2874099"
   },
   {
     "id": "task1_7",
-    "instruction": "What\u2019s the MRN of the patient with name Kevin Vasquez and DOB of 1953-11-19? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What’s the MRN of the patient with name Kevin Vasquez and DOB of 1953-11-19? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
     "sol": ["S6200102"],
     "eval_MRN": "S6200102"
   },
   {
     "id": "task1_8",
-    "instruction": "What\u2019s the MRN of the patient with name Brian Buchanan and DOB of 1954-08-10? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What’s the MRN of the patient with name Brian Buchanan and DOB of 1954-08-10? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
     "sol": ["S6530532"],
     "eval_MRN": "S6530532"
   },
   {
     "id": "task1_9",
-    "instruction": "What\u2019s the MRN of the patient with name Katrina Golden and DOB of 1960-08-18? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What’s the MRN of the patient with name Katrina Golden and DOB of 1960-08-18? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
     "sol": ["S6539215"],
     "eval_MRN": "S6539215"
   },
   {
     "id": "task1_10",
-    "instruction": "What\u2019s the MRN of the patient with name Joshua Martinez and DOB of 1967-03-11? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What’s the MRN of the patient with name Joshua Martinez and DOB of 1967-03-11? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
     "sol": ["S6264184"],
     "eval_MRN": "S6264184"
   },
   {
     "id": "task1_11",
-    "instruction": "What\u2019s the MRN of the patient with name Glenda Hall and DOB of 1952-11-14? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What’s the MRN of the patient with name Glenda Hall and DOB of 1952-11-14? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
     "sol": ["S6521727"],
     "eval_MRN": "S6521727"
   },
   {
     "id": "task1_12",
-    "instruction": "What\u2019s the MRN of the patient with name Margaret Kidd and DOB of 1982-08-24? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What’s the MRN of the patient with name Margaret Kidd and DOB of 1982-08-24? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
     "sol": ["S0789363"],
     "eval_MRN": "S0789363"
   },
   {
     "id": "task1_13",
-    "instruction": "What\u2019s the MRN of the patient with name Emily Hicks and DOB of 1942-05-11? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What’s the MRN of the patient with name Emily Hicks and DOB of 1942-05-11? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
     "sol": ["S2154941"],
     "eval_MRN": "S2154941"
   },
   {
     "id": "task1_14",
-    "instruction": "What\u2019s the MRN of the patient with name Pamela Merritt and DOB of 1994-09-15? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What’s the MRN of the patient with name Pamela Merritt and DOB of 1994-09-15? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
     "sol": ["S2197736"],
     "eval_MRN": "S2197736"
   },
   {
     "id": "task1_15",
-    "instruction": "What\u2019s the MRN of the patient with name Denise Dunlap and DOB of 1945-09-20? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What’s the MRN of the patient with name Denise Dunlap and DOB of 1945-09-20? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
     "sol": ["S3228213"],
     "eval_MRN": "S3228213"
   },
   {
     "id": "task1_16",
-    "instruction": "What\u2019s the MRN of the patient with name Debra Dunn and DOB of 1969-05-12? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What’s the MRN of the patient with name Debra Dunn and DOB of 1969-05-12? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
     "sol": ["S6551923"],
     "eval_MRN": "S6551923"
   },
   {
     "id": "task1_17",
-    "instruction": "What\u2019s the MRN of the patient with name Shannon Palmer and DOB of 1956-11-16? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What’s the MRN of the patient with name Shannon Palmer and DOB of 1956-11-16? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
     "sol": ["S2119664"],
     "eval_MRN": "S2119664"
   },
   {
     "id": "task1_18",
-    "instruction": "What\u2019s the MRN of the patient with name Melissa Nguyen and DOB of 1973-08-14? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What’s the MRN of the patient with name Melissa Nguyen and DOB of 1973-08-14? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
     "sol": ["S2863714"],
     "eval_MRN": "S2863714"
   },
   {
     "id": "task1_19",
-    "instruction": "What\u2019s the MRN of the patient with name Tim Ramos and DOB of 1959-04-28? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What’s the MRN of the patient with name Tim Ramos and DOB of 1959-04-28? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
     "sol": ["S6192632"],
     "eval_MRN": "S6192632"
   },
   {
     "id": "task1_20",
-    "instruction": "What\u2019s the MRN of the patient with name Christopher Cruz and DOB of 1940-08-28? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What’s the MRN of the patient with name Christopher Cruz and DOB of 1940-08-28? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
     "sol": ["S0658561"],
     "eval_MRN": "S0658561"
   },
   {
     "id": "task1_21",
-    "instruction": "What\u2019s the MRN of the patient with name Tina Anderson and DOB of 1959-01-24? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What’s the MRN of the patient with name Tina Anderson and DOB of 1959-01-24? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
     "sol": ["S0547588"],
     "eval_MRN": "S0547588"
   },
   {
     "id": "task1_22",
-    "instruction": "What\u2019s the MRN of the patient with name Robert Gardner and DOB of 1975-05-30? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What’s the MRN of the patient with name Robert Gardner and DOB of 1975-05-30? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
     "sol": ["S0722219"],
     "eval_MRN": "S0722219"
   },
   {
     "id": "task1_23",
-    "instruction": "What\u2019s the MRN of the patient with name Julie Rodriguez and DOB of 1962-01-20? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What’s the MRN of the patient with name Julie Rodriguez and DOB of 1962-01-20? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
     "sol": ["S3057899"],
     "eval_MRN": "S3057899"
   },
   {
     "id": "task1_24",
-    "instruction": "What\u2019s the MRN of the patient with name Katherine Sutton and DOB of 1943-02-11? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What’s the MRN of the patient with name Katherine Sutton and DOB of 1943-02-11? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
     "sol": ["S6538722"],
     "eval_MRN": "S6538722"
   },
   {
     "id": "task1_25",
-    "instruction": "What\u2019s the MRN of the patient with name Russell Shields and DOB of 1964-01-02? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What’s the MRN of the patient with name Russell Shields and DOB of 1964-01-02? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
     "sol": ["S6545016"],
     "eval_MRN": "S6545016"
   },
   {
     "id": "task1_26",
-    "instruction": "What\u2019s the MRN of the patient with name Victoria Owens and DOB of 2002-06-07? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What’s the MRN of the patient with name Victoria Owens and DOB of 2002-06-07? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
     "sol": ["S3236936"],
     "eval_MRN": "S3236936"
   },
   {
     "id": "task1_27",
-    "instruction": "What\u2019s the MRN of the patient with name Tina Reid and DOB of 1953-10-18? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What’s the MRN of the patient with name Tina Reid and DOB of 1953-10-18? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
     "sol": ["S3213957"],
     "eval_MRN": "S3213957"
   },
   {
     "id": "task1_28",
-    "instruction": "What\u2019s the MRN of the patient with name Tracey Stanley and DOB of 1988-12-04? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What’s the MRN of the patient with name Tracey Stanley and DOB of 1988-12-04? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
     "sol": ["S2704870"],
     "eval_MRN": "S2704870"
@@ -569,181 +569,181 @@
   },
   {
     "id": "task4_1",
-    "instruction": "What\u2019s the most recent magnesium level of the patient S3032536 within last 24 hours?",
+    "instruction": "What’s the most recent magnesium level of the patient S3032536 within last 24 hours?",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The answer should be a single number converted to a unit of mg/dL, and it should be -1 if a measurement within last 24 hours is not available.",
     "eval_MRN": "S3032536"
   },
   {
     "id": "task4_2",
-    "instruction": "What\u2019s the most recent magnesium level of the patient S2863714 within last 24 hours?",
+    "instruction": "What’s the most recent magnesium level of the patient S2863714 within last 24 hours?",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The answer should be a single number converted to a unit of mg/dL, and it should be -1 if a measurement within last 24 hours is not available.",
     "eval_MRN": "S2863714"
   },
   {
     "id": "task4_3",
-    "instruction": "What\u2019s the most recent magnesium level of the patient S6547257 within last 24 hours?",
+    "instruction": "What’s the most recent magnesium level of the patient S6547257 within last 24 hours?",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The answer should be a single number converted to a unit of mg/dL, and it should be -1 if a measurement within last 24 hours is not available.",
     "eval_MRN": "S6547257"
   },
   {
     "id": "task4_4",
-    "instruction": "What\u2019s the most recent magnesium level of the patient S6474456 within last 24 hours?",
+    "instruction": "What’s the most recent magnesium level of the patient S6474456 within last 24 hours?",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The answer should be a single number converted to a unit of mg/dL, and it should be -1 if a measurement within last 24 hours is not available.",
     "eval_MRN": "S6474456"
   },
   {
     "id": "task4_5",
-    "instruction": "What\u2019s the most recent magnesium level of the patient S2161163 within last 24 hours?",
+    "instruction": "What’s the most recent magnesium level of the patient S2161163 within last 24 hours?",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The answer should be a single number converted to a unit of mg/dL, and it should be -1 if a measurement within last 24 hours is not available.",
     "eval_MRN": "S2161163"
   },
   {
     "id": "task4_6",
-    "instruction": "What\u2019s the most recent magnesium level of the patient S1733937 within last 24 hours?",
+    "instruction": "What’s the most recent magnesium level of the patient S1733937 within last 24 hours?",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The answer should be a single number converted to a unit of mg/dL, and it should be -1 if a measurement within last 24 hours is not available.",
     "eval_MRN": "S1733937"
   },
   {
     "id": "task4_7",
-    "instruction": "What\u2019s the most recent magnesium level of the patient S2937751 within last 24 hours?",
+    "instruction": "What’s the most recent magnesium level of the patient S2937751 within last 24 hours?",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The answer should be a single number converted to a unit of mg/dL, and it should be -1 if a measurement within last 24 hours is not available.",
     "eval_MRN": "S2937751"
   },
   {
     "id": "task4_8",
-    "instruction": "What\u2019s the most recent magnesium level of the patient S6330912 within last 24 hours?",
+    "instruction": "What’s the most recent magnesium level of the patient S6330912 within last 24 hours?",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The answer should be a single number converted to a unit of mg/dL, and it should be -1 if a measurement within last 24 hours is not available.",
     "eval_MRN": "S6330912"
   },
   {
     "id": "task4_9",
-    "instruction": "What\u2019s the most recent magnesium level of the patient S6468480 within last 24 hours?",
+    "instruction": "What’s the most recent magnesium level of the patient S6468480 within last 24 hours?",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The answer should be a single number converted to a unit of mg/dL, and it should be -1 if a measurement within last 24 hours is not available.",
     "eval_MRN": "S6468480"
   },
   {
     "id": "task4_10",
-    "instruction": "What\u2019s the most recent magnesium level of the patient S3213957 within last 24 hours?",
+    "instruction": "What’s the most recent magnesium level of the patient S3213957 within last 24 hours?",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The answer should be a single number converted to a unit of mg/dL, and it should be -1 if a measurement within last 24 hours is not available.",
     "eval_MRN": "S3213957"
   },
   {
     "id": "task4_11",
-    "instruction": "What\u2019s the most recent magnesium level of the patient S1754095 within last 24 hours?",
+    "instruction": "What’s the most recent magnesium level of the patient S1754095 within last 24 hours?",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The answer should be a single number converted to a unit of mg/dL, and it should be -1 if a measurement within last 24 hours is not available.",
     "eval_MRN": "S1754095"
   },
   {
     "id": "task4_12",
-    "instruction": "What\u2019s the most recent magnesium level of the patient S1777769 within last 24 hours?",
+    "instruction": "What’s the most recent magnesium level of the patient S1777769 within last 24 hours?",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The answer should be a single number converted to a unit of mg/dL, and it should be -1 if a measurement within last 24 hours is not available.",
     "eval_MRN": "S1777769"
   },
   {
     "id": "task4_13",
-    "instruction": "What\u2019s the most recent magnesium level of the patient S3114648 within last 24 hours?",
+    "instruction": "What’s the most recent magnesium level of the patient S3114648 within last 24 hours?",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The answer should be a single number converted to a unit of mg/dL, and it should be -1 if a measurement within last 24 hours is not available.",
     "eval_MRN": "S3114648"
   },
   {
     "id": "task4_14",
-    "instruction": "What\u2019s the most recent magnesium level of the patient S6530532 within last 24 hours?",
+    "instruction": "What’s the most recent magnesium level of the patient S6530532 within last 24 hours?",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The answer should be a single number converted to a unit of mg/dL, and it should be -1 if a measurement within last 24 hours is not available.",
     "eval_MRN": "S6530532"
   },
   {
     "id": "task4_15",
-    "instruction": "What\u2019s the most recent magnesium level of the patient S3057899 within last 24 hours?",
+    "instruction": "What’s the most recent magnesium level of the patient S3057899 within last 24 hours?",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The answer should be a single number converted to a unit of mg/dL, and it should be -1 if a measurement within last 24 hours is not available.",
     "eval_MRN": "S3057899"
   },
   {
     "id": "task4_16",
-    "instruction": "What\u2019s the most recent magnesium level of the patient S1635224 within last 24 hours?",
+    "instruction": "What’s the most recent magnesium level of the patient S1635224 within last 24 hours?",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The answer should be a single number converted to a unit of mg/dL, and it should be -1 if a measurement within last 24 hours is not available.",
     "eval_MRN": "S1635224"
   },
   {
     "id": "task4_17",
-    "instruction": "What\u2019s the most recent magnesium level of the patient S2154941 within last 24 hours?",
+    "instruction": "What’s the most recent magnesium level of the patient S2154941 within last 24 hours?",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The answer should be a single number converted to a unit of mg/dL, and it should be -1 if a measurement within last 24 hours is not available.",
     "eval_MRN": "S2154941"
   },
   {
     "id": "task4_18",
-    "instruction": "What\u2019s the most recent magnesium level of the patient S2199765 within last 24 hours?",
+    "instruction": "What’s the most recent magnesium level of the patient S2199765 within last 24 hours?",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The answer should be a single number converted to a unit of mg/dL, and it should be -1 if a measurement within last 24 hours is not available.",
     "eval_MRN": "S2199765"
   },
   {
     "id": "task4_19",
-    "instruction": "What\u2019s the most recent magnesium level of the patient S6550473 within last 24 hours?",
+    "instruction": "What’s the most recent magnesium level of the patient S6550473 within last 24 hours?",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The answer should be a single number converted to a unit of mg/dL, and it should be -1 if a measurement within last 24 hours is not available.",
     "eval_MRN": "S6550473"
   },
   {
     "id": "task4_20",
-    "instruction": "What\u2019s the most recent magnesium level of the patient S0636132 within last 24 hours?",
+    "instruction": "What’s the most recent magnesium level of the patient S0636132 within last 24 hours?",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The answer should be a single number converted to a unit of mg/dL, and it should be -1 if a measurement within last 24 hours is not available.",
     "eval_MRN": "S0636132"
   },
   {
     "id": "task4_21",
-    "instruction": "What\u2019s the most recent magnesium level of the patient S1521703 within last 24 hours?",
+    "instruction": "What’s the most recent magnesium level of the patient S1521703 within last 24 hours?",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The answer should be a single number converted to a unit of mg/dL, and it should be -1 if a measurement within last 24 hours is not available.",
     "eval_MRN": "S1521703"
   },
   {
     "id": "task4_22",
-    "instruction": "What\u2019s the most recent magnesium level of the patient S6200102 within last 24 hours?",
+    "instruction": "What’s the most recent magnesium level of the patient S6200102 within last 24 hours?",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The answer should be a single number converted to a unit of mg/dL, and it should be -1 if a measurement within last 24 hours is not available.",
     "eval_MRN": "S6200102"
   },
   {
     "id": "task4_23",
-    "instruction": "What\u2019s the most recent magnesium level of the patient S1876702 within last 24 hours?",
+    "instruction": "What’s the most recent magnesium level of the patient S1876702 within last 24 hours?",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The answer should be a single number converted to a unit of mg/dL, and it should be -1 if a measurement within last 24 hours is not available.",
     "eval_MRN": "S1876702"
   },
   {
     "id": "task4_24",
-    "instruction": "What\u2019s the most recent magnesium level of the patient S2197736 within last 24 hours?",
+    "instruction": "What’s the most recent magnesium level of the patient S2197736 within last 24 hours?",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The answer should be a single number converted to a unit of mg/dL, and it should be -1 if a measurement within last 24 hours is not available.",
     "eval_MRN": "S2197736"
   },
   {
     "id": "task4_25",
-    "instruction": "What\u2019s the most recent magnesium level of the patient S2703270 within last 24 hours?",
+    "instruction": "What’s the most recent magnesium level of the patient S2703270 within last 24 hours?",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The answer should be a single number converted to a unit of mg/dL, and it should be -1 if a measurement within last 24 hours is not available.",
     "eval_MRN": "S2703270"
   },
   {
     "id": "task4_26",
-    "instruction": "What\u2019s the most recent magnesium level of the patient S1311412 within last 24 hours?",
+    "instruction": "What’s the most recent magnesium level of the patient S1311412 within last 24 hours?",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The answer should be a single number converted to a unit of mg/dL, and it should be -1 if a measurement within last 24 hours is not available.",
     "eval_MRN": "S1311412"
   },
   {
     "id": "task4_27",
-    "instruction": "What\u2019s the most recent magnesium level of the patient S6227720 within last 24 hours?",
+    "instruction": "What’s the most recent magnesium level of the patient S6227720 within last 24 hours?",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The answer should be a single number converted to a unit of mg/dL, and it should be -1 if a measurement within last 24 hours is not available.",
     "eval_MRN": "S6227720"
   },
   {
     "id": "task4_28",
-    "instruction": "What\u2019s the most recent magnesium level of the patient S0674240 within last 24 hours?",
+    "instruction": "What’s the most recent magnesium level of the patient S0674240 within last 24 hours?",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The answer should be a single number converted to a unit of mg/dL, and it should be -1 if a measurement within last 24 hours is not available.",
     "eval_MRN": "S0674240"
   },
   {
     "id": "task4_29",
-    "instruction": "What\u2019s the most recent magnesium level of the patient S6309742 within last 24 hours?",
+    "instruction": "What’s the most recent magnesium level of the patient S6309742 within last 24 hours?",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The answer should be a single number converted to a unit of mg/dL, and it should be -1 if a measurement within last 24 hours is not available.",
     "eval_MRN": "S6309742"
   },
   {
     "id": "task4_30",
-    "instruction": "What\u2019s the most recent magnesium level of the patient S6312049 within last 24 hours?",
+    "instruction": "What’s the most recent magnesium level of the patient S6312049 within last 24 hours?",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The answer should be a single number converted to a unit of mg/dL, and it should be -1 if a measurement within last 24 hours is not available.",
     "eval_MRN": "S6312049"
   },
@@ -1110,181 +1110,181 @@
   {
     "id": "task7_1",
     "instruction": "What is the most recent CBG of the patient S2823623?",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\"",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\". Valid outputs: FINISH([value]) or FINISH([-1]) if no recent CBG is available. No other output shapes are allowed.",
     "eval_MRN": "S2823623"
   },
   {
     "id": "task7_2",
     "instruction": "What is the most recent CBG of the patient S2197736?",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\"",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\". Valid outputs: FINISH([value]) or FINISH([-1]) if no recent CBG is available. No other output shapes are allowed.",
     "eval_MRN": "S2197736"
   },
   {
     "id": "task7_3",
     "instruction": "What is the most recent CBG of the patient S6265496?",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\"",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\". Valid outputs: FINISH([value]) or FINISH([-1]) if no recent CBG is available. No other output shapes are allowed.",
     "eval_MRN": "S6265496"
   },
   {
     "id": "task7_4",
     "instruction": "What is the most recent CBG of the patient S6530532?",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\"",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\". Valid outputs: FINISH([value]) or FINISH([-1]) if no recent CBG is available. No other output shapes are allowed.",
     "eval_MRN": "S6530532"
   },
   {
     "id": "task7_5",
     "instruction": "What is the most recent CBG of the patient S6542579?",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\"",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\". Valid outputs: FINISH([value]) or FINISH([-1]) if no recent CBG is available. No other output shapes are allowed.",
     "eval_MRN": "S6542579"
   },
   {
     "id": "task7_6",
     "instruction": "What is the most recent CBG of the patient S0611496?",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\"",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\". Valid outputs: FINISH([value]) or FINISH([-1]) if no recent CBG is available. No other output shapes are allowed.",
     "eval_MRN": "S0611496"
   },
   {
     "id": "task7_7",
     "instruction": "What is the most recent CBG of the patient S3084624?",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\"",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\". Valid outputs: FINISH([value]) or FINISH([-1]) if no recent CBG is available. No other output shapes are allowed.",
     "eval_MRN": "S3084624"
   },
   {
     "id": "task7_8",
     "instruction": "What is the most recent CBG of the patient S6307599?",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\"",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\". Valid outputs: FINISH([value]) or FINISH([-1]) if no recent CBG is available. No other output shapes are allowed.",
     "eval_MRN": "S6307599"
   },
   {
     "id": "task7_9",
     "instruction": "What is the most recent CBG of the patient S2748981?",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\"",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\". Valid outputs: FINISH([value]) or FINISH([-1]) if no recent CBG is available. No other output shapes are allowed.",
     "eval_MRN": "S2748981"
   },
   {
     "id": "task7_10",
     "instruction": "What is the most recent CBG of the patient S0674240?",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\"",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\". Valid outputs: FINISH([value]) or FINISH([-1]) if no recent CBG is available. No other output shapes are allowed.",
     "eval_MRN": "S0674240"
   },
   {
     "id": "task7_11",
     "instruction": "What is the most recent CBG of the patient S0658561?",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\"",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\". Valid outputs: FINISH([value]) or FINISH([-1]) if no recent CBG is available. No other output shapes are allowed.",
     "eval_MRN": "S0658561"
   },
   {
     "id": "task7_12",
     "instruction": "What is the most recent CBG of the patient S1891852?",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\"",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\". Valid outputs: FINISH([value]) or FINISH([-1]) if no recent CBG is available. No other output shapes are allowed.",
     "eval_MRN": "S1891852"
   },
   {
     "id": "task7_13",
     "instruction": "What is the most recent CBG of the patient S3213957?",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\"",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\". Valid outputs: FINISH([value]) or FINISH([-1]) if no recent CBG is available. No other output shapes are allowed.",
     "eval_MRN": "S3213957"
   },
   {
     "id": "task7_14",
     "instruction": "What is the most recent CBG of the patient S6539215?",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\"",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\". Valid outputs: FINISH([value]) or FINISH([-1]) if no recent CBG is available. No other output shapes are allowed.",
     "eval_MRN": "S6539215"
   },
   {
     "id": "task7_15",
     "instruction": "What is the most recent CBG of the patient S6550473?",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\"",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\". Valid outputs: FINISH([value]) or FINISH([-1]) if no recent CBG is available. No other output shapes are allowed.",
     "eval_MRN": "S6550473"
   },
   {
     "id": "task7_16",
     "instruction": "What is the most recent CBG of the patient S6547257?",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\"",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\". Valid outputs: FINISH([value]) or FINISH([-1]) if no recent CBG is available. No other output shapes are allowed.",
     "eval_MRN": "S6547257"
   },
   {
     "id": "task7_17",
     "instruction": "What is the most recent CBG of the patient S1353305?",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\"",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\". Valid outputs: FINISH([value]) or FINISH([-1]) if no recent CBG is available. No other output shapes are allowed.",
     "eval_MRN": "S1353305"
   },
   {
     "id": "task7_18",
     "instruction": "What is the most recent CBG of the patient S6521727?",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\"",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\". Valid outputs: FINISH([value]) or FINISH([-1]) if no recent CBG is available. No other output shapes are allowed.",
     "eval_MRN": "S6521727"
   },
   {
     "id": "task7_19",
     "instruction": "What is the most recent CBG of the patient S6426560?",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\"",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\". Valid outputs: FINISH([value]) or FINISH([-1]) if no recent CBG is available. No other output shapes are allowed.",
     "eval_MRN": "S6426560"
   },
   {
     "id": "task7_20",
     "instruction": "What is the most recent CBG of the patient S2380121?",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\"",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\". Valid outputs: FINISH([value]) or FINISH([-1]) if no recent CBG is available. No other output shapes are allowed.",
     "eval_MRN": "S2380121"
   },
   {
     "id": "task7_21",
     "instruction": "What is the most recent CBG of the patient S2874099?",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\"",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\". Valid outputs: FINISH([value]) or FINISH([-1]) if no recent CBG is available. No other output shapes are allowed.",
     "eval_MRN": "S2874099"
   },
   {
     "id": "task7_22",
     "instruction": "What is the most recent CBG of the patient S6474456?",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\"",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\". Valid outputs: FINISH([value]) or FINISH([-1]) if no recent CBG is available. No other output shapes are allowed.",
     "eval_MRN": "S6474456"
   },
   {
     "id": "task7_23",
     "instruction": "What is the most recent CBG of the patient S6550627?",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\"",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\". Valid outputs: FINISH([value]) or FINISH([-1]) if no recent CBG is available. No other output shapes are allowed.",
     "eval_MRN": "S6550627"
   },
   {
     "id": "task7_24",
     "instruction": "What is the most recent CBG of the patient S2075210?",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\"",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\". Valid outputs: FINISH([value]) or FINISH([-1]) if no recent CBG is available. No other output shapes are allowed.",
     "eval_MRN": "S2075210"
   },
   {
     "id": "task7_25",
     "instruction": "What is the most recent CBG of the patient S0789363?",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\"",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\". Valid outputs: FINISH([value]) or FINISH([-1]) if no recent CBG is available. No other output shapes are allowed.",
     "eval_MRN": "S0789363"
   },
   {
     "id": "task7_26",
     "instruction": "What is the most recent CBG of the patient S2199765?",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\"",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\". Valid outputs: FINISH([value]) or FINISH([-1]) if no recent CBG is available. No other output shapes are allowed.",
     "eval_MRN": "S2199765"
   },
   {
     "id": "task7_27",
     "instruction": "What is the most recent CBG of the patient S1698248?",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\"",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\". Valid outputs: FINISH([value]) or FINISH([-1]) if no recent CBG is available. No other output shapes are allowed.",
     "eval_MRN": "S1698248"
   },
   {
     "id": "task7_28",
     "instruction": "What is the most recent CBG of the patient S6534835?",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\"",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\". Valid outputs: FINISH([value]) or FINISH([-1]) if no recent CBG is available. No other output shapes are allowed.",
     "eval_MRN": "S6534835"
   },
   {
     "id": "task7_29",
     "instruction": "What is the most recent CBG of the patient S1374652?",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\"",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\". Valid outputs: FINISH([value]) or FINISH([-1]) if no recent CBG is available. No other output shapes are allowed.",
     "eval_MRN": "S1374652"
   },
   {
     "id": "task7_30",
     "instruction": "What is the most recent CBG of the patient S6531922?",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\"",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for CBG is \"GLU\". Valid outputs: FINISH([value]) or FINISH([-1]) if no recent CBG is available. No other output shapes are allowed.",
     "eval_MRN": "S6531922"
   },
   {
@@ -1649,182 +1649,182 @@
   },
   {
     "id": "task10_1",
-    "instruction": "What’s the last HbA1C (hemoglobin A1C) value in the chart for patient S6227720 and when was it recorded? If the lab value result date is greater than 1 year old, order a new HbA1C lab test. ",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
+    "instruction": "Check patient with MRN S6227720 last HbA1C value and date. Then follow these rules strictly: Step 1: Query the HbA1C observations for the patient. Step 2: Determine if an HbA1C measurement exists. Step 3: If a measurement exists, compare its date to the cutoff (2022-11-13T10:15:00+00:00 = 1 year ago). Step 4: ONLY order a new HbA1C lab test if: - No HbA1C exists, OR - The HbA1C date is BEFORE 2022-11-13T10:15:00+00:00 Step 5: If the HbA1C date is ON or AFTER 2022-11-13T10:15:00+00:00, DO NOT place any orders.",
+    "context": "The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
     "eval_MRN": "S6227720"
   },
   {
     "id": "task10_2",
-    "instruction": "What’s the last HbA1C (hemoglobin A1C) value in the chart for patient S1635224 and when was it recorded? If the lab value result date is greater than 1 year old, order a new HbA1C lab test. ",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
+    "instruction": "Check patient with MRN S1635224 last HbA1C value and date. Then follow these rules strictly: Step 1: Query the HbA1C observations for the patient. Step 2: Determine if an HbA1C measurement exists. Step 3: If a measurement exists, compare its date to the cutoff (2022-11-13T10:15:00+00:00 = 1 year ago). Step 4: ONLY order a new HbA1C lab test if: - No HbA1C exists, OR - The HbA1C date is BEFORE 2022-11-13T10:15:00+00:00 Step 5: If the HbA1C date is ON or AFTER 2022-11-13T10:15:00+00:00, DO NOT place any orders.",
+    "context": "The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
     "eval_MRN": "S1635224"
   },
   {
     "id": "task10_3",
-    "instruction": "What’s the last HbA1C (hemoglobin A1C) value in the chart for patient S6474456 and when was it recorded? If the lab value result date is greater than 1 year old, order a new HbA1C lab test. ",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
+    "instruction": "Check patient with MRN S6474456 last HbA1C value and date. Then follow these rules strictly: Step 1: Query the HbA1C observations for the patient. Step 2: Determine if an HbA1C measurement exists. Step 3: If a measurement exists, compare its date to the cutoff (2022-11-13T10:15:00+00:00 = 1 year ago). Step 4: ONLY order a new HbA1C lab test if: - No HbA1C exists, OR - The HbA1C date is BEFORE 2022-11-13T10:15:00+00:00 Step 5: If the HbA1C date is ON or AFTER 2022-11-13T10:15:00+00:00, DO NOT place any orders.",
+    "context": "The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
     "eval_MRN": "S6474456"
   },
   {
     "id": "task10_4",
-    "instruction": "What’s the last HbA1C (hemoglobin A1C) value in the chart for patient S2161163 and when was it recorded? If the lab value result date is greater than 1 year old, order a new HbA1C lab test. ",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
+    "instruction": "Check patient with MRN S2161163 last HbA1C value and date. Then follow these rules strictly: Step 1: Query the HbA1C observations for the patient. Step 2: Determine if an HbA1C measurement exists. Step 3: If a measurement exists, compare its date to the cutoff (2022-11-13T10:15:00+00:00 = 1 year ago). Step 4: ONLY order a new HbA1C lab test if: - No HbA1C exists, OR - The HbA1C date is BEFORE 2022-11-13T10:15:00+00:00 Step 5: If the HbA1C date is ON or AFTER 2022-11-13T10:15:00+00:00, DO NOT place any orders.",
+    "context": "The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
     "eval_MRN": "S2161163"
   },
   {
     "id": "task10_5",
-    "instruction": "What’s the last HbA1C (hemoglobin A1C) value in the chart for patient S0547588 and when was it recorded? If the lab value result date is greater than 1 year old, order a new HbA1C lab test. ",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
+    "instruction": "Check patient with MRN S0547588 last HbA1C value and date. Then follow these rules strictly: Step 1: Query the HbA1C observations for the patient. Step 2: Determine if an HbA1C measurement exists. Step 3: If a measurement exists, compare its date to the cutoff (2022-11-13T10:15:00+00:00 = 1 year ago). Step 4: ONLY order a new HbA1C lab test if: - No HbA1C exists, OR - The HbA1C date is BEFORE 2022-11-13T10:15:00+00:00 Step 5: If the HbA1C date is ON or AFTER 2022-11-13T10:15:00+00:00, DO NOT place any orders.",
+    "context": "The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
     "eval_MRN": "S0547588"
   },
   {
     "id": "task10_6",
-    "instruction": "What\u2019s the last HbA1C (hemoglobin A1C) value in the chart for patient S2111822 and when was it recorded? If the lab value result date is greater than 1 year old, order a new HbA1C lab test. ",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
+    "instruction": "Check patient with MRN S2111822 last HbA1C value and date. Then follow these rules strictly: Step 1: Query the HbA1C observations for the patient. Step 2: Determine if an HbA1C measurement exists. Step 3: If a measurement exists, compare its date to the cutoff (2022-11-13T10:15:00+00:00 = 1 year ago). Step 4: ONLY order a new HbA1C lab test if: - No HbA1C exists, OR - The HbA1C date is BEFORE 2022-11-13T10:15:00+00:00 Step 5: If the HbA1C date is ON or AFTER 2022-11-13T10:15:00+00:00, DO NOT place any orders.",
+    "context": "The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
     "eval_MRN": "S2111822"
   },
   {
     "id": "task10_7",
-    "instruction": "What\u2019s the last HbA1C (hemoglobin A1C) value in the chart for patient S1891852 and when was it recorded? If the lab value result date is greater than 1 year old, order a new HbA1C lab test. ",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
+    "instruction": "Check patient with MRN S1891852 last HbA1C value and date. Then follow these rules strictly: Step 1: Query the HbA1C observations for the patient. Step 2: Determine if an HbA1C measurement exists. Step 3: If a measurement exists, compare its date to the cutoff (2022-11-13T10:15:00+00:00 = 1 year ago). Step 4: ONLY order a new HbA1C lab test if: - No HbA1C exists, OR - The HbA1C date is BEFORE 2022-11-13T10:15:00+00:00 Step 5: If the HbA1C date is ON or AFTER 2022-11-13T10:15:00+00:00, DO NOT place any orders.",
+    "context": "The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
     "eval_MRN": "S1891852"
   },
   {
     "id": "task10_8",
-    "instruction": "What\u2019s the last HbA1C (hemoglobin A1C) value in the chart for patient S3114648 and when was it recorded? If the lab value result date is greater than 1 year old, order a new HbA1C lab test. ",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
+    "instruction": "Check patient with MRN S3114648 last HbA1C value and date. Then follow these rules strictly: Step 1: Query the HbA1C observations for the patient. Step 2: Determine if an HbA1C measurement exists. Step 3: If a measurement exists, compare its date to the cutoff (2022-11-13T10:15:00+00:00 = 1 year ago). Step 4: ONLY order a new HbA1C lab test if: - No HbA1C exists, OR - The HbA1C date is BEFORE 2022-11-13T10:15:00+00:00 Step 5: If the HbA1C date is ON or AFTER 2022-11-13T10:15:00+00:00, DO NOT place any orders.",
+    "context": "The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
     "eval_MRN": "S3114648"
   },
   {
     "id": "task10_9",
-    "instruction": "What\u2019s the last HbA1C (hemoglobin A1C) value in the chart for patient S1698248 and when was it recorded? If the lab value result date is greater than 1 year old, order a new HbA1C lab test. ",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
+    "instruction": "Check patient with MRN S1698248 last HbA1C value and date. Then follow these rules strictly: Step 1: Query the HbA1C observations for the patient. Step 2: Determine if an HbA1C measurement exists. Step 3: If a measurement exists, compare its date to the cutoff (2022-11-13T10:15:00+00:00 = 1 year ago). Step 4: ONLY order a new HbA1C lab test if: - No HbA1C exists, OR - The HbA1C date is BEFORE 2022-11-13T10:15:00+00:00 Step 5: If the HbA1C date is ON or AFTER 2022-11-13T10:15:00+00:00, DO NOT place any orders.",
+    "context": "The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
     "eval_MRN": "S1698248"
   },
   {
     "id": "task10_10",
-    "instruction": "What\u2019s the last HbA1C (hemoglobin A1C) value in the chart for patient S6488980 and when was it recorded? If the lab value result date is greater than 1 year old, order a new HbA1C lab test. ",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
+    "instruction": "Check patient with MRN S6488980 last HbA1C value and date. Then follow these rules strictly: Step 1: Query the HbA1C observations for the patient. Step 2: Determine if an HbA1C measurement exists. Step 3: If a measurement exists, compare its date to the cutoff (2022-11-13T10:15:00+00:00 = 1 year ago). Step 4: ONLY order a new HbA1C lab test if: - No HbA1C exists, OR - The HbA1C date is BEFORE 2022-11-13T10:15:00+00:00 Step 5: If the HbA1C date is ON or AFTER 2022-11-13T10:15:00+00:00, DO NOT place any orders.",
+    "context": "The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
     "eval_MRN": "S6488980"
   },
   {
     "id": "task10_11",
-    "instruction": "What\u2019s the last HbA1C (hemoglobin A1C) value in the chart for patient S2033286 and when was it recorded? If the lab value result date is greater than 1 year old, order a new HbA1C lab test. ",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
+    "instruction": "Check patient with MRN S2033286 last HbA1C value and date. Then follow these rules strictly: Step 1: Query the HbA1C observations for the patient. Step 2: Determine if an HbA1C measurement exists. Step 3: If a measurement exists, compare its date to the cutoff (2022-11-13T10:15:00+00:00 = 1 year ago). Step 4: ONLY order a new HbA1C lab test if: - No HbA1C exists, OR - The HbA1C date is BEFORE 2022-11-13T10:15:00+00:00 Step 5: If the HbA1C date is ON or AFTER 2022-11-13T10:15:00+00:00, DO NOT place any orders.",
+    "context": "The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
     "eval_MRN": "S2033286"
   },
   {
     "id": "task10_12",
-    "instruction": "What\u2019s the last HbA1C (hemoglobin A1C) value in the chart for patient S6550627 and when was it recorded? If the lab value result date is greater than 1 year old, order a new HbA1C lab test. ",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
+    "instruction": "Check patient with MRN S6550627 last HbA1C value and date. Then follow these rules strictly: Step 1: Query the HbA1C observations for the patient. Step 2: Determine if an HbA1C measurement exists. Step 3: If a measurement exists, compare its date to the cutoff (2022-11-13T10:15:00+00:00 = 1 year ago). Step 4: ONLY order a new HbA1C lab test if: - No HbA1C exists, OR - The HbA1C date is BEFORE 2022-11-13T10:15:00+00:00 Step 5: If the HbA1C date is ON or AFTER 2022-11-13T10:15:00+00:00, DO NOT place any orders.",
+    "context": "The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
     "eval_MRN": "S6550627"
   },
   {
     "id": "task10_13",
-    "instruction": "What\u2019s the last HbA1C (hemoglobin A1C) value in the chart for patient S6521727 and when was it recorded? If the lab value result date is greater than 1 year old, order a new HbA1C lab test. ",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
+    "instruction": "Check patient with MRN S6521727 last HbA1C value and date. Then follow these rules strictly: Step 1: Query the HbA1C observations for the patient. Step 2: Determine if an HbA1C measurement exists. Step 3: If a measurement exists, compare its date to the cutoff (2022-11-13T10:15:00+00:00 = 1 year ago). Step 4: ONLY order a new HbA1C lab test if: - No HbA1C exists, OR - The HbA1C date is BEFORE 2022-11-13T10:15:00+00:00 Step 5: If the HbA1C date is ON or AFTER 2022-11-13T10:15:00+00:00, DO NOT place any orders.",
+    "context": "The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
     "eval_MRN": "S6521727"
   },
   {
     "id": "task10_14",
-    "instruction": "What\u2019s the last HbA1C (hemoglobin A1C) value in the chart for patient S6541609 and when was it recorded? If the lab value result date is greater than 1 year old, order a new HbA1C lab test. ",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
+    "instruction": "Check patient with MRN S6541609 last HbA1C value and date. Then follow these rules strictly: Step 1: Query the HbA1C observations for the patient. Step 2: Determine if an HbA1C measurement exists. Step 3: If a measurement exists, compare its date to the cutoff (2022-11-13T10:15:00+00:00 = 1 year ago). Step 4: ONLY order a new HbA1C lab test if: - No HbA1C exists, OR - The HbA1C date is BEFORE 2022-11-13T10:15:00+00:00 Step 5: If the HbA1C date is ON or AFTER 2022-11-13T10:15:00+00:00, DO NOT place any orders.",
+    "context": "The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
     "eval_MRN": "S6541609"
   },
   {
     "id": "task10_15",
-    "instruction": "What\u2019s the last HbA1C (hemoglobin A1C) value in the chart for patient S6545016 and when was it recorded? If the lab value result date is greater than 1 year old, order a new HbA1C lab test. ",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
+    "instruction": "Check patient with MRN S6545016 last HbA1C value and date. Then follow these rules strictly: Step 1: Query the HbA1C observations for the patient. Step 2: Determine if an HbA1C measurement exists. Step 3: If a measurement exists, compare its date to the cutoff (2022-11-13T10:15:00+00:00 = 1 year ago). Step 4: ONLY order a new HbA1C lab test if: - No HbA1C exists, OR - The HbA1C date is BEFORE 2022-11-13T10:15:00+00:00 Step 5: If the HbA1C date is ON or AFTER 2022-11-13T10:15:00+00:00, DO NOT place any orders.",
+    "context": "The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
     "eval_MRN": "S6545016"
   },
   {
     "id": "task10_16",
-    "instruction": "What\u2019s the last HbA1C (hemoglobin A1C) value in the chart for patient S2016972 and when was it recorded? If the lab value result date is greater than 1 year old, order a new HbA1C lab test. ",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
+    "instruction": "Check patient with MRN S2016972 last HbA1C value and date. Then follow these rules strictly: Step 1: Query the HbA1C observations for the patient. Step 2: Determine if an HbA1C measurement exists. Step 3: If a measurement exists, compare its date to the cutoff (2022-11-13T10:15:00+00:00 = 1 year ago). Step 4: ONLY order a new HbA1C lab test if: - No HbA1C exists, OR - The HbA1C date is BEFORE 2022-11-13T10:15:00+00:00 Step 5: If the HbA1C date is ON or AFTER 2022-11-13T10:15:00+00:00, DO NOT place any orders.",
+    "context": "The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
     "eval_MRN": "S2016972"
   },
   {
     "id": "task10_17",
-    "instruction": "What\u2019s the last HbA1C (hemoglobin A1C) value in the chart for patient S2823623 and when was it recorded? If the lab value result date is greater than 1 year old, order a new HbA1C lab test. ",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
+    "instruction": "Check patient with MRN S2823623 last HbA1C value and date. Then follow these rules strictly: Step 1: Query the HbA1C observations for the patient. Step 2: Determine if an HbA1C measurement exists. Step 3: If a measurement exists, compare its date to the cutoff (2022-11-13T10:15:00+00:00 = 1 year ago). Step 4: ONLY order a new HbA1C lab test if: - No HbA1C exists, OR - The HbA1C date is BEFORE 2022-11-13T10:15:00+00:00 Step 5: If the HbA1C date is ON or AFTER 2022-11-13T10:15:00+00:00, DO NOT place any orders.",
+    "context": "The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
     "eval_MRN": "S2823623"
   },
   {
     "id": "task10_18",
-    "instruction": "What\u2019s the last HbA1C (hemoglobin A1C) value in the chart for patient S1311412 and when was it recorded? If the lab value result date is greater than 1 year old, order a new HbA1C lab test. ",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
+    "instruction": "Check patient with MRN S1311412 last HbA1C value and date. Then follow these rules strictly: Step 1: Query the HbA1C observations for the patient. Step 2: Determine if an HbA1C measurement exists. Step 3: If a measurement exists, compare its date to the cutoff (2022-11-13T10:15:00+00:00 = 1 year ago). Step 4: ONLY order a new HbA1C lab test if: - No HbA1C exists, OR - The HbA1C date is BEFORE 2022-11-13T10:15:00+00:00 Step 5: If the HbA1C date is ON or AFTER 2022-11-13T10:15:00+00:00, DO NOT place any orders.",
+    "context": "The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
     "eval_MRN": "S1311412"
   },
   {
     "id": "task10_19",
-    "instruction": "What\u2019s the last HbA1C (hemoglobin A1C) value in the chart for patient S2154941 and when was it recorded? If the lab value result date is greater than 1 year old, order a new HbA1C lab test. ",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
+    "instruction": "Check patient with MRN S2154941 last HbA1C value and date. Then follow these rules strictly: Step 1: Query the HbA1C observations for the patient. Step 2: Determine if an HbA1C measurement exists. Step 3: If a measurement exists, compare its date to the cutoff (2022-11-13T10:15:00+00:00 = 1 year ago). Step 4: ONLY order a new HbA1C lab test if: - No HbA1C exists, OR - The HbA1C date is BEFORE 2022-11-13T10:15:00+00:00 Step 5: If the HbA1C date is ON or AFTER 2022-11-13T10:15:00+00:00, DO NOT place any orders.",
+    "context": "The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
     "eval_MRN": "S2154941"
   },
   {
     "id": "task10_20",
-    "instruction": "What\u2019s the last HbA1C (hemoglobin A1C) value in the chart for patient S0722219 and when was it recorded? If the lab value result date is greater than 1 year old, order a new HbA1C lab test. ",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
+    "instruction": "Check patient with MRN S0722219 last HbA1C value and date. Then follow these rules strictly: Step 1: Query the HbA1C observations for the patient. Step 2: Determine if an HbA1C measurement exists. Step 3: If a measurement exists, compare its date to the cutoff (2022-11-13T10:15:00+00:00 = 1 year ago). Step 4: ONLY order a new HbA1C lab test if: - No HbA1C exists, OR - The HbA1C date is BEFORE 2022-11-13T10:15:00+00:00 Step 5: If the HbA1C date is ON or AFTER 2022-11-13T10:15:00+00:00, DO NOT place any orders.",
+    "context": "The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
     "eval_MRN": "S0722219"
   },
   {
     "id": "task10_21",
-    "instruction": "What\u2019s the last HbA1C (hemoglobin A1C) value in the chart for patient S0789363 and when was it recorded? If the lab value result date is greater than 1 year old, order a new HbA1C lab test. ",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
+    "instruction": "Check patient with MRN S0789363 last HbA1C value and date. Then follow these rules strictly: Step 1: Query the HbA1C observations for the patient. Step 2: Determine if an HbA1C measurement exists. Step 3: If a measurement exists, compare its date to the cutoff (2022-11-13T10:15:00+00:00 = 1 year ago). Step 4: ONLY order a new HbA1C lab test if: - No HbA1C exists, OR - The HbA1C date is BEFORE 2022-11-13T10:15:00+00:00 Step 5: If the HbA1C date is ON or AFTER 2022-11-13T10:15:00+00:00, DO NOT place any orders.",
+    "context": "The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
     "eval_MRN": "S0789363"
   },
   {
     "id": "task10_22",
-    "instruction": "What\u2019s the last HbA1C (hemoglobin A1C) value in the chart for patient S2090974 and when was it recorded? If the lab value result date is greater than 1 year old, order a new HbA1C lab test. ",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
+    "instruction": "Check patient with MRN S2090974 last HbA1C value and date. Then follow these rules strictly: Step 1: Query the HbA1C observations for the patient. Step 2: Determine if an HbA1C measurement exists. Step 3: If a measurement exists, compare its date to the cutoff (2022-11-13T10:15:00+00:00 = 1 year ago). Step 4: ONLY order a new HbA1C lab test if: - No HbA1C exists, OR - The HbA1C date is BEFORE 2022-11-13T10:15:00+00:00 Step 5: If the HbA1C date is ON or AFTER 2022-11-13T10:15:00+00:00, DO NOT place any orders.",
+    "context": "The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
     "eval_MRN": "S2090974"
   },
   {
     "id": "task10_23",
-    "instruction": "What\u2019s the last HbA1C (hemoglobin A1C) value in the chart for patient S3070524 and when was it recorded? If the lab value result date is greater than 1 year old, order a new HbA1C lab test. ",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
+    "instruction": "Check patient with MRN S3070524 last HbA1C value and date. Then follow these rules strictly: Step 1: Query the HbA1C observations for the patient. Step 2: Determine if an HbA1C measurement exists. Step 3: If a measurement exists, compare its date to the cutoff (2022-11-13T10:15:00+00:00 = 1 year ago). Step 4: ONLY order a new HbA1C lab test if: - No HbA1C exists, OR - The HbA1C date is BEFORE 2022-11-13T10:15:00+00:00 Step 5: If the HbA1C date is ON or AFTER 2022-11-13T10:15:00+00:00, DO NOT place any orders.",
+    "context": "The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
     "eval_MRN": "S3070524"
   },
   {
     "id": "task10_24",
-    "instruction": "What\u2019s the last HbA1C (hemoglobin A1C) value in the chart for patient S6500497 and when was it recorded? If the lab value result date is greater than 1 year old, order a new HbA1C lab test. ",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
+    "instruction": "Check patient with MRN S6500497 last HbA1C value and date. Then follow these rules strictly: Step 1: Query the HbA1C observations for the patient. Step 2: Determine if an HbA1C measurement exists. Step 3: If a measurement exists, compare its date to the cutoff (2022-11-13T10:15:00+00:00 = 1 year ago). Step 4: ONLY order a new HbA1C lab test if: - No HbA1C exists, OR - The HbA1C date is BEFORE 2022-11-13T10:15:00+00:00 Step 5: If the HbA1C date is ON or AFTER 2022-11-13T10:15:00+00:00, DO NOT place any orders.",
+    "context": "The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
     "eval_MRN": "S6500497"
   },
   {
     "id": "task10_25",
-    "instruction": "What\u2019s the last HbA1C (hemoglobin A1C) value in the chart for patient S1152319 and when was it recorded? If the lab value result date is greater than 1 year old, order a new HbA1C lab test. ",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
+    "instruction": "Check patient with MRN S1152319 last HbA1C value and date. Then follow these rules strictly: Step 1: Query the HbA1C observations for the patient. Step 2: Determine if an HbA1C measurement exists. Step 3: If a measurement exists, compare its date to the cutoff (2022-11-13T10:15:00+00:00 = 1 year ago). Step 4: ONLY order a new HbA1C lab test if: - No HbA1C exists, OR - The HbA1C date is BEFORE 2022-11-13T10:15:00+00:00 Step 5: If the HbA1C date is ON or AFTER 2022-11-13T10:15:00+00:00, DO NOT place any orders.",
+    "context": "The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
     "eval_MRN": "S1152319"
   },
   {
     "id": "task10_26",
-    "instruction": "What\u2019s the last HbA1C (hemoglobin A1C) value in the chart for patient S6352985 and when was it recorded? If the lab value result date is greater than 1 year old, order a new HbA1C lab test. ",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
+    "instruction": "Check patient with MRN S6352985 last HbA1C value and date. Then follow these rules strictly: Step 1: Query the HbA1C observations for the patient. Step 2: Determine if an HbA1C measurement exists. Step 3: If a measurement exists, compare its date to the cutoff (2022-11-13T10:15:00+00:00 = 1 year ago). Step 4: ONLY order a new HbA1C lab test if: - No HbA1C exists, OR - The HbA1C date is BEFORE 2022-11-13T10:15:00+00:00 Step 5: If the HbA1C date is ON or AFTER 2022-11-13T10:15:00+00:00, DO NOT place any orders.",
+    "context": "The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
     "eval_MRN": "S6352985"
   },
   {
     "id": "task10_27",
-    "instruction": "What\u2019s the last HbA1C (hemoglobin A1C) value in the chart for patient S0658561 and when was it recorded? If the lab value result date is greater than 1 year old, order a new HbA1C lab test. ",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
+    "instruction": "Check patient with MRN S0658561 last HbA1C value and date. Then follow these rules strictly: Step 1: Query the HbA1C observations for the patient. Step 2: Determine if an HbA1C measurement exists. Step 3: If a measurement exists, compare its date to the cutoff (2022-11-13T10:15:00+00:00 = 1 year ago). Step 4: ONLY order a new HbA1C lab test if: - No HbA1C exists, OR - The HbA1C date is BEFORE 2022-11-13T10:15:00+00:00 Step 5: If the HbA1C date is ON or AFTER 2022-11-13T10:15:00+00:00, DO NOT place any orders.",
+    "context": "The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
     "eval_MRN": "S0658561"
   },
   {
     "id": "task10_28",
-    "instruction": "What\u2019s the last HbA1C (hemoglobin A1C) value in the chart for patient S6530532 and when was it recorded? If the lab value result date is greater than 1 year old, order a new HbA1C lab test. ",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
+    "instruction": "Check patient with MRN S6530532 last HbA1C value and date. Then follow these rules strictly: Step 1: Query the HbA1C observations for the patient. Step 2: Determine if an HbA1C measurement exists. Step 3: If a measurement exists, compare its date to the cutoff (2022-11-13T10:15:00+00:00 = 1 year ago). Step 4: ONLY order a new HbA1C lab test if: - No HbA1C exists, OR - The HbA1C date is BEFORE 2022-11-13T10:15:00+00:00 Step 5: If the HbA1C date is ON or AFTER 2022-11-13T10:15:00+00:00, DO NOT place any orders.",
+    "context": "The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
     "eval_MRN": "S6530532"
   },
   {
     "id": "task10_29",
-    "instruction": "What\u2019s the last HbA1C (hemoglobin A1C) value in the chart for patient S2703270 and when was it recorded? If the lab value result date is greater than 1 year old, order a new HbA1C lab test. ",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
+    "instruction": "Check patient with MRN S2703270 last HbA1C value and date. Then follow these rules strictly: Step 1: Query the HbA1C observations for the patient. Step 2: Determine if an HbA1C measurement exists. Step 3: If a measurement exists, compare its date to the cutoff (2022-11-13T10:15:00+00:00 = 1 year ago). Step 4: ONLY order a new HbA1C lab test if: - No HbA1C exists, OR - The HbA1C date is BEFORE 2022-11-13T10:15:00+00:00 Step 5: If the HbA1C date is ON or AFTER 2022-11-13T10:15:00+00:00, DO NOT place any orders.",
+    "context": "The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
     "eval_MRN": "S2703270"
   },
   {
     "id": "task10_30",
-    "instruction": "What\u2019s the last HbA1C (hemoglobin A1C) value in the chart for patient S1876702 and when was it recorded? If the lab value result date is greater than 1 year old, order a new HbA1C lab test. ",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
+    "instruction": "Check patient with MRN S1876702 last HbA1C value and date. Then follow these rules strictly: Step 1: Query the HbA1C observations for the patient. Step 2: Determine if an HbA1C measurement exists. Step 3: If a measurement exists, compare its date to the cutoff (2022-11-13T10:15:00+00:00 = 1 year ago). Step 4: ONLY order a new HbA1C lab test if: - No HbA1C exists, OR - The HbA1C date is BEFORE 2022-11-13T10:15:00+00:00 Step 5: If the HbA1C date is ON or AFTER 2022-11-13T10:15:00+00:00, DO NOT place any orders.",
+    "context": "The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
     "eval_MRN": "S1876702"
   }
 ]
