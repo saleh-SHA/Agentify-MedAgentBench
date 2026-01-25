@@ -443,7 +443,6 @@ def eval_task3(case_data, results, fhir_api_base) -> EvalOutcome:
         )
     
     url, payload = posts[0]
-    
     # Check endpoint
     expected_path = normalize_fhir_url(f'{fhir_api_base.rstrip("/")}/Observation')
     actual_path = normalize_fhir_url(url)

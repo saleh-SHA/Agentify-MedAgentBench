@@ -212,10 +212,10 @@ def _call_fhir(method: str, path: str, params: Optional[Dict] = None, body: Opti
                 # We want to only log the request body (in order not to change the database state and reinitialize the server), so we don't use the client.request method
                 # For POST requests, include details needed for evaluation
                 result["status_code"] = 200
-                result["response"] = "POST request accepted and executed successfully."
+                result["response"] = "Action executed successfully."
                 result["fhir_post"] = {
                     "fhir_url": url,
-                    "parameters": body,  # Use body, not params - POST tools pass data as body
+                    "parameters": body,
                     "accepted": True
                     }
             return result
@@ -344,7 +344,7 @@ def record_vital_observation(
     code: Annotated[VitalsCodeObject, Field(description="Code object specifying what is being measured.")],
     effectiveDateTime: Annotated[str, Field(description="The date and time the observation was taken, in ISO format (e.g., '2023-11-13T10:15:00+00:00').")],
     status: Annotated[str, Field(description="The status of the observation. Only 'final' is supported. We do not support filing data that isn't finalized.")],
-    valueString: Annotated[str, Field(description="Measurement value as a string (e.g., '118/77' for BP, '98.6' for temp).")],
+    valueString: Annotated[str, Field(description="Measurement value as a string (e.g., '122/80 mmHg' for BP.")],
     subject: Annotated[SubjectReference, Field(description="The patient this observation is about.")],
 ) -> Dict[str, Any]:
     """Observation.Create (Vitals) - File vital signs to all non-duplicable flowsheet rows. This resource can file vital signs for all flowsheets."""
@@ -505,6 +505,96 @@ def check_date_within_period(
             "reference_date": reference_date,
             "period_days": period_days,
         }
+
+
+# -----------------------------------------------------------------------------
+# Utility Tools - Lab Value Evaluation
+# -----------------------------------------------------------------------------
+
+@mcp.tool()
+def calculate_age(
+    birth_date: Annotated[str, Field(description="The patient's birth date in ISO format or YYYY-MM-DD (e.g., '1990-05-15' or '1990-05-15T00:00:00+00:00').")],
+    reference_date: Annotated[str, Field(description="The reference date to calculate age at, in ISO format (e.g., '2023-11-13T10:15:00+00:00').")],
+) -> Dict[str, Any]:
+    """Calculate a patient's age in years from their birth date.
+    
+    Given a birth date and a reference date (typically the current date),
+    calculates the patient's age in complete years (rounded down).
+    
+    Example: To calculate age for someone born '1990-05-15' as of '2023-11-13':
+    - birth_date: '1990-05-15'
+    - reference_date: '2023-11-13T10:15:00+00:00'
+    - Result: age=33
+    """
+    try:
+        # Parse birth date - handle both simple date and ISO formats
+        birth_str = birth_date.replace('Z', '+00:00')
+        if 'T' in birth_str:
+            birth = datetime.fromisoformat(birth_str)
+        else:
+            birth = datetime.fromisoformat(birth_str + 'T00:00:00+00:00')
+        
+        # Parse reference date
+        ref_str = reference_date.replace('Z', '+00:00')
+        ref = datetime.fromisoformat(ref_str)
+        
+        # Make both timezone-aware if needed
+        if birth.tzinfo is None:
+            from datetime import timezone
+            birth = birth.replace(tzinfo=timezone.utc)
+        if ref.tzinfo is None:
+            from datetime import timezone
+            ref = ref.replace(tzinfo=timezone.utc)
+        
+        # Calculate age in complete years
+        age = ref.year - birth.year
+        # Adjust if birthday hasn't occurred yet this year
+        if (ref.month, ref.day) < (birth.month, birth.day):
+            age -= 1
+        
+        return {
+            "birth_date": birth_date,
+            "reference_date": reference_date,
+            "age_years": age,
+            "message": f"Patient is {age} years old as of {reference_date}"
+        }
+    except Exception as e:
+        return {
+            "error": f"Failed to calculate age: {str(e)}",
+            "birth_date": birth_date,
+            "reference_date": reference_date,
+        }
+
+
+@mcp.tool()
+def evaluate_potassium_level(
+    potassium_value: Annotated[float, Field(description="The potassium level in mmol/L to evaluate.")],
+    threshold: Annotated[float, Field(description="The threshold value in mmol/L.")],
+) -> Dict[str, Any]:
+    """Lab Value Utility - Evaluate if a potassium level is low or normal.
+    
+    Compares the given potassium value against the threshold to determine
+    if the patient has low potassium (hypokalemia) or normal potassium.
+    
+    Example: To check if potassium 3.2 mmol/L is low (threshold 3.5):
+    - potassium_value: 3.2
+    - threshold: 3.5
+    - Result: status='LOW' (3.2 < 3.5)
+    
+    Example: To check if potassium 4.5 mmol/L is low (threshold 3.5):
+    - potassium_value: 4.5
+    - threshold: 3.5
+    - Result: status='NORMAL' (4.5 >= 3.5)
+    """
+    is_low = potassium_value < threshold
+    
+    return {
+        "potassium_value": potassium_value,
+        "threshold": threshold,
+        "is_low": is_low,
+        "status": "LOW" if is_low else "NORMAL",
+        "message": f"Potassium {potassium_value} mmol/L is {'below' if is_low else 'at or above'} the threshold of {threshold} mmol/L"
+    }
 
 
 def main() -> None:

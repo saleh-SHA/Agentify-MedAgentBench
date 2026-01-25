@@ -17,8 +17,8 @@ cmd = "python scenarios/medagentbench/agent/src/server.py --host 0.0.0.0 --port 
 
 # Specific task IDs to run (optional, overrides num_tasks if provided)
 #task_ids = ["task1_1", "task1_2", "task1_3", "task1_4", "task1_5", "task1_6", "task1_7", "task1_8", "task1_9", "task1_10"]
-#task_ids = ["task2_1", "task2_2", "task2_3", "task2_4", "task2_5", "task2_6", "task2_7", "task2_8", "task2_9", "task2_10"]
-task_ids = ["task3_1", "task3_2", "task3_3", "task3_4", "task3_5", "task3_6", "task3_7", "task3_8", "task3_9", "task3_10"]
+task_ids = ["task2_1", "task2_2", "task2_3", "task2_4", "task2_5", "task2_6", "task2_7", "task2_8", "task2_9", "task2_10"]
+#task_ids = ["task3_1", "task3_2", "task3_3", "task3_4", "task3_5", "task3_6", "task3_7", "task3_8", "task3_9", "task3_10"]
 #task_ids = ["task4_1", "task4_2", "task4_3", "task4_4", "task4_5", "task4_6", "task4_7", "task4_8", "task4_9", "task4_10"]
 #task_ids = ["task5_1", "task5_2", "task5_3", "task5_4", "task5_5", "task5_6", "task5_7", "task5_8", "task5_9", "task5_10"]
 #task_ids = ["task6_1", "task6_2", "task6_3", "task6_4", "task6_5", "task6_6", "task6_7", "task6_8", "task6_9", "task6_10"]
@@ -26,8 +26,6 @@ task_ids = ["task3_1", "task3_2", "task3_3", "task3_4", "task3_5", "task3_6", "t
 #task_ids = ["task8_1", "task8_2", "task8_3", "task8_4", "task8_5", "task8_6", "task8_7", "task8_8", "task8_9", "task8_10"]
 #task_ids = ["task9_1", "task9_2", "task9_3", "task9_4", "task9_5", "task9_6", "task9_7", "task9_8", "task9_9", "task9_10"]
 #task_ids = ["task10_1", "task10_2", "task10_3", "task10_4", "task10_5", "task10_6", "task10_7", "task10_8", "task10_9", "task10_10"]
-
-
 
 
 # Maximum tool-calling rounds per task
