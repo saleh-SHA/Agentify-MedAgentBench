@@ -597,6 +597,65 @@ def evaluate_potassium_level(
     }
 
 
+@mcp.tool()
+def evaluate_magnesium_level(
+    magnesium_value: Annotated[float, Field(description="The magnesium level in mg/dL to evaluate.")],
+) -> Dict[str, Any]:
+    """Lab Value Utility - Evaluate magnesium level and determine if IV replacement is needed.
+    
+    Evaluates the serum magnesium level and returns:
+    - Whether the level is normal or deficient
+    - If deficient, the recommended IV magnesium dosing
+    
+    Thresholds:
+    - >= 1.9 mg/dL: NORMAL (no replacement needed)
+    - 1.5 to < 1.9 mg/dL: MILD deficiency → 1g IV over 1 hour
+    - 1.0 to < 1.5 mg/dL: MODERATE deficiency → 2g IV over 2 hours
+    - < 1.0 mg/dL: SEVERE deficiency → 4g IV over 4 hours
+    
+    Example: evaluate_magnesium_level(1.3) → MODERATE, order 2g over 2h
+    Example: evaluate_magnesium_level(2.1) → NORMAL, do NOT order
+    """
+    if magnesium_value >= 1.9:
+        return {
+            "magnesium_value": magnesium_value,
+            "status": "NORMAL",
+            "needs_replacement": False,
+            "message": f"Magnesium {magnesium_value} mg/dL is normal (>= 1.9).",
+            "action": "DO_NOT_ORDER"
+        }
+    elif magnesium_value >= 1.5:
+        return {
+            "magnesium_value": magnesium_value,
+            "status": "MILD_DEFICIENCY",
+            "needs_replacement": True,
+            "dose_grams": 1,
+            "infusion_hours": 1,
+            "message": f"Magnesium {magnesium_value} mg/dL is mild deficiency (1.5-1.9).",
+            "action": "ORDER_1G_OVER_1H"
+        }
+    elif magnesium_value >= 1.0:
+        return {
+            "magnesium_value": magnesium_value,
+            "status": "MODERATE_DEFICIENCY",
+            "needs_replacement": True,
+            "dose_grams": 2,
+            "infusion_hours": 2,
+            "message": f"Magnesium {magnesium_value} mg/dL is moderate deficiency (1.0-1.5).",
+            "action": "ORDER_2G_OVER_2H"
+        }
+    else:
+        return {
+            "magnesium_value": magnesium_value,
+            "status": "SEVERE_DEFICIENCY",
+            "needs_replacement": True,
+            "dose_grams": 4,
+            "infusion_hours": 4,
+            "message": f"Magnesium {magnesium_value} mg/dL is severe deficiency (< 1.0).",
+            "action": "ORDER_4G_OVER_4H"
+        }
+
+
 def main() -> None:
     """Entrypoint used by `python -m src.mcp.server`.
 

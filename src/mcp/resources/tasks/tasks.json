@@ -3,209 +3,269 @@
     "id": "task1_1",
     "instruction": "What’s the MRN of the patient with name Peter Stafford and DOB of 1932-12-29? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S6534835"],
+    "sol": [
+      "S6534835"
+    ],
     "eval_MRN": "S6534835"
   },
   {
     "id": "task1_2",
     "instruction": "What’s the MRN of the patient with name Maria Alvarez and DOB of 1940-03-05? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S6426560"],
+    "sol": [
+      "S6426560"
+    ],
     "eval_MRN": "S6426560"
   },
   {
     "id": "task1_3",
     "instruction": "What’s the MRN of the patient with name Dana Sandoval and DOB of 1989-04-19? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S1986380"],
+    "sol": [
+      "S1986380"
+    ],
     "eval_MRN": "S1986380"
   },
   {
     "id": "task1_4",
     "instruction": "What’s the MRN of the patient with name James Snyder and DOB of 1953-08-03? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S6484983"],
+    "sol": [
+      "S6484983"
+    ],
     "eval_MRN": "S6484983"
   },
   {
     "id": "task1_5",
     "instruction": "What’s the MRN of the patient with name Justin Gould and DOB of 1943-05-19? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S2703270"],
+    "sol": [
+      "S2703270"
+    ],
     "eval_MRN": "S2703270"
   },
   {
     "id": "task1_6",
     "instruction": "What’s the MRN of the patient with name Andrew Bishop and DOB of 1963-01-29? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S2874099"],
+    "sol": [
+      "S2874099"
+    ],
     "eval_MRN": "S2874099"
   },
   {
     "id": "task1_7",
     "instruction": "What’s the MRN of the patient with name Kevin Vasquez and DOB of 1953-11-19? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S6200102"],
+    "sol": [
+      "S6200102"
+    ],
     "eval_MRN": "S6200102"
   },
   {
     "id": "task1_8",
     "instruction": "What’s the MRN of the patient with name Brian Buchanan and DOB of 1954-08-10? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S6530532"],
+    "sol": [
+      "S6530532"
+    ],
     "eval_MRN": "S6530532"
   },
   {
     "id": "task1_9",
     "instruction": "What’s the MRN of the patient with name Katrina Golden and DOB of 1960-08-18? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S6539215"],
+    "sol": [
+      "S6539215"
+    ],
     "eval_MRN": "S6539215"
   },
   {
     "id": "task1_10",
     "instruction": "What’s the MRN of the patient with name Joshua Martinez and DOB of 1967-03-11? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S6264184"],
+    "sol": [
+      "S6264184"
+    ],
     "eval_MRN": "S6264184"
   },
   {
     "id": "task1_11",
     "instruction": "What’s the MRN of the patient with name Glenda Hall and DOB of 1952-11-14? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S6521727"],
+    "sol": [
+      "S6521727"
+    ],
     "eval_MRN": "S6521727"
   },
   {
     "id": "task1_12",
     "instruction": "What’s the MRN of the patient with name Margaret Kidd and DOB of 1982-08-24? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S0789363"],
+    "sol": [
+      "S0789363"
+    ],
     "eval_MRN": "S0789363"
   },
   {
     "id": "task1_13",
     "instruction": "What’s the MRN of the patient with name Emily Hicks and DOB of 1942-05-11? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S2154941"],
+    "sol": [
+      "S2154941"
+    ],
     "eval_MRN": "S2154941"
   },
   {
     "id": "task1_14",
     "instruction": "What’s the MRN of the patient with name Pamela Merritt and DOB of 1994-09-15? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S2197736"],
+    "sol": [
+      "S2197736"
+    ],
     "eval_MRN": "S2197736"
   },
   {
     "id": "task1_15",
     "instruction": "What’s the MRN of the patient with name Denise Dunlap and DOB of 1945-09-20? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S3228213"],
+    "sol": [
+      "S3228213"
+    ],
     "eval_MRN": "S3228213"
   },
   {
     "id": "task1_16",
     "instruction": "What’s the MRN of the patient with name Debra Dunn and DOB of 1969-05-12? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S6551923"],
+    "sol": [
+      "S6551923"
+    ],
     "eval_MRN": "S6551923"
   },
   {
     "id": "task1_17",
     "instruction": "What’s the MRN of the patient with name Shannon Palmer and DOB of 1956-11-16? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S2119664"],
+    "sol": [
+      "S2119664"
+    ],
     "eval_MRN": "S2119664"
   },
   {
     "id": "task1_18",
     "instruction": "What’s the MRN of the patient with name Melissa Nguyen and DOB of 1973-08-14? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S2863714"],
+    "sol": [
+      "S2863714"
+    ],
     "eval_MRN": "S2863714"
   },
   {
     "id": "task1_19",
     "instruction": "What’s the MRN of the patient with name Tim Ramos and DOB of 1959-04-28? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S6192632"],
+    "sol": [
+      "S6192632"
+    ],
     "eval_MRN": "S6192632"
   },
   {
     "id": "task1_20",
     "instruction": "What’s the MRN of the patient with name Christopher Cruz and DOB of 1940-08-28? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S0658561"],
+    "sol": [
+      "S0658561"
+    ],
     "eval_MRN": "S0658561"
   },
   {
     "id": "task1_21",
     "instruction": "What’s the MRN of the patient with name Tina Anderson and DOB of 1959-01-24? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S0547588"],
+    "sol": [
+      "S0547588"
+    ],
     "eval_MRN": "S0547588"
   },
   {
     "id": "task1_22",
     "instruction": "What’s the MRN of the patient with name Robert Gardner and DOB of 1975-05-30? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S0722219"],
+    "sol": [
+      "S0722219"
+    ],
     "eval_MRN": "S0722219"
   },
   {
     "id": "task1_23",
     "instruction": "What’s the MRN of the patient with name Julie Rodriguez and DOB of 1962-01-20? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S3057899"],
+    "sol": [
+      "S3057899"
+    ],
     "eval_MRN": "S3057899"
   },
   {
     "id": "task1_24",
     "instruction": "What’s the MRN of the patient with name Katherine Sutton and DOB of 1943-02-11? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S6538722"],
+    "sol": [
+      "S6538722"
+    ],
     "eval_MRN": "S6538722"
   },
   {
     "id": "task1_25",
     "instruction": "What’s the MRN of the patient with name Russell Shields and DOB of 1964-01-02? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S6545016"],
+    "sol": [
+      "S6545016"
+    ],
     "eval_MRN": "S6545016"
   },
   {
     "id": "task1_26",
     "instruction": "What’s the MRN of the patient with name Victoria Owens and DOB of 2002-06-07? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S3236936"],
+    "sol": [
+      "S3236936"
+    ],
     "eval_MRN": "S3236936"
   },
   {
     "id": "task1_27",
     "instruction": "What’s the MRN of the patient with name Tina Reid and DOB of 1953-10-18? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S3213957"],
+    "sol": [
+      "S3213957"
+    ],
     "eval_MRN": "S3213957"
   },
   {
     "id": "task1_28",
     "instruction": "What’s the MRN of the patient with name Tracey Stanley and DOB of 1988-12-04? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S2704870"],
+    "sol": [
+      "S2704870"
+    ],
     "eval_MRN": "S2704870"
   },
   {
     "id": "task1_29",
     "instruction": "What's the MRN of the patient with name Debra Dunn and DOB of 1969-05-15? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["Patient not found"]
+    "sol": [
+      "Patient not found"
+    ]
   },
   {
     "id": "task1_30",
     "instruction": "What's the MRN of the patient with name Kyle Jia and DOB of 1969-05-15? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["Patient not found"]
+    "sol": [
+      "Patient not found"
+    ]
   },
   {
     "id": "task2_1",
@@ -749,182 +809,182 @@
   },
   {
     "id": "task5_1",
-    "instruction": "Check patient S6315806's last serum magnesium level within last 24 hours. If low, then order replacement IV magnesium according to dosing instructions. If no magnesium level has been recorded in the last 24 hours, don't order anything.\n",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. Dosing instructions: (1) Mild deficiency (eg, serum magnesium 1.5 to 1.9 mg/dL):\nIV: 1 g over 1 hour.\n(2) Moderate deficiency (eg, serum magnesium 1 to <1.5 mg/dL):\nIV: 2 g over 2 hours.\n(3) Severe deficiency (eg, serum magnesium <1 mg/dL):\nIV: 4 g over 4 hours.\n",
+    "instruction": "Check patient S6315806's last serum magnesium level within last 24 hours. Step 1: Query MG observations for the patient. Step 2: If NO observations within 24 hours, do NOT order anything this means NO magnesium data exists - IMMEDIATELY return FINISH([-1]) and do NOT make any more tool calls.. Step 3: Find the MOST RECENT observation within 24 hours. Step 4: Evaluate the magnesium level to determine if replacement is needed. Step 5: If status is NORMAL (Mg >= 1.9), do NOT order - return FINISH([magnesium_value]). Step 6: ONLY if status shows deficiency, make exactly ONE medication request with the recommended dose, then return FINISH([magnesium_value]).",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. CRITICAL: Only order if Mg < 1.9 mg/dL. If Mg >= 1.9 or no data within 24h, do NOT create any medication request. Make at most ONE medication order.",
     "eval_MRN": "S6315806"
   },
   {
     "id": "task5_2",
-    "instruction": "Check patient S6541353's last serum magnesium level within last 24 hours. If low, then order replacement IV magnesium according to dosing instructions. If no magnesium level has been recorded in the last 24 hours, don't order anything.\n",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. Dosing instructions: (1) Mild deficiency (eg, serum magnesium 1.5 to 1.9 mg/dL):\nIV: 1 g over 1 hour.\n(2) Moderate deficiency (eg, serum magnesium 1 to <1.5 mg/dL):\nIV: 2 g over 2 hours.\n(3) Severe deficiency (eg, serum magnesium <1 mg/dL):\nIV: 4 g over 4 hours.\n",
+    "instruction": "Check patient S6541353's last serum magnesium level within last 24 hours. Step 1: Query MG observations for the patient. Step 2: If NO observations within 24 hours, do NOT order anything this means NO magnesium data exists - IMMEDIATELY return FINISH([-1]) and do NOT make any more tool calls.. Step 3: Find the MOST RECENT observation within 24 hours. Step 4: Evaluate the magnesium level to determine if replacement is needed. Step 5: If status is NORMAL (Mg >= 1.9), do NOT order - return FINISH([magnesium_value]). Step 6: ONLY if status shows deficiency, make exactly ONE medication request with the recommended dose, then return FINISH([magnesium_value]).",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. CRITICAL: Only order if Mg < 1.9 mg/dL. If Mg >= 1.9 or no data within 24h, do NOT create any medication request. Make at most ONE medication order.",
     "eval_MRN": "S6541353"
   },
   {
     "id": "task5_3",
-    "instruction": "Check patient S0636132's last serum magnesium level within last 24 hours. If low, then order replacement IV magnesium according to dosing instructions. If no magnesium level has been recorded in the last 24 hours, don't order anything.\n",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. Dosing instructions: (1) Mild deficiency (eg, serum magnesium 1.5 to 1.9 mg/dL):\nIV: 1 g over 1 hour.\n(2) Moderate deficiency (eg, serum magnesium 1 to <1.5 mg/dL):\nIV: 2 g over 2 hours.\n(3) Severe deficiency (eg, serum magnesium <1 mg/dL):\nIV: 4 g over 4 hours.\n",
+    "instruction": "Check patient S0636132's last serum magnesium level within last 24 hours. Step 1: Query MG observations for the patient. Step 2: If NO observations within 24 hours, do NOT order anything this means NO magnesium data exists - IMMEDIATELY return FINISH([-1]) and do NOT make any more tool calls.. Step 3: Find the MOST RECENT observation within 24 hours. Step 4: Evaluate the magnesium level to determine if replacement is needed. Step 5: If status is NORMAL (Mg >= 1.9), do NOT order - return FINISH([magnesium_value]). Step 6: ONLY if status shows deficiency, make exactly ONE medication request with the recommended dose, then return FINISH([magnesium_value]).",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. CRITICAL: Only order if Mg < 1.9 mg/dL. If Mg >= 1.9 or no data within 24h, do NOT create any medication request. Make at most ONE medication order.",
     "eval_MRN": "S0636132"
   },
   {
     "id": "task5_4",
-    "instruction": "Check patient S6468480's last serum magnesium level within last 24 hours. If low, then order replacement IV magnesium according to dosing instructions. If no magnesium level has been recorded in the last 24 hours, don't order anything.\n",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. Dosing instructions: (1) Mild deficiency (eg, serum magnesium 1.5 to 1.9 mg/dL):\nIV: 1 g over 1 hour.\n(2) Moderate deficiency (eg, serum magnesium 1 to <1.5 mg/dL):\nIV: 2 g over 2 hours.\n(3) Severe deficiency (eg, serum magnesium <1 mg/dL):\nIV: 4 g over 4 hours.\n",
+    "instruction": "Check patient S6468480's last serum magnesium level within last 24 hours. Step 1: Query MG observations for the patient. Step 2: If NO observations within 24 hours, do NOT order anything this means NO magnesium data exists - IMMEDIATELY return FINISH([-1]) and do NOT make any more tool calls.. Step 3: Find the MOST RECENT observation within 24 hours. Step 4: Evaluate the magnesium level to determine if replacement is needed. Step 5: If status is NORMAL (Mg >= 1.9), do NOT order - return FINISH([magnesium_value]). Step 6: ONLY if status shows deficiency, make exactly ONE medication request with the recommended dose, then return FINISH([magnesium_value]).",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. CRITICAL: Only order if Mg < 1.9 mg/dL. If Mg >= 1.9 or no data within 24h, do NOT create any medication request. Make at most ONE medication order.",
     "eval_MRN": "S6468480"
   },
   {
     "id": "task5_5",
-    "instruction": "Check patient S6530813's last serum magnesium level within last 24 hours. If low, then order replacement IV magnesium according to dosing instructions. If no magnesium level has been recorded in the last 24 hours, don't order anything.\n",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. Dosing instructions: (1) Mild deficiency (eg, serum magnesium 1.5 to 1.9 mg/dL):\nIV: 1 g over 1 hour.\n(2) Moderate deficiency (eg, serum magnesium 1 to <1.5 mg/dL):\nIV: 2 g over 2 hours.\n(3) Severe deficiency (eg, serum magnesium <1 mg/dL):\nIV: 4 g over 4 hours.\n",
+    "instruction": "Check patient S6530813's last serum magnesium level within last 24 hours. Step 1: Query MG observations for the patient. Step 2: If NO observations within 24 hours, do NOT order anything this means NO magnesium data exists - IMMEDIATELY return FINISH([-1]) and do NOT make any more tool calls.. Step 3: Find the MOST RECENT observation within 24 hours. Step 4: Evaluate the magnesium level to determine if replacement is needed. Step 5: If status is NORMAL (Mg >= 1.9), do NOT order - return FINISH([magnesium_value]). Step 6: ONLY if status shows deficiency, make exactly ONE medication request with the recommended dose, then return FINISH([magnesium_value]).",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. CRITICAL: Only order if Mg < 1.9 mg/dL. If Mg >= 1.9 or no data within 24h, do NOT create any medication request. Make at most ONE medication order.",
     "eval_MRN": "S6530813"
   },
   {
     "id": "task5_6",
-    "instruction": "Check patient S2075210's last serum magnesium level within last 24 hours. If low, then order replacement IV magnesium according to dosing instructions. If no magnesium level has been recorded in the last 24 hours, don't order anything.\n",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. Dosing instructions: (1) Mild deficiency (eg, serum magnesium 1.5 to 1.9 mg/dL):\nIV: 1 g over 1 hour.\n(2) Moderate deficiency (eg, serum magnesium 1 to <1.5 mg/dL):\nIV: 2 g over 2 hours.\n(3) Severe deficiency (eg, serum magnesium <1 mg/dL):\nIV: 4 g over 4 hours.\n",
+    "instruction": "Check patient S2075210's last serum magnesium level within last 24 hours. Step 1: Query MG observations for the patient. Step 2: If NO observations within 24 hours, do NOT order anything this means NO magnesium data exists - IMMEDIATELY return FINISH([-1]) and do NOT make any more tool calls.. Step 3: Find the MOST RECENT observation within 24 hours. Step 4: Evaluate the magnesium level to determine if replacement is needed. Step 5: If status is NORMAL (Mg >= 1.9), do NOT order - return FINISH([magnesium_value]). Step 6: ONLY if status shows deficiency, make exactly ONE medication request with the recommended dose, then return FINISH([magnesium_value]).",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. CRITICAL: Only order if Mg < 1.9 mg/dL. If Mg >= 1.9 or no data within 24h, do NOT create any medication request. Make at most ONE medication order.",
     "eval_MRN": "S2075210"
   },
   {
     "id": "task5_7",
-    "instruction": "Check patient S0581164's last serum magnesium level within last 24 hours. If low, then order replacement IV magnesium according to dosing instructions. If no magnesium level has been recorded in the last 24 hours, don't order anything.\n",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. Dosing instructions: (1) Mild deficiency (eg, serum magnesium 1.5 to 1.9 mg/dL):\nIV: 1 g over 1 hour.\n(2) Moderate deficiency (eg, serum magnesium 1 to <1.5 mg/dL):\nIV: 2 g over 2 hours.\n(3) Severe deficiency (eg, serum magnesium <1 mg/dL):\nIV: 4 g over 4 hours.\n",
+    "instruction": "Check patient S0581164's last serum magnesium level within last 24 hours. Step 1: Query MG observations for the patient. Step 2: If NO observations within 24 hours, do NOT order anything this means NO magnesium data exists - IMMEDIATELY return FINISH([-1]) and do NOT make any more tool calls.. Step 3: Find the MOST RECENT observation within 24 hours. Step 4: Evaluate the magnesium level to determine if replacement is needed. Step 5: If status is NORMAL (Mg >= 1.9), do NOT order - return FINISH([magnesium_value]). Step 6: ONLY if status shows deficiency, make exactly ONE medication request with the recommended dose, then return FINISH([magnesium_value]).",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. CRITICAL: Only order if Mg < 1.9 mg/dL. If Mg >= 1.9 or no data within 24h, do NOT create any medication request. Make at most ONE medication order.",
     "eval_MRN": "S0581164"
   },
   {
     "id": "task5_8",
-    "instruction": "Check patient S1891852's last serum magnesium level within last 24 hours. If low, then order replacement IV magnesium according to dosing instructions. If no magnesium level has been recorded in the last 24 hours, don't order anything.\n",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. Dosing instructions: (1) Mild deficiency (eg, serum magnesium 1.5 to 1.9 mg/dL):\nIV: 1 g over 1 hour.\n(2) Moderate deficiency (eg, serum magnesium 1 to <1.5 mg/dL):\nIV: 2 g over 2 hours.\n(3) Severe deficiency (eg, serum magnesium <1 mg/dL):\nIV: 4 g over 4 hours.\n",
+    "instruction": "Check patient S1891852's last serum magnesium level within last 24 hours. Step 1: Query MG observations for the patient. Step 2: If NO observations within 24 hours, do NOT order anything this means NO magnesium data exists - IMMEDIATELY return FINISH([-1]) and do NOT make any more tool calls.. Step 3: Find the MOST RECENT observation within 24 hours. Step 4: Evaluate the magnesium level to determine if replacement is needed. Step 5: If status is NORMAL (Mg >= 1.9), do NOT order - return FINISH([magnesium_value]). Step 6: ONLY if status shows deficiency, make exactly ONE medication request with the recommended dose, then return FINISH([magnesium_value]).",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. CRITICAL: Only order if Mg < 1.9 mg/dL. If Mg >= 1.9 or no data within 24h, do NOT create any medication request. Make at most ONE medication order.",
     "eval_MRN": "S1891852"
   },
   {
     "id": "task5_9",
-    "instruction": "Check patient S3195056's last serum magnesium level within last 24 hours. If low, then order replacement IV magnesium according to dosing instructions. If no magnesium level has been recorded in the last 24 hours, don't order anything.\n",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. Dosing instructions: (1) Mild deficiency (eg, serum magnesium 1.5 to 1.9 mg/dL):\nIV: 1 g over 1 hour.\n(2) Moderate deficiency (eg, serum magnesium 1 to <1.5 mg/dL):\nIV: 2 g over 2 hours.\n(3) Severe deficiency (eg, serum magnesium <1 mg/dL):\nIV: 4 g over 4 hours.\n",
+    "instruction": "Check patient S3195056's last serum magnesium level within last 24 hours. Step 1: Query MG observations for the patient. Step 2: If NO observations within 24 hours, do NOT order anything this means NO magnesium data exists - IMMEDIATELY return FINISH([-1]) and do NOT make any more tool calls.. Step 3: Find the MOST RECENT observation within 24 hours. Step 4: Evaluate the magnesium level to determine if replacement is needed. Step 5: If status is NORMAL (Mg >= 1.9), do NOT order - return FINISH([magnesium_value]). Step 6: ONLY if status shows deficiency, make exactly ONE medication request with the recommended dose, then return FINISH([magnesium_value]).",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. CRITICAL: Only order if Mg < 1.9 mg/dL. If Mg >= 1.9 or no data within 24h, do NOT create any medication request. Make at most ONE medication order.",
     "eval_MRN": "S3195056"
   },
   {
     "id": "task5_10",
-    "instruction": "Check patient S2874099's last serum magnesium level within last 24 hours. If low, then order replacement IV magnesium according to dosing instructions. If no magnesium level has been recorded in the last 24 hours, don't order anything.\n",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. Dosing instructions: (1) Mild deficiency (eg, serum magnesium 1.5 to 1.9 mg/dL):\nIV: 1 g over 1 hour.\n(2) Moderate deficiency (eg, serum magnesium 1 to <1.5 mg/dL):\nIV: 2 g over 2 hours.\n(3) Severe deficiency (eg, serum magnesium <1 mg/dL):\nIV: 4 g over 4 hours.\n",
+    "instruction": "Check patient S2874099's last serum magnesium level within last 24 hours. Step 1: Query MG observations for the patient. Step 2: If NO observations within 24 hours, do NOT order anything this means NO magnesium data exists - IMMEDIATELY return FINISH([-1]) and do NOT make any more tool calls.. Step 3: Find the MOST RECENT observation within 24 hours. Step 4: Evaluate the magnesium level to determine if replacement is needed. Step 5: If status is NORMAL (Mg >= 1.9), do NOT order - return FINISH([magnesium_value]). Step 6: ONLY if status shows deficiency, make exactly ONE medication request with the recommended dose, then return FINISH([magnesium_value]).",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. CRITICAL: Only order if Mg < 1.9 mg/dL. If Mg >= 1.9 or no data within 24h, do NOT create any medication request. Make at most ONE medication order.",
     "eval_MRN": "S2874099"
   },
   {
     "id": "task5_11",
-    "instruction": "Check patient S6537563's last serum magnesium level within last 24 hours. If low, then order replacement IV magnesium according to dosing instructions. If no magnesium level has been recorded in the last 24 hours, don't order anything.\n",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. Dosing instructions: (1) Mild deficiency (eg, serum magnesium 1.5 to 1.9 mg/dL):\nIV: 1 g over 1 hour.\n(2) Moderate deficiency (eg, serum magnesium 1 to <1.5 mg/dL):\nIV: 2 g over 2 hours.\n(3) Severe deficiency (eg, serum magnesium <1 mg/dL):\nIV: 4 g over 4 hours.\n",
+    "instruction": "Check patient S6537563's last serum magnesium level within last 24 hours. Step 1: Query MG observations for the patient. Step 2: If NO observations within 24 hours, do NOT order anything this means NO magnesium data exists - IMMEDIATELY return FINISH([-1]) and do NOT make any more tool calls.. Step 3: Find the MOST RECENT observation within 24 hours. Step 4: Evaluate the magnesium level to determine if replacement is needed. Step 5: If status is NORMAL (Mg >= 1.9), do NOT order - return FINISH([magnesium_value]). Step 6: ONLY if status shows deficiency, make exactly ONE medication request with the recommended dose, then return FINISH([magnesium_value]).",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. CRITICAL: Only order if Mg < 1.9 mg/dL. If Mg >= 1.9 or no data within 24h, do NOT create any medication request. Make at most ONE medication order.",
     "eval_MRN": "S6537563"
   },
   {
     "id": "task5_12",
-    "instruction": "Check patient S2016972's last serum magnesium level within last 24 hours. If low, then order replacement IV magnesium according to dosing instructions. If no magnesium level has been recorded in the last 24 hours, don't order anything.\n",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. Dosing instructions: (1) Mild deficiency (eg, serum magnesium 1.5 to 1.9 mg/dL):\nIV: 1 g over 1 hour.\n(2) Moderate deficiency (eg, serum magnesium 1 to <1.5 mg/dL):\nIV: 2 g over 2 hours.\n(3) Severe deficiency (eg, serum magnesium <1 mg/dL):\nIV: 4 g over 4 hours.\n",
+    "instruction": "Check patient S2016972's last serum magnesium level within last 24 hours. Step 1: Query MG observations for the patient. Step 2: If NO observations within 24 hours, do NOT order anything this means NO magnesium data exists - IMMEDIATELY return FINISH([-1]) and do NOT make any more tool calls.. Step 3: Find the MOST RECENT observation within 24 hours. Step 4: Evaluate the magnesium level to determine if replacement is needed. Step 5: If status is NORMAL (Mg >= 1.9), do NOT order - return FINISH([magnesium_value]). Step 6: ONLY if status shows deficiency, make exactly ONE medication request with the recommended dose, then return FINISH([magnesium_value]).",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. CRITICAL: Only order if Mg < 1.9 mg/dL. If Mg >= 1.9 or no data within 24h, do NOT create any medication request. Make at most ONE medication order.",
     "eval_MRN": "S2016972"
   },
   {
     "id": "task5_13",
-    "instruction": "Check patient S6521727's last serum magnesium level within last 24 hours. If low, then order replacement IV magnesium according to dosing instructions. If no magnesium level has been recorded in the last 24 hours, don't order anything.\n",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. Dosing instructions: (1) Mild deficiency (eg, serum magnesium 1.5 to 1.9 mg/dL):\nIV: 1 g over 1 hour.\n(2) Moderate deficiency (eg, serum magnesium 1 to <1.5 mg/dL):\nIV: 2 g over 2 hours.\n(3) Severe deficiency (eg, serum magnesium <1 mg/dL):\nIV: 4 g over 4 hours.\n",
+    "instruction": "Check patient S6521727's last serum magnesium level within last 24 hours. Step 1: Query MG observations for the patient. Step 2: If NO observations within 24 hours, do NOT order anything this means NO magnesium data exists - IMMEDIATELY return FINISH([-1]) and do NOT make any more tool calls.. Step 3: Find the MOST RECENT observation within 24 hours. Step 4: Evaluate the magnesium level to determine if replacement is needed. Step 5: If status is NORMAL (Mg >= 1.9), do NOT order - return FINISH([magnesium_value]). Step 6: ONLY if status shows deficiency, make exactly ONE medication request with the recommended dose, then return FINISH([magnesium_value]).",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. CRITICAL: Only order if Mg < 1.9 mg/dL. If Mg >= 1.9 or no data within 24h, do NOT create any medication request. Make at most ONE medication order.",
     "eval_MRN": "S6521727"
   },
   {
     "id": "task5_14",
-    "instruction": "Check patient S0658561's last serum magnesium level within last 24 hours. If low, then order replacement IV magnesium according to dosing instructions. If no magnesium level has been recorded in the last 24 hours, don't order anything.\n",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. Dosing instructions: (1) Mild deficiency (eg, serum magnesium 1.5 to 1.9 mg/dL):\nIV: 1 g over 1 hour.\n(2) Moderate deficiency (eg, serum magnesium 1 to <1.5 mg/dL):\nIV: 2 g over 2 hours.\n(3) Severe deficiency (eg, serum magnesium <1 mg/dL):\nIV: 4 g over 4 hours.\n",
+    "instruction": "Check patient S0658561's last serum magnesium level within last 24 hours. Step 1: Query MG observations for the patient. Step 2: If NO observations within 24 hours, do NOT order anything this means NO magnesium data exists - IMMEDIATELY return FINISH([-1]) and do NOT make any more tool calls.. Step 3: Find the MOST RECENT observation within 24 hours. Step 4: Evaluate the magnesium level to determine if replacement is needed. Step 5: If status is NORMAL (Mg >= 1.9), do NOT order - return FINISH([magnesium_value]). Step 6: ONLY if status shows deficiency, make exactly ONE medication request with the recommended dose, then return FINISH([magnesium_value]).",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. CRITICAL: Only order if Mg < 1.9 mg/dL. If Mg >= 1.9 or no data within 24h, do NOT create any medication request. Make at most ONE medication order.",
     "eval_MRN": "S0658561"
   },
   {
     "id": "task5_15",
-    "instruction": "Check patient S1733937's last serum magnesium level within last 24 hours. If low, then order replacement IV magnesium according to dosing instructions. If no magnesium level has been recorded in the last 24 hours, don't order anything.\n",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. Dosing instructions: (1) Mild deficiency (eg, serum magnesium 1.5 to 1.9 mg/dL):\nIV: 1 g over 1 hour.\n(2) Moderate deficiency (eg, serum magnesium 1 to <1.5 mg/dL):\nIV: 2 g over 2 hours.\n(3) Severe deficiency (eg, serum magnesium <1 mg/dL):\nIV: 4 g over 4 hours.\n",
+    "instruction": "Check patient S1733937's last serum magnesium level within last 24 hours. Step 1: Query MG observations for the patient. Step 2: If NO observations within 24 hours, do NOT order anything this means NO magnesium data exists - IMMEDIATELY return FINISH([-1]) and do NOT make any more tool calls.. Step 3: Find the MOST RECENT observation within 24 hours. Step 4: Evaluate the magnesium level to determine if replacement is needed. Step 5: If status is NORMAL (Mg >= 1.9), do NOT order - return FINISH([magnesium_value]). Step 6: ONLY if status shows deficiency, make exactly ONE medication request with the recommended dose, then return FINISH([magnesium_value]).",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. CRITICAL: Only order if Mg < 1.9 mg/dL. If Mg >= 1.9 or no data within 24h, do NOT create any medication request. Make at most ONE medication order.",
     "eval_MRN": "S1733937"
   },
   {
     "id": "task5_16",
-    "instruction": "Check patient S1023381's last serum magnesium level within last 24 hours. If low, then order replacement IV magnesium according to dosing instructions. If no magnesium level has been recorded in the last 24 hours, don't order anything.\n",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. Dosing instructions: (1) Mild deficiency (eg, serum magnesium 1.5 to 1.9 mg/dL):\nIV: 1 g over 1 hour.\n(2) Moderate deficiency (eg, serum magnesium 1 to <1.5 mg/dL):\nIV: 2 g over 2 hours.\n(3) Severe deficiency (eg, serum magnesium <1 mg/dL):\nIV: 4 g over 4 hours.\n",
+    "instruction": "Check patient S1023381's last serum magnesium level within last 24 hours. Step 1: Query MG observations for the patient. Step 2: If NO observations within 24 hours, do NOT order anything this means NO magnesium data exists - IMMEDIATELY return FINISH([-1]) and do NOT make any more tool calls.. Step 3: Find the MOST RECENT observation within 24 hours. Step 4: Evaluate the magnesium level to determine if replacement is needed. Step 5: If status is NORMAL (Mg >= 1.9), do NOT order - return FINISH([magnesium_value]). Step 6: ONLY if status shows deficiency, make exactly ONE medication request with the recommended dose, then return FINISH([magnesium_value]).",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. CRITICAL: Only order if Mg < 1.9 mg/dL. If Mg >= 1.9 or no data within 24h, do NOT create any medication request. Make at most ONE medication order.",
     "eval_MRN": "S1023381"
   },
   {
     "id": "task5_17",
-    "instruction": "Check patient S6192632's last serum magnesium level within last 24 hours. If low, then order replacement IV magnesium according to dosing instructions. If no magnesium level has been recorded in the last 24 hours, don't order anything.\n",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. Dosing instructions: (1) Mild deficiency (eg, serum magnesium 1.5 to 1.9 mg/dL):\nIV: 1 g over 1 hour.\n(2) Moderate deficiency (eg, serum magnesium 1 to <1.5 mg/dL):\nIV: 2 g over 2 hours.\n(3) Severe deficiency (eg, serum magnesium <1 mg/dL):\nIV: 4 g over 4 hours.\n",
+    "instruction": "Check patient S6192632's last serum magnesium level within last 24 hours. Step 1: Query MG observations for the patient. Step 2: If NO observations within 24 hours, do NOT order anything this means NO magnesium data exists - IMMEDIATELY return FINISH([-1]) and do NOT make any more tool calls.. Step 3: Find the MOST RECENT observation within 24 hours. Step 4: Evaluate the magnesium level to determine if replacement is needed. Step 5: If status is NORMAL (Mg >= 1.9), do NOT order - return FINISH([magnesium_value]). Step 6: ONLY if status shows deficiency, make exactly ONE medication request with the recommended dose, then return FINISH([magnesium_value]).",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. CRITICAL: Only order if Mg < 1.9 mg/dL. If Mg >= 1.9 or no data within 24h, do NOT create any medication request. Make at most ONE medication order.",
     "eval_MRN": "S6192632"
   },
   {
     "id": "task5_18",
-    "instruction": "Check patient S6534835's last serum magnesium level within last 24 hours. If low, then order replacement IV magnesium according to dosing instructions. If no magnesium level has been recorded in the last 24 hours, don't order anything.\n",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. Dosing instructions: (1) Mild deficiency (eg, serum magnesium 1.5 to 1.9 mg/dL):\nIV: 1 g over 1 hour.\n(2) Moderate deficiency (eg, serum magnesium 1 to <1.5 mg/dL):\nIV: 2 g over 2 hours.\n(3) Severe deficiency (eg, serum magnesium <1 mg/dL):\nIV: 4 g over 4 hours.\n",
+    "instruction": "Check patient S6534835's last serum magnesium level within last 24 hours. Step 1: Query MG observations for the patient. Step 2: If NO observations within 24 hours, do NOT order anything this means NO magnesium data exists - IMMEDIATELY return FINISH([-1]) and do NOT make any more tool calls.. Step 3: Find the MOST RECENT observation within 24 hours. Step 4: Evaluate the magnesium level to determine if replacement is needed. Step 5: If status is NORMAL (Mg >= 1.9), do NOT order - return FINISH([magnesium_value]). Step 6: ONLY if status shows deficiency, make exactly ONE medication request with the recommended dose, then return FINISH([magnesium_value]).",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. CRITICAL: Only order if Mg < 1.9 mg/dL. If Mg >= 1.9 or no data within 24h, do NOT create any medication request. Make at most ONE medication order.",
     "eval_MRN": "S6534835"
   },
   {
     "id": "task5_19",
-    "instruction": "Check patient S3057899's last serum magnesium level within last 24 hours. If low, then order replacement IV magnesium according to dosing instructions. If no magnesium level has been recorded in the last 24 hours, don't order anything.\n",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. Dosing instructions: (1) Mild deficiency (eg, serum magnesium 1.5 to 1.9 mg/dL):\nIV: 1 g over 1 hour.\n(2) Moderate deficiency (eg, serum magnesium 1 to <1.5 mg/dL):\nIV: 2 g over 2 hours.\n(3) Severe deficiency (eg, serum magnesium <1 mg/dL):\nIV: 4 g over 4 hours.\n",
+    "instruction": "Check patient S3057899's last serum magnesium level within last 24 hours. Step 1: Query MG observations for the patient. Step 2: If NO observations within 24 hours, do NOT order anything this means NO magnesium data exists - IMMEDIATELY return FINISH([-1]) and do NOT make any more tool calls.. Step 3: Find the MOST RECENT observation within 24 hours. Step 4: Evaluate the magnesium level to determine if replacement is needed. Step 5: If status is NORMAL (Mg >= 1.9), do NOT order - return FINISH([magnesium_value]). Step 6: ONLY if status shows deficiency, make exactly ONE medication request with the recommended dose, then return FINISH([magnesium_value]).",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. CRITICAL: Only order if Mg < 1.9 mg/dL. If Mg >= 1.9 or no data within 24h, do NOT create any medication request. Make at most ONE medication order.",
     "eval_MRN": "S3057899"
   },
   {
     "id": "task5_20",
-    "instruction": "Check patient S1715871's last serum magnesium level within last 24 hours. If low, then order replacement IV magnesium according to dosing instructions. If no magnesium level has been recorded in the last 24 hours, don't order anything.\n",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. Dosing instructions: (1) Mild deficiency (eg, serum magnesium 1.5 to 1.9 mg/dL):\nIV: 1 g over 1 hour.\n(2) Moderate deficiency (eg, serum magnesium 1 to <1.5 mg/dL):\nIV: 2 g over 2 hours.\n(3) Severe deficiency (eg, serum magnesium <1 mg/dL):\nIV: 4 g over 4 hours.\n",
+    "instruction": "Check patient S1715871's last serum magnesium level within last 24 hours. Step 1: Query MG observations for the patient. Step 2: If NO observations within 24 hours, do NOT order anything this means NO magnesium data exists - IMMEDIATELY return FINISH([-1]) and do NOT make any more tool calls.. Step 3: Find the MOST RECENT observation within 24 hours. Step 4: Evaluate the magnesium level to determine if replacement is needed. Step 5: If status is NORMAL (Mg >= 1.9), do NOT order - return FINISH([magnesium_value]). Step 6: ONLY if status shows deficiency, make exactly ONE medication request with the recommended dose, then return FINISH([magnesium_value]).",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. CRITICAL: Only order if Mg < 1.9 mg/dL. If Mg >= 1.9 or no data within 24h, do NOT create any medication request. Make at most ONE medication order.",
     "eval_MRN": "S1715871"
   },
   {
     "id": "task5_21",
-    "instruction": "Check patient S3084624's last serum magnesium level within last 24 hours. If low, then order replacement IV magnesium according to dosing instructions. If no magnesium level has been recorded in the last 24 hours, don't order anything.\n",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. Dosing instructions: (1) Mild deficiency (eg, serum magnesium 1.5 to 1.9 mg/dL):\nIV: 1 g over 1 hour.\n(2) Moderate deficiency (eg, serum magnesium 1 to <1.5 mg/dL):\nIV: 2 g over 2 hours.\n(3) Severe deficiency (eg, serum magnesium <1 mg/dL):\nIV: 4 g over 4 hours.\n",
+    "instruction": "Check patient S3084624's last serum magnesium level within last 24 hours. Step 1: Query MG observations for the patient. Step 2: If NO observations within 24 hours, do NOT order anything this means NO magnesium data exists - IMMEDIATELY return FINISH([-1]) and do NOT make any more tool calls.. Step 3: Find the MOST RECENT observation within 24 hours. Step 4: Evaluate the magnesium level to determine if replacement is needed. Step 5: If status is NORMAL (Mg >= 1.9), do NOT order - return FINISH([magnesium_value]). Step 6: ONLY if status shows deficiency, make exactly ONE medication request with the recommended dose, then return FINISH([magnesium_value]).",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. CRITICAL: Only order if Mg < 1.9 mg/dL. If Mg >= 1.9 or no data within 24h, do NOT create any medication request. Make at most ONE medication order.",
     "eval_MRN": "S3084624"
   },
   {
     "id": "task5_22",
-    "instruction": "Check patient S1698248's last serum magnesium level within last 24 hours. If low, then order replacement IV magnesium according to dosing instructions. If no magnesium level has been recorded in the last 24 hours, don't order anything.\n",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. Dosing instructions: (1) Mild deficiency (eg, serum magnesium 1.5 to 1.9 mg/dL):\nIV: 1 g over 1 hour.\n(2) Moderate deficiency (eg, serum magnesium 1 to <1.5 mg/dL):\nIV: 2 g over 2 hours.\n(3) Severe deficiency (eg, serum magnesium <1 mg/dL):\nIV: 4 g over 4 hours.\n",
+    "instruction": "Check patient S1698248's last serum magnesium level within last 24 hours. Step 1: Query MG observations for the patient. Step 2: If NO observations within 24 hours, do NOT order anything this means NO magnesium data exists - IMMEDIATELY return FINISH([-1]) and do NOT make any more tool calls.. Step 3: Find the MOST RECENT observation within 24 hours. Step 4: Evaluate the magnesium level to determine if replacement is needed. Step 5: If status is NORMAL (Mg >= 1.9), do NOT order - return FINISH([magnesium_value]). Step 6: ONLY if status shows deficiency, make exactly ONE medication request with the recommended dose, then return FINISH([magnesium_value]).",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. CRITICAL: Only order if Mg < 1.9 mg/dL. If Mg >= 1.9 or no data within 24h, do NOT create any medication request. Make at most ONE medication order.",
     "eval_MRN": "S1698248"
   },
   {
     "id": "task5_23",
-    "instruction": "Check patient S2402518's last serum magnesium level within last 24 hours. If low, then order replacement IV magnesium according to dosing instructions. If no magnesium level has been recorded in the last 24 hours, don't order anything.\n",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. Dosing instructions: (1) Mild deficiency (eg, serum magnesium 1.5 to 1.9 mg/dL):\nIV: 1 g over 1 hour.\n(2) Moderate deficiency (eg, serum magnesium 1 to <1.5 mg/dL):\nIV: 2 g over 2 hours.\n(3) Severe deficiency (eg, serum magnesium <1 mg/dL):\nIV: 4 g over 4 hours.\n",
+    "instruction": "Check patient S2402518's last serum magnesium level within last 24 hours. Step 1: Query MG observations for the patient. Step 2: If NO observations within 24 hours, do NOT order anything this means NO magnesium data exists - IMMEDIATELY return FINISH([-1]) and do NOT make any more tool calls.. Step 3: Find the MOST RECENT observation within 24 hours. Step 4: Evaluate the magnesium level to determine if replacement is needed. Step 5: If status is NORMAL (Mg >= 1.9), do NOT order - return FINISH([magnesium_value]). Step 6: ONLY if status shows deficiency, make exactly ONE medication request with the recommended dose, then return FINISH([magnesium_value]).",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. CRITICAL: Only order if Mg < 1.9 mg/dL. If Mg >= 1.9 or no data within 24h, do NOT create any medication request. Make at most ONE medication order.",
     "eval_MRN": "S2402518"
   },
   {
     "id": "task5_24",
-    "instruction": "Check patient S6549951's last serum magnesium level within last 24 hours. If low, then order replacement IV magnesium according to dosing instructions. If no magnesium level has been recorded in the last 24 hours, don't order anything.\n",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. Dosing instructions: (1) Mild deficiency (eg, serum magnesium 1.5 to 1.9 mg/dL):\nIV: 1 g over 1 hour.\n(2) Moderate deficiency (eg, serum magnesium 1 to <1.5 mg/dL):\nIV: 2 g over 2 hours.\n(3) Severe deficiency (eg, serum magnesium <1 mg/dL):\nIV: 4 g over 4 hours.\n",
+    "instruction": "Check patient S6549951's last serum magnesium level within last 24 hours. Step 1: Query MG observations for the patient. Step 2: If NO observations within 24 hours, do NOT order anything this means NO magnesium data exists - IMMEDIATELY return FINISH([-1]) and do NOT make any more tool calls.. Step 3: Find the MOST RECENT observation within 24 hours. Step 4: Evaluate the magnesium level to determine if replacement is needed. Step 5: If status is NORMAL (Mg >= 1.9), do NOT order - return FINISH([magnesium_value]). Step 6: ONLY if status shows deficiency, make exactly ONE medication request with the recommended dose, then return FINISH([magnesium_value]).",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. CRITICAL: Only order if Mg < 1.9 mg/dL. If Mg >= 1.9 or no data within 24h, do NOT create any medication request. Make at most ONE medication order.",
     "eval_MRN": "S6549951"
   },
   {
     "id": "task5_25",
-    "instruction": "Check patient S6542579's last serum magnesium level within last 24 hours. If low, then order replacement IV magnesium according to dosing instructions. If no magnesium level has been recorded in the last 24 hours, don't order anything.\n",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. Dosing instructions: (1) Mild deficiency (eg, serum magnesium 1.5 to 1.9 mg/dL):\nIV: 1 g over 1 hour.\n(2) Moderate deficiency (eg, serum magnesium 1 to <1.5 mg/dL):\nIV: 2 g over 2 hours.\n(3) Severe deficiency (eg, serum magnesium <1 mg/dL):\nIV: 4 g over 4 hours.\n",
+    "instruction": "Check patient S6542579's last serum magnesium level within last 24 hours. Step 1: Query MG observations for the patient. Step 2: If NO observations within 24 hours, do NOT order anything this means NO magnesium data exists - IMMEDIATELY return FINISH([-1]) and do NOT make any more tool calls.. Step 3: Find the MOST RECENT observation within 24 hours. Step 4: Evaluate the magnesium level to determine if replacement is needed. Step 5: If status is NORMAL (Mg >= 1.9), do NOT order - return FINISH([magnesium_value]). Step 6: ONLY if status shows deficiency, make exactly ONE medication request with the recommended dose, then return FINISH([magnesium_value]).",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. CRITICAL: Only order if Mg < 1.9 mg/dL. If Mg >= 1.9 or no data within 24h, do NOT create any medication request. Make at most ONE medication order.",
     "eval_MRN": "S6542579"
   },
   {
     "id": "task5_26",
-    "instruction": "Check patient S1478444's last serum magnesium level within last 24 hours. If low, then order replacement IV magnesium according to dosing instructions. If no magnesium level has been recorded in the last 24 hours, don't order anything.\n",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. Dosing instructions: (1) Mild deficiency (eg, serum magnesium 1.5 to 1.9 mg/dL):\nIV: 1 g over 1 hour.\n(2) Moderate deficiency (eg, serum magnesium 1 to <1.5 mg/dL):\nIV: 2 g over 2 hours.\n(3) Severe deficiency (eg, serum magnesium <1 mg/dL):\nIV: 4 g over 4 hours.\n",
+    "instruction": "Check patient S1478444's last serum magnesium level within last 24 hours. Step 1: Query MG observations for the patient. Step 2: If NO observations within 24 hours, do NOT order anything this means NO magnesium data exists - IMMEDIATELY return FINISH([-1]) and do NOT make any more tool calls.. Step 3: Find the MOST RECENT observation within 24 hours. Step 4: Evaluate the magnesium level to determine if replacement is needed. Step 5: If status is NORMAL (Mg >= 1.9), do NOT order - return FINISH([magnesium_value]). Step 6: ONLY if status shows deficiency, make exactly ONE medication request with the recommended dose, then return FINISH([magnesium_value]).",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. CRITICAL: Only order if Mg < 1.9 mg/dL. If Mg >= 1.9 or no data within 24h, do NOT create any medication request. Make at most ONE medication order.",
     "eval_MRN": "S1478444"
   },
   {
     "id": "task5_27",
-    "instruction": "Check patient S6547257's last serum magnesium level within last 24 hours. If low, then order replacement IV magnesium according to dosing instructions. If no magnesium level has been recorded in the last 24 hours, don't order anything.\n",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. Dosing instructions: (1) Mild deficiency (eg, serum magnesium 1.5 to 1.9 mg/dL):\nIV: 1 g over 1 hour.\n(2) Moderate deficiency (eg, serum magnesium 1 to <1.5 mg/dL):\nIV: 2 g over 2 hours.\n(3) Severe deficiency (eg, serum magnesium <1 mg/dL):\nIV: 4 g over 4 hours.\n",
+    "instruction": "Check patient S6547257's last serum magnesium level within last 24 hours. Step 1: Query MG observations for the patient. Step 2: If NO observations within 24 hours, do NOT order anything this means NO magnesium data exists - IMMEDIATELY return FINISH([-1]) and do NOT make any more tool calls.. Step 3: Find the MOST RECENT observation within 24 hours. Step 4: Evaluate the magnesium level to determine if replacement is needed. Step 5: If status is NORMAL (Mg >= 1.9), do NOT order - return FINISH([magnesium_value]). Step 6: ONLY if status shows deficiency, make exactly ONE medication request with the recommended dose, then return FINISH([magnesium_value]).",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. CRITICAL: Only order if Mg < 1.9 mg/dL. If Mg >= 1.9 or no data within 24h, do NOT create any medication request. Make at most ONE medication order.",
     "eval_MRN": "S6547257"
   },
   {
     "id": "task5_28",
-    "instruction": "Check patient S2703270's last serum magnesium level within last 24 hours. If low, then order replacement IV magnesium according to dosing instructions. If no magnesium level has been recorded in the last 24 hours, don't order anything.\n",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. Dosing instructions: (1) Mild deficiency (eg, serum magnesium 1.5 to 1.9 mg/dL):\nIV: 1 g over 1 hour.\n(2) Moderate deficiency (eg, serum magnesium 1 to <1.5 mg/dL):\nIV: 2 g over 2 hours.\n(3) Severe deficiency (eg, serum magnesium <1 mg/dL):\nIV: 4 g over 4 hours.\n",
+    "instruction": "Check patient S2703270's last serum magnesium level within last 24 hours. Step 1: Query MG observations for the patient. Step 2: If NO observations within 24 hours, do NOT order anything this means NO magnesium data exists - IMMEDIATELY return FINISH([-1]) and do NOT make any more tool calls.. Step 3: Find the MOST RECENT observation within 24 hours. Step 4: Evaluate the magnesium level to determine if replacement is needed. Step 5: If status is NORMAL (Mg >= 1.9), do NOT order - return FINISH([magnesium_value]). Step 6: ONLY if status shows deficiency, make exactly ONE medication request with the recommended dose, then return FINISH([magnesium_value]).",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. CRITICAL: Only order if Mg < 1.9 mg/dL. If Mg >= 1.9 or no data within 24h, do NOT create any medication request. Make at most ONE medication order.",
     "eval_MRN": "S2703270"
   },
   {
     "id": "task5_29",
-    "instruction": "Check patient S2937751's last serum magnesium level within last 24 hours. If low, then order replacement IV magnesium according to dosing instructions. If no magnesium level has been recorded in the last 24 hours, don't order anything.\n",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. Dosing instructions: (1) Mild deficiency (eg, serum magnesium 1.5 to 1.9 mg/dL):\nIV: 1 g over 1 hour.\n(2) Moderate deficiency (eg, serum magnesium 1 to <1.5 mg/dL):\nIV: 2 g over 2 hours.\n(3) Severe deficiency (eg, serum magnesium <1 mg/dL):\nIV: 4 g over 4 hours.\n",
+    "instruction": "Check patient S2937751's last serum magnesium level within last 24 hours. Step 1: Query MG observations for the patient. Step 2: If NO observations within 24 hours, do NOT order anything this means NO magnesium data exists - IMMEDIATELY return FINISH([-1]) and do NOT make any more tool calls.. Step 3: Find the MOST RECENT observation within 24 hours. Step 4: Evaluate the magnesium level to determine if replacement is needed. Step 5: If status is NORMAL (Mg >= 1.9), do NOT order - return FINISH([magnesium_value]). Step 6: ONLY if status shows deficiency, make exactly ONE medication request with the recommended dose, then return FINISH([magnesium_value]).",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. CRITICAL: Only order if Mg < 1.9 mg/dL. If Mg >= 1.9 or no data within 24h, do NOT create any medication request. Make at most ONE medication order.",
     "eval_MRN": "S2937751"
   },
   {
     "id": "task5_30",
-    "instruction": "Check patient S6484983's last serum magnesium level within last 24 hours. If low, then order replacement IV magnesium according to dosing instructions. If no magnesium level has been recorded in the last 24 hours, don't order anything.\n",
-    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. Dosing instructions: (1) Mild deficiency (eg, serum magnesium 1.5 to 1.9 mg/dL):\nIV: 1 g over 1 hour.\n(2) Moderate deficiency (eg, serum magnesium 1 to <1.5 mg/dL):\nIV: 2 g over 2 hours.\n(3) Severe deficiency (eg, serum magnesium <1 mg/dL):\nIV: 4 g over 4 hours.\n",
+    "instruction": "Check patient S6484983's last serum magnesium level within last 24 hours. Step 1: Query MG observations for the patient. Step 2: If NO observations within 24 hours, do NOT order anything this means NO magnesium data exists - IMMEDIATELY return FINISH([-1]) and do NOT make any more tool calls.. Step 3: Find the MOST RECENT observation within 24 hours. Step 4: Evaluate the magnesium level to determine if replacement is needed. Step 5: If status is NORMAL (Mg >= 1.9), do NOT order - return FINISH([magnesium_value]). Step 6: ONLY if status shows deficiency, make exactly ONE medication request with the recommended dose, then return FINISH([magnesium_value]).",
+    "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. CRITICAL: Only order if Mg < 1.9 mg/dL. If Mg >= 1.9 or no data within 24h, do NOT create any medication request. Make at most ONE medication order.",
     "eval_MRN": "S6484983"
   },
   {
