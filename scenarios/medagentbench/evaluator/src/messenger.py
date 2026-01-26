@@ -193,7 +193,7 @@ class Messenger:
                     message=message,
                     base_url=url,
                     context_id=None if new_conversation else self._context_ids.get(url),
-                    config=config
+                    config=config,
                     timeout=timeout,
                 )
                 if outputs.get("status", "completed") != "completed":
