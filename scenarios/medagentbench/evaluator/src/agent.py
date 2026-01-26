@@ -177,6 +177,7 @@ class TaskResult(BaseModel):
     expected_answer: list | None
     time_used: float
     rounds: int
+    tools_called: int = 0  # Total number of tool calls made during the task
     # Failure tracking fields (only populated when correct=False)
     primary_failure: str | None = None
     failure_details: list[str] | None = None
@@ -191,6 +192,7 @@ class EvalResults(BaseModel):
     min_rounds: int | None = None  # Minimum rounds across all tasks
     max_rounds: int | None = None  # Maximum rounds across all tasks
     avg_rounds: float | None = None  # Average rounds across all tasks
+    avg_tools_called: float | None = None  # Average tool calls per task
     task_results: dict[str, TaskResult]
     time_used: float
 
@@ -262,6 +264,7 @@ def write_run_result(
             "correct": task_result.correct,
             "expected": task_result.expected_answer,
             "rounds": task_result.rounds,
+            "tools_called": task_result.tools_called,
             "time_used": task_result.time_used,
             "history": history,
         }
@@ -366,6 +369,7 @@ class ThreadSafeFileWriter:
                 "correct": task_result.correct,
                 "expected": task_result.expected_answer,
                 "rounds": task_result.rounds,
+                "tools_called": task_result.tools_called,
                 "time_used": task_result.time_used,
                 "history": history,
             } if task_result else None,
@@ -1598,7 +1602,8 @@ class Agent:
 
         try:
             # Send to agent with structured config via DataPart
-            agent_response: AgentResponse = await self.messenger.talk_to_agent(
+            # Use task_messenger (per-task) instead of self.messenger (shared) to avoid asyncio.Lock errors
+            agent_response: AgentResponse = await task_messenger.talk_to_agent(
                 message=task_prompt,
                 url=agent_url,
                 new_conversation=True,
@@ -1618,6 +1623,7 @@ class Agent:
                 response_text, fhir_ops = self.extract_fhir_operations_from_text(response_text)
             
             clean_response = response_text
+            tools_called = len(tool_history)  # Count total tool calls for this task
             
             # Add tool calls to history
             for tool_call in tool_history:
@@ -1662,6 +1668,7 @@ class Agent:
                         expected_answer=task_data.get('sol'),
                         time_used=time.time() - start_time,
                         rounds=rounds,
+                        tools_called=tools_called,
                         primary_failure=FailureType.MAX_ROUNDS_REACHED.value,
                         failure_details=[DetailedFailure.MAX_ITERATIONS_EXCEEDED.value],
                     )
@@ -1692,6 +1699,7 @@ class Agent:
                     expected_answer=task_data.get('sol'),
                     time_used=time.time() - start_time,
                     rounds=rounds,
+                    tools_called=tools_called,
                     primary_failure=eval_outcome.primary_failure if not eval_outcome.passed else None,
                     failure_details=eval_outcome.failure_details if not eval_outcome.passed else None,
                 )
@@ -1711,6 +1719,7 @@ class Agent:
                     expected_answer=task_data.get('sol'),
                     time_used=time.time() - start_time,
                     rounds=rounds,
+                    tools_called=tools_called,
                     primary_failure=FailureType.INVALID_FINISH_FORMAT.value,
                     failure_details=[DetailedFailure.NO_FINISH_FORMAT.value],
                 )
@@ -1731,6 +1740,7 @@ class Agent:
                 expected_answer=task_data.get('sol'),
                 time_used=time.time() - start_time,
                 rounds=0,
+                tools_called=0,  # Exception occurred, no tool calls tracked
                 primary_failure=FailureType.SYSTEM_ERROR.value,
                 failure_details=[f"exception: {str(e)}"],
             )
@@ -1858,6 +1868,7 @@ class Agent:
                             expected_answer=task.get('sol'),
                             time_used=0,
                             rounds=0,
+                            tools_called=0,
                         )
                 else:
                     worker_url = agent_url
@@ -1901,6 +1912,7 @@ class Agent:
                         expected_answer=task.get('sol'),
                         time_used=0,
                         rounds=0,
+                        tools_called=0,
                     )
                 finally:
                     loop.close()
@@ -1935,6 +1947,7 @@ class Agent:
                             expected_answer=task.get('sol'),
                             time_used=0,
                             rounds=0,
+                            tools_called=0,
                         ))
 
             # Process results
@@ -1975,6 +1988,12 @@ class Agent:
                 min_rounds = min(all_rounds)
                 max_rounds = max(all_rounds)
                 avg_rounds = round(sum(all_rounds) / len(all_rounds), 2)
+            
+            # Calculate tools_called statistics
+            avg_tools_called: float | None = None
+            if task_results:
+                all_tools = [r.tools_called for r in task_results.values()]
+                avg_tools_called = round(sum(all_tools) / len(all_tools), 2)
 
             eval_results = EvalResults(
                 domain=domain,
@@ -1985,6 +2004,7 @@ class Agent:
                 min_rounds=min_rounds,
                 max_rounds=max_rounds,
                 avg_rounds=avg_rounds,
+                avg_tools_called=avg_tools_called,
                 task_results=task_results,
                 time_used=time_used,
             )
