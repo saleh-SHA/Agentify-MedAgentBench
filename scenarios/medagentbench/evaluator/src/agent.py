@@ -1431,6 +1431,7 @@ class Agent:
         self.messenger = Messenger()
         self.tasks: list[dict] = []
         self._cached_prompt: str | None = None  # Cached prompt template from MCP
+        self.file_writer = ThreadSafeFileWriter()  # Thread-safe file writer for parallel execution
     
     async def get_system_prompt(self, mcp_server_url: str) -> str:
         """Get the system prompt template, fetching from MCP server if not cached.
@@ -1459,7 +1460,6 @@ class Agent:
             logger.warning("Using fallback system prompt (MCP fetch failed)")
         
         return self._cached_prompt
-        self.file_writer = ThreadSafeFileWriter()  # Thread-safe file writer for parallel execution
 
     def validate_request(self, request: EvalRequest) -> tuple[bool, str]:
         missing_roles = set(self.required_roles) - set(request.participants.keys())
