@@ -315,16 +315,17 @@ The MCP server provides **9 FHIR tools** for interacting with patient data:
 
 ## Environment Variables
 
-| Variable                   | Default                              | Description                         |
-| -------------------------- | ------------------------------------ | ----------------------------------- |
-| `OPENAI_API_KEY`           | (required)                           | OpenAI API key for the purple agent |
-| `MEDAGENT_LLM_MODEL`       | `openai/gpt-5`                       | LLM model to use (litellm format)   |
-| `MCP_SERVER_URL`           | `http://localhost:8002`              | MCP server URL                      |
-| `MCP_FHIR_API_BASE`        | `http://localhost:8080/fhir/`        | FHIR server base URL                |
-| `MEDAGENTBENCH_TASKS_FILE` | `src/mcp/resources/tasks/tasks.json` | Path to tasks file                  |
-| `MEDAGENT_OUTPUT_DIR`      | `outputs/medagentbench`              | Output directory for results        |
-| `HOST`                     | `0.0.0.0`                            | Host for agent servers              |
-| `AGENT_PORT`               | `9009`                               | Port for green agent server         |
+| Variable                   | Default                              | Description                                         |
+| -------------------------- | ------------------------------------ | --------------------------------------------------- |
+| `OPENAI_API_KEY`           | (required)                           | OpenAI API key for the purple agent                 |
+| `MEDAGENT_LLM_MODEL`       | `openai/gpt-4o-mini`                 | LLM model to use (litellm format)                   |
+| `MEDAGENT_LLM_PROVIDER`    | (auto-detect)                        | LLM provider override (e.g., `anthropic`, `google`) |
+| `MCP_SERVER_URL`           | `http://localhost:8002`              | MCP server URL                                      |
+| `MCP_FHIR_API_BASE`        | `http://localhost:8080/fhir/`        | FHIR server base URL                                |
+| `MEDAGENTBENCH_TASKS_FILE` | `src/mcp/resources/tasks/tasks.json` | Path to tasks file                                  |
+| `MEDAGENT_OUTPUT_DIR`      | `outputs/medagentbench`              | Output directory for results                        |
+| `HOST`                     | `0.0.0.0`                            | Host for agent servers                              |
+| `AGENT_PORT`               | `9009`                               | Port for green agent server                         |
 
 ---
 
