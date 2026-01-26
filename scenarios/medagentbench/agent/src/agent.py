@@ -25,9 +25,7 @@ MCP_SERVER_URL = os.environ.get("MCP_SERVER_URL")  # Can be overridden via DataP
 
 # LLM configuration (required)
 # LLM_MODEL: The model identifier in LiteLLM format (e.g., "openai/gpt-4o-mini", "anthropic/claude-3.5-sonnet")
-LLM_MODEL = os.environ.get("MEDAGENT_LLM_MODEL")
-if not LLM_MODEL:
-    raise RuntimeError("MEDAGENT_LLM_MODEL environment variable is required")
+LLM_MODEL = "openai/gpt-4o-mini"
 
 # LLM_PROVIDER: Optional provider override (e.g., "openai", "anthropic", "google", "azure")
 # Set to None (or leave empty) to let LiteLLM auto-detect from the model string prefix
