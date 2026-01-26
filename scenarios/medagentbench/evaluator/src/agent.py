@@ -1,12 +1,18 @@
 """MedAgentBench evaluator (green agent) - orchestrates and evaluates medical AI agents."""
 
+import asyncio
 import json
 import logging
 import os
+import queue
 import re
+import socket
+import subprocess
+import threading
 import time
 from collections import Counter
 from dataclasses import dataclass, field
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Optional
@@ -294,18 +300,262 @@ def write_overall_results(
     eval_results: "EvalResults",
 ) -> None:
     """Write overall evaluation results to overall.json.
-    
+
     Args:
         output_dir: Directory to write the results to
         eval_results: The EvalResults object containing overall metrics
     """
     os.makedirs(output_dir, exist_ok=True)
-    
+
     output_file = os.path.join(output_dir, "overall.json")
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(eval_results.model_dump(), f, indent=2, ensure_ascii=False)
-    
+
     logger.info(f"Overall results written to {output_file}")
+
+
+# ============================================================================
+# Thread-Safe File Writer for Parallel Execution
+# ============================================================================
+
+class ThreadSafeFileWriter:
+    """Thread-safe file writer using threading.Lock for true parallel execution."""
+
+    def __init__(self):
+        self._locks: dict[str, threading.Lock] = {}
+        self._master_lock = threading.Lock()
+
+    def _get_lock(self, filepath: str) -> threading.Lock:
+        """Get or create a lock for a specific file path."""
+        with self._master_lock:
+            if filepath not in self._locks:
+                self._locks[filepath] = threading.Lock()
+            return self._locks[filepath]
+
+    def write_run_result(
+        self,
+        output_dir: str,
+        task_id: str,
+        task_result: "TaskResult",
+        task_data: dict,
+        history: list,
+        error: Optional[str] = None,
+    ) -> None:
+        """Thread-safe write of a single task run result to runs.jsonl or error.jsonl.
+
+        Args:
+            output_dir: Directory to write the result to
+            task_id: Task identifier
+            task_result: The TaskResult object containing results
+            task_data: Original task data
+            history: Conversation history
+            error: Error message if the task failed
+        """
+        os.makedirs(output_dir, exist_ok=True)
+
+        timestamp_ms = int(time.time() * 1000)
+        time_str = datetime.fromtimestamp(timestamp_ms / 1000).strftime("%Y-%m-%d %H:%M:%S")
+
+        # Build the result record
+        record = {
+            "index": task_id,
+            "error": error,
+            "output": {
+                "result": task_result.agent_answer,
+                "status": task_result.status,
+                "correct": task_result.correct,
+                "expected": task_result.expected_answer,
+                "rounds": task_result.rounds,
+                "time_used": task_result.time_used,
+                "history": history,
+            } if task_result else None,
+            "task_data": {
+                "id": task_data.get("id"),
+                "instruction": task_data.get("instruction"),
+                "context": task_data.get("context"),
+            },
+            "time": {"timestamp": timestamp_ms, "str": time_str},
+        }
+
+        # Write to appropriate file
+        if error:
+            target_file = os.path.join(output_dir, "error.jsonl")
+        else:
+            target_file = os.path.join(output_dir, "runs.jsonl")
+
+        # Use threading lock for thread-safe file writes
+        lock = self._get_lock(target_file)
+        with lock:
+            with open(target_file, "a", encoding="utf-8") as f:
+                f.write(json.dumps(record, ensure_ascii=False) + "\n")
+
+        logger.info(f"Result written to {target_file}")
+
+
+# ============================================================================
+# Worker Pool for Multi-Process Parallelism
+# ============================================================================
+
+class WorkerPool:
+    """Manages multiple agent worker processes for true parallel execution.
+
+    Similar to MedAgentBench's worker architecture, this spawns multiple agent
+    processes on different ports to handle tasks in parallel.
+    """
+
+    BASE_PORT = 9019  # Starting port for agent workers
+    AGENT_SCRIPT = "scenarios/medagentbench/agent/src/server.py"
+
+    def __init__(self, num_workers: int = 1):
+        self.num_workers = num_workers
+        self.workers: list[dict] = []  # List of {process, port, url, available}
+        self._lock = threading.Lock()
+        self._available_workers = queue.Queue()
+
+    def _is_port_available(self, port: int) -> bool:
+        """Check if a port is available for use."""
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            try:
+                s.bind(('localhost', port))
+                return True
+            except OSError:
+                return False
+
+    def _wait_for_service(self, host: str, port: int, timeout: int = 60) -> bool:
+        """Wait for a service to become available on a specific port."""
+        start_time = time.time()
+        while time.time() - start_time < timeout:
+            try:
+                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                    s.settimeout(1)
+                    s.connect((host, port))
+                    return True
+            except (socket.error, socket.timeout):
+                time.sleep(0.5)
+        return False
+
+    def start_workers(self) -> list[str]:
+        """Start all worker processes and return their URLs.
+
+        Returns:
+            List of worker URLs (e.g., ["http://localhost:9019", "http://localhost:9020"])
+        """
+        logger.info(f"Starting {self.num_workers} agent worker(s)...")
+
+        worker_urls = []
+
+        for i in range(self.num_workers):
+            port = self.BASE_PORT + i
+
+            # Check if port is already in use (maybe from previous run)
+            if not self._is_port_available(port):
+                logger.warning(f"Port {port} already in use, assuming worker is running")
+                url = f"http://localhost:{port}"
+                worker_urls.append(url)
+                self.workers.append({
+                    "process": None,  # Not managed by us
+                    "port": port,
+                    "url": url,
+                    "managed": False,
+                })
+                self._available_workers.put(url)
+                continue
+
+            # Start new worker process
+            try:
+                process = subprocess.Popen(
+                    [
+                        "python", self.AGENT_SCRIPT,
+                        "--host", "0.0.0.0",
+                        "--port", str(port),
+                    ],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                )
+
+                url = f"http://localhost:{port}"
+                self.workers.append({
+                    "process": process,
+                    "port": port,
+                    "url": url,
+                    "managed": True,
+                })
+
+                logger.info(f"Started worker {i+1}/{self.num_workers} on port {port} (PID: {process.pid})")
+
+            except Exception as e:
+                logger.error(f"Failed to start worker on port {port}: {e}")
+                continue
+
+        # Wait for all workers to be ready
+        logger.info("Waiting for workers to be ready...")
+        for worker in self.workers:
+            port = worker["port"]
+            if self._wait_for_service("localhost", port, timeout=30):
+                logger.info(f"Worker on port {port} is ready")
+                worker_urls.append(worker["url"])
+                self._available_workers.put(worker["url"])
+            else:
+                logger.error(f"Worker on port {port} failed to start within timeout")
+                if worker["managed"] and worker["process"]:
+                    worker["process"].terminate()
+
+        logger.info(f"Successfully started {len(worker_urls)} worker(s)")
+        return worker_urls
+
+    def get_worker(self, timeout: float = 300) -> str:
+        """Get an available worker URL (blocks until one is available).
+
+        Args:
+            timeout: Maximum time to wait for a worker
+
+        Returns:
+            Worker URL
+
+        Raises:
+            queue.Empty: If no worker becomes available within timeout
+        """
+        return self._available_workers.get(timeout=timeout)
+
+    def release_worker(self, url: str) -> None:
+        """Release a worker back to the pool."""
+        self._available_workers.put(url)
+
+    def stop_workers(self) -> None:
+        """Stop all managed worker processes."""
+        logger.info("Stopping worker processes...")
+
+        for worker in self.workers:
+            if worker["managed"] and worker["process"]:
+                try:
+                    worker["process"].terminate()
+                    worker["process"].wait(timeout=10)
+                    logger.info(f"Stopped worker on port {worker['port']}")
+                except subprocess.TimeoutExpired:
+                    worker["process"].kill()
+                    logger.warning(f"Force killed worker on port {worker['port']}")
+                except Exception as e:
+                    logger.error(f"Error stopping worker on port {worker['port']}: {e}")
+
+        self.workers.clear()
+        # Clear the queue
+        while not self._available_workers.empty():
+            try:
+                self._available_workers.get_nowait()
+            except queue.Empty:
+                break
+
+        logger.info("All workers stopped")
+
+    def __enter__(self):
+        """Context manager entry."""
+        self.start_workers()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Context manager exit."""
+        self.stop_workers()
+        return False
 
 
 # ============================================================================
@@ -1209,6 +1459,7 @@ class Agent:
             logger.warning("Using fallback system prompt (MCP fetch failed)")
         
         return self._cached_prompt
+        self.file_writer = ThreadSafeFileWriter()  # Thread-safe file writer for parallel execution
 
     def validate_request(self, request: EvalRequest) -> tuple[bool, str]:
         missing_roles = set(self.required_roles) - set(request.participants.keys())
@@ -1310,15 +1561,23 @@ class Agent:
         updater: TaskUpdater,
         output_dir: Optional[str] = None,
     ) -> TaskResult:
-        """Run a single task and return results."""
+        """Run a single task and return results.
+
+        Note: Creates a dedicated Messenger per task to support parallel execution
+        without context_id conflicts.
+        """
         start_time = time.time()
         task_id = task_data['id']
-        
+
+        # Create a dedicated messenger for this task to avoid context_id conflicts
+        # when running multiple tasks in parallel
+        task_messenger = Messenger()
+
         await updater.update_status(
             TaskState.working,
             new_agent_text_message(f"Running task {task_id}..."),
         )
-        
+
         # Get system prompt (fetched from MCP server or fallback)
         prompt_template = await self.get_system_prompt(mcp_server_url)
         
@@ -1336,7 +1595,7 @@ class Agent:
         }
         
         history = [{"role": "user", "content": task_prompt}]
-        
+
         try:
             # Send to agent with structured config via DataPart
             agent_response: AgentResponse = await self.messenger.talk_to_agent(
@@ -1437,10 +1696,10 @@ class Agent:
                     failure_details=eval_outcome.failure_details if not eval_outcome.passed else None,
                 )
                 
-                # Write to runs.jsonl
+                # Write to runs.jsonl using thread-safe file writer
                 if output_dir:
-                    write_run_result(output_dir, task_id, result, task_data, history)
-                
+                    self.file_writer.write_run_result(output_dir, task_id, result, task_data, history)
+
                 return result
             else:
                 # Agent didn't return valid FINISH format
@@ -1455,13 +1714,13 @@ class Agent:
                     primary_failure=FailureType.INVALID_FINISH_FORMAT.value,
                     failure_details=[DetailedFailure.NO_FINISH_FORMAT.value],
                 )
-                
-                # Write to runs.jsonl
+
+                # Write to runs.jsonl using thread-safe file writer
                 if output_dir:
-                    write_run_result(output_dir, task_id, result, task_data, history)
-                
+                    self.file_writer.write_run_result(output_dir, task_id, result, task_data, history)
+
                 return result
-                
+
         except Exception as e:
             logger.error(f"Task {task_id} failed: {e}")
             result = TaskResult(
@@ -1475,11 +1734,11 @@ class Agent:
                 primary_failure=FailureType.SYSTEM_ERROR.value,
                 failure_details=[f"exception: {str(e)}"],
             )
-            
-            # Write to error.jsonl
+
+            # Write to error.jsonl using thread-safe file writer
             if output_dir:
-                write_run_result(output_dir, task_id, result, task_data, history, error=str(e))
-            
+                self.file_writer.write_run_result(output_dir, task_id, result, task_data, history, error=str(e))
+
             return result
 
     async def run(self, message: Message, updater: TaskUpdater) -> None:
@@ -1509,7 +1768,13 @@ class Agent:
         max_rounds = int(request.config.get("max_rounds", 10))
         mcp_server_url = str(request.config.get("mcp_server_url", "http://localhost:8002"))
         fhir_api_base = str(request.config.get("fhir_api_base", "http://medagentbench.ddns.net:8080/fhir/"))
-        
+
+        # Multi-worker parallelism configuration (MedAgentBench-style)
+        # num_workers: Number of agent worker processes to spawn (each on different port)
+        # When num_workers > 1, tasks are distributed across workers for true parallelism
+        num_workers = int(request.config.get("num_workers", 1))
+        max_concurrent_tasks = num_workers  # One task per worker at a time
+
         # Get agent name from config or derive from URL
         agent_name = str(request.config.get("agent_name", "default_agent"))
         
@@ -1533,36 +1798,153 @@ class Agent:
             tasks = all_tasks
 
         logger.info(f"Running {len(tasks)} tasks for domain {domain}")
-        
-        await updater.update_status(
-            TaskState.working,
-            new_agent_text_message(f"Evaluating {len(tasks)} tasks in {domain} domain"),
-        )
+
+        # Log parallel execution mode
+        if num_workers > 1:
+            logger.info(f"Multi-worker parallelism enabled: {num_workers} workers")
+            await updater.update_status(
+                TaskState.working,
+                new_agent_text_message(
+                    f"Starting parallel evaluation: {len(tasks)} tasks with {num_workers} worker processes"
+                ),
+            )
+        else:
+            await updater.update_status(
+                TaskState.working,
+                new_agent_text_message(f"Evaluating {len(tasks)} tasks in {domain} domain"),
+            )
 
         start_time = time.time()
         task_results: dict[str, TaskResult] = {}
         correct_count = 0
 
+        # Create worker pool for multi-process parallelism
+        worker_pool = WorkerPool(num_workers=num_workers) if num_workers > 1 else None
+
         try:
-            for task in tasks:
-                result = await self.run_single_task(
-                    agent_url=agent_url,
-                    task_data=task,
-                    mcp_server_url=mcp_server_url,
-                    fhir_api_base=fhir_api_base,
-                    max_rounds=max_rounds,
-                    updater=updater,
-                    output_dir=output_dir,
-                )
+            # Start worker processes if using multi-worker mode
+            if worker_pool:
+                worker_urls = worker_pool.start_workers()
+                if not worker_urls:
+                    raise RuntimeError("Failed to start any worker processes")
+                logger.info(f"Worker pool ready with {len(worker_urls)} workers")
+            else:
+                # Single worker mode - use the configured agent URL
+                worker_urls = [agent_url]
+
+            # Thread-safe progress tracking
+            progress_lock = threading.Lock()
+            completed_count = 0
+
+            def run_task_in_thread(task: dict, index: int) -> TaskResult:
+                """Run a single task in its own thread with a dedicated event loop.
+
+                Uses worker pool to get an available agent worker for true parallelism.
+                Each worker handles one task at a time, enabling independent parallel execution.
+                """
+                nonlocal completed_count
+
+                # Get an available worker from the pool
+                if worker_pool:
+                    try:
+                        worker_url = worker_pool.get_worker(timeout=600)
+                    except queue.Empty:
+                        logger.error(f"No worker available for task {task.get('id', 'unknown')}")
+                        return TaskResult(
+                            task_id=task.get('id', 'unknown'),
+                            correct=False,
+                            status="error",
+                            agent_answer="No worker available",
+                            expected_answer=task.get('sol'),
+                            time_used=0,
+                            rounds=0,
+                        )
+                else:
+                    worker_url = agent_url
+
+                # Create a new event loop for this thread
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+
+                try:
+                    # Run the async task in this thread's event loop
+                    result = loop.run_until_complete(
+                        self.run_single_task(
+                            agent_url=worker_url,  # Use worker URL instead of fixed agent_url
+                            task_data=task,
+                            mcp_server_url=mcp_server_url,
+                            fhir_api_base=fhir_api_base,
+                            max_rounds=max_rounds,
+                            updater=updater,
+                            output_dir=output_dir,
+                        )
+                    )
+
+                    # Update progress (thread-safe)
+                    with progress_lock:
+                        completed_count += 1
+                        status_emoji = "[PASS]" if result.correct else "[FAIL]"
+                        logger.info(
+                            f"[{completed_count}/{len(tasks)}] Task {result.task_id}: {status_emoji} ({result.time_used:.1f}s) [Worker: {worker_url}]"
+                        )
+
+                    return result
+
+                except Exception as e:
+                    logger.error(f"Task {task.get('id', 'unknown')} failed with exception: {e}")
+                    # Return error result instead of raising to allow other tasks to continue
+                    return TaskResult(
+                        task_id=task.get('id', 'unknown'),
+                        correct=False,
+                        status="error",
+                        agent_answer=str(e),
+                        expected_answer=task.get('sol'),
+                        time_used=0,
+                        rounds=0,
+                    )
+                finally:
+                    loop.close()
+                    # Release the worker back to the pool
+                    if worker_pool:
+                        worker_pool.release_worker(worker_url)
+
+            # Execute all tasks with ThreadPoolExecutor for true parallelism
+            logger.info(f"Starting ThreadPoolExecutor with {num_workers} workers")
+            results = []
+
+            with ThreadPoolExecutor(max_workers=num_workers) as executor:
+                # Submit all tasks to the thread pool
+                futures = {
+                    executor.submit(run_task_in_thread, task, idx): task
+                    for idx, task in enumerate(tasks)
+                }
+
+                # Collect results as they complete
+                for future in as_completed(futures):
+                    task = futures[future]
+                    try:
+                        result = future.result()
+                        results.append(result)
+                    except Exception as e:
+                        logger.error(f"Task {task.get('id', 'unknown')} raised exception: {e}")
+                        results.append(TaskResult(
+                            task_id=task.get('id', 'unknown'),
+                            correct=False,
+                            status="error",
+                            agent_answer=str(e),
+                            expected_answer=task.get('sol'),
+                            time_used=0,
+                            rounds=0,
+                        ))
+
+            # Process results
+            for result in results:
+                if isinstance(result, Exception):
+                    logger.error(f"Task failed with unhandled exception: {result}")
+                    continue
                 task_results[result.task_id] = result
                 if result.correct:
                     correct_count += 1
-                
-                status_emoji = "✓" if result.correct else "✗"
-                await updater.update_status(
-                    TaskState.working,
-                    new_agent_text_message(f"Task {result.task_id}: {status_emoji} ({result.time_used:.1f}s)"),
-                )
 
             time_used = time.time() - start_time
             pass_rate = (correct_count / len(tasks) * 100) if tasks else 0
@@ -1609,7 +1991,7 @@ class Agent:
 
             # Build summary
             task_results_str = "\n".join(
-                f"  {tid}: {'✓' if r.correct else '✗'} ({r.status})"
+                f"  {tid}: {'[PASS]' if r.correct else '[FAIL]'} ({r.status})"
                 for tid, r in task_results.items()
             )
             summary = f"""MedAgentBench Results
@@ -1617,6 +1999,7 @@ Domain: {domain}
 Tasks: {len(tasks)}
 Pass Rate: {pass_rate:.1f}% ({correct_count}/{len(tasks)})
 Time: {time_used:.1f}s
+Workers: {num_workers}
 
 Task Results:
 {task_results_str}"""
@@ -1628,9 +2011,11 @@ Task Results:
                 ],
                 name="Result",
             )
-            
+
             # Write overall results to file
             write_overall_results(output_dir, eval_results)
         finally:
-            self.messenger.reset()
+            # Stop worker processes if using multi-worker mode
+            if worker_pool:
+                worker_pool.stop_workers()
 

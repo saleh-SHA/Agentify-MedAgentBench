@@ -21,6 +21,7 @@ dotenv.load_dotenv()
 
 # MCP server URL from environment (default to localhost:8002 for local development)
 MCP_SERVER_URL = os.environ.get("MCP_SERVER_URL", "http://localhost:8002")
+MODEL = os.environ.get("MEDAGENT_LLM_MODEL", "openai/gpt-4o-mini")
 
 logger = logging_config.setup_logging("logs/white_agent.log", "white_agent")
 
@@ -163,10 +164,10 @@ class MedAgentWhiteExecutor(AgentExecutor):
         fhir_posts: List[Dict[str, Any]] = []  # Track FHIR POST operations for evaluation
         
         for iteration in range(max_iterations):
-            logger.info(f"Calling GPT-5 with tools (iteration {iteration + 1})")
+            logger.info(f"Calling {MODEL} with tools (iteration {iteration + 1})")
             response = completion(
                 messages=messages,
-                model="openai/gpt-5",
+                model=MODEL,
                 custom_llm_provider="openai",
                 tools=openai_tools,
                 tool_choice="auto"
@@ -239,10 +240,10 @@ class MedAgentWhiteExecutor(AgentExecutor):
         Returns:
             Response content
         """
-        logger.info("Calling GPT-5 without tools")
+        logger.info(f"Calling {MODEL} without tools")
         response = completion(
             messages=messages,
-            model="openai/gpt-5",
+            model=MODEL,
             custom_llm_provider="openai",
         )
         message = response.choices[0].message.model_dump()
