@@ -138,10 +138,17 @@ class NoteObject(BaseModel):
     """Note object with text field for comments."""
     text: str = Field(description="Free text comment")
 
-# Configuration (defaults for local development)
-FHIR_API_BASE = os.environ.get("MCP_FHIR_API_BASE", "http://localhost:8080/fhir/").rstrip("/")
-TASKS_FILE = os.environ.get("MCP_TASKS_FILE", "src/mcp/resources/tasks/tasks.json")
-SYSTEM_PROMPT_FILE = os.environ.get("MCP_SYSTEM_PROMPT_FILE", "src/mcp/resources/prompts/system_prompt.txt")
+# Configuration from environment
+# FHIR_API_BASE is required - must be provided
+FHIR_API_BASE = os.environ.get("MCP_FHIR_API_BASE")
+if not FHIR_API_BASE:
+    raise RuntimeError("MCP_FHIR_API_BASE environment variable is required")
+FHIR_API_BASE = FHIR_API_BASE.rstrip("/")
+
+# Tasks and prompt files use bundled defaults (relative to this file's directory)
+_SCRIPT_DIR = Path(__file__).parent.resolve()
+TASKS_FILE = str(_SCRIPT_DIR / "resources" / "tasks" / "tasks.json")
+SYSTEM_PROMPT_FILE = str(_SCRIPT_DIR / "resources" / "prompts" / "system_prompt.txt")
 
 # Create FastMCP server
 mcp = FastMCP(
@@ -152,11 +159,14 @@ mcp = FastMCP(
 
 # Load tasks from JSON file
 def _load_tasks() -> List[Dict[str, Any]]:
-    """Load tasks from JSON file."""
+    """Load tasks from JSON file.
+    
+    Raises:
+        RuntimeError: If the tasks file is not found or cannot be loaded.
+    """
     tasks_path = Path(TASKS_FILE)
     if not tasks_path.exists():
-        print(f"Warning: Tasks file '{TASKS_FILE}' not found. No tasks will be available.")
-        return []
+        raise RuntimeError(f"Tasks file '{TASKS_FILE}' not found")
     
     try:
         with open(tasks_path, 'r', encoding='utf-8') as f:
@@ -164,16 +174,18 @@ def _load_tasks() -> List[Dict[str, Any]]:
         print(f"Loaded {len(tasks)} tasks from {TASKS_FILE}")
         return tasks
     except Exception as e:
-        print(f"Error loading tasks from '{TASKS_FILE}': {e}")
-        return []
+        raise RuntimeError(f"Error loading tasks from '{TASKS_FILE}': {e}") from e
 
 
 def _load_system_prompt() -> str:
-    """Load system prompt template from file."""
+    """Load system prompt template from file.
+    
+    Raises:
+        RuntimeError: If the system prompt file is not found or cannot be loaded.
+    """
     prompt_path = Path(SYSTEM_PROMPT_FILE)
     if not prompt_path.exists():
-        print(f"Warning: System prompt file '{SYSTEM_PROMPT_FILE}' not found.")
-        return ""
+        raise RuntimeError(f"System prompt file '{SYSTEM_PROMPT_FILE}' not found")
     
     try:
         with open(prompt_path, 'r', encoding='utf-8') as f:
@@ -181,8 +193,7 @@ def _load_system_prompt() -> str:
         print(f"Loaded system prompt from {SYSTEM_PROMPT_FILE}")
         return prompt
     except Exception as e:
-        print(f"Error loading system prompt from '{SYSTEM_PROMPT_FILE}': {e}")
-        return ""
+        raise RuntimeError(f"Error loading system prompt from '{SYSTEM_PROMPT_FILE}': {e}") from e
 
 
 # Initialize tasks and prompt

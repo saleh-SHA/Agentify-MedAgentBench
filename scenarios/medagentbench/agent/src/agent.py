@@ -3,7 +3,6 @@
 import json
 import logging
 import os
-import re
 from typing import Any
 
 from dotenv import load_dotenv
@@ -21,13 +20,14 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("medagentbench_agent")
 
-# Configuration from environment (defaults for local development)
-DEFAULT_MCP_SERVER_URL = os.environ.get("mcp_server_url", "http://localhost:8002")
-DEFAULT_FHIR_API_BASE = os.environ.get("fhir_api_base", "http://localhost:8080/fhir/").rstrip("/")
+# Configuration from environment (required)
+MCP_SERVER_URL = os.environ.get("MCP_SERVER_URL")  # Can be overridden via DataPart config
 
-# LLM configuration
+# LLM configuration (required)
 # LLM_MODEL: The model identifier in LiteLLM format (e.g., "openai/gpt-4o-mini", "anthropic/claude-3.5-sonnet")
-LLM_MODEL = os.environ.get("MEDAGENT_LLM_MODEL", "openai/gpt-4o-mini")
+LLM_MODEL = os.environ.get("MEDAGENT_LLM_MODEL")
+if not LLM_MODEL:
+    raise RuntimeError("MEDAGENT_LLM_MODEL environment variable is required")
 
 # LLM_PROVIDER: Optional provider override (e.g., "openai", "anthropic", "google", "azure")
 # Set to None (or leave empty) to let LiteLLM auto-detect from the model string prefix
@@ -51,25 +51,12 @@ def extract_config_from_message(message: Message) -> dict[str, Any]:
     return {}
 
 
-def extract_mcp_server_url_from_text(text: str) -> str | None:
-    """Extract MCP server URL from task prompt text (legacy fallback).
-    
-    Looks for pattern: 'MCP server at: <url>'
-    This is kept for backward compatibility with older evaluators.
-    """
-    pattern = r'MCP server at:\s*(https?://[^\s]+)'
-    match = re.search(pattern, text)
-    if match:
-        return match.group(1).rstrip('/')
-    return None
-
-
 class Agent:
     def __init__(self):
-        self.mcp_server_url = DEFAULT_MCP_SERVER_URL
+        self.mcp_server_url = MCP_SERVER_URL  # Can be overridden via DataPart config
         self.model = LLM_MODEL
         self.llm_provider = LLM_PROVIDER  # None means auto-detect from model string
-        self.max_iterations = 10  # Default, can be overridden via config
+        self.max_iterations: int | None = None  # Must be provided via config
 
     async def discover_tools(self, session: ClientSession) -> list[dict[str, Any]]:
         """Discover available tools from MCP server."""
@@ -262,25 +249,20 @@ class Agent:
             new_agent_text_message("Processing request..."),
         )
 
-        # Extract config from DataPart (preferred) or fallback to text regex
+        # Extract config from DataPart (required)
         config = extract_config_from_message(message)
         
         if "mcp_server_url" in config:
-            # New approach: mcp_server_url from structured DataPart
             self.mcp_server_url = config["mcp_server_url"]
             logger.info(f"Extracted MCP server URL from DataPart config: {self.mcp_server_url}")
         
-        if "max_iterations" in config:
-            self.max_iterations = int(config["max_iterations"])
-            logger.info(f"Extracted max_iterations from DataPart config: {self.max_iterations}")
-        else:
-            # Fallback: try regex extraction from prompt text (backward compatibility)
-            mcp_url = extract_mcp_server_url_from_text(user_input)
-            if mcp_url:
-                self.mcp_server_url = mcp_url
-                logger.info(f"Extracted MCP server URL from prompt text (fallback): {mcp_url}")
-            else:
-                logger.info(f"Using default MCP server URL: {self.mcp_server_url}")
+        if not self.mcp_server_url:
+            raise RuntimeError("mcp_server_url must be provided via DataPart config or MCP_SERVER_URL environment variable")
+        
+        if "max_iterations" not in config:
+            raise RuntimeError("max_iterations must be provided via DataPart config")
+        self.max_iterations = int(config["max_iterations"])
+        logger.info(f"Extracted max_iterations from DataPart config: {self.max_iterations}")
 
         messages = [{"role": "user", "content": user_input}]
 
