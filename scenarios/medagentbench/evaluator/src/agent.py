@@ -21,6 +21,8 @@ from urllib.parse import urlparse
 import httpx
 import requests
 from dotenv import load_dotenv
+from mcp import ClientSession
+from mcp.client.streamable_http import streamable_http_client
 from pydantic import BaseModel, HttpUrl, ValidationError
 
 from a2a.server.tasks import TaskUpdater
@@ -34,8 +36,10 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("medagentbench_evaluator")
 
-# Output directory for runs.jsonl logging
-OUTPUT_DIR = os.environ.get("MEDAGENT_OUTPUT_DIR", "outputs/medagentbench")
+# Output directory for runs.jsonl logging (required)
+OUTPUT_DIR = os.environ.get("MEDAGENT_OUTPUT_DIR")
+if not OUTPUT_DIR:
+    raise RuntimeError("MEDAGENT_OUTPUT_DIR environment variable is required")
 
 
 # ============================================================================
@@ -119,7 +123,6 @@ class DetailedFailure(str, Enum):
     # Answer comparison failures
     ANSWER_VALUE_MISMATCH = "answer_value_mismatch"
     ANSWER_LENGTH_MISMATCH = "answer_length_mismatch"
-    VALUE_TOLERANCE_EXCEEDED = "value_tolerance_exceeded"
 
 
 @dataclass
@@ -177,6 +180,7 @@ class TaskResult(BaseModel):
     expected_answer: list | None
     time_used: float
     rounds: int
+    tools_called: int = 0  # Total number of tool calls made during the task
     # Failure tracking fields (only populated when correct=False)
     primary_failure: str | None = None
     failure_details: list[str] | None = None
@@ -191,6 +195,7 @@ class EvalResults(BaseModel):
     min_rounds: int | None = None  # Minimum rounds across all tasks
     max_rounds: int | None = None  # Maximum rounds across all tasks
     avg_rounds: float | None = None  # Average rounds across all tasks
+    avg_tools_called: float | None = None  # Average tool calls per task
     task_results: dict[str, TaskResult]
     time_used: float
 
@@ -262,6 +267,7 @@ def write_run_result(
             "correct": task_result.correct,
             "expected": task_result.expected_answer,
             "rounds": task_result.rounds,
+            "tools_called": task_result.tools_called,
             "time_used": task_result.time_used,
             "history": history,
         }
@@ -366,6 +372,7 @@ class ThreadSafeFileWriter:
                 "correct": task_result.correct,
                 "expected": task_result.expected_answer,
                 "rounds": task_result.rounds,
+                "tools_called": task_result.tools_called,
                 "time_used": task_result.time_used,
                 "history": history,
             } if task_result else None,
@@ -947,12 +954,12 @@ def eval_task6(case_data, results, fhir_api_base) -> EvalOutcome:
             [DetailedFailure.ANSWER_LENGTH_MISMATCH]
         )
     
-    if abs(agent_result[0] - ref_sol[0]) < 0.1:
+    if agent_result[0] == ref_sol[0]:
         return EvalOutcome.success()
     else:
         return EvalOutcome.failure(
             FailureType.ANSWER_MISMATCH,
-            [DetailedFailure.VALUE_TOLERANCE_EXCEEDED]
+            [DetailedFailure.ANSWER_VALUE_MISMATCH]
         )
 
 
@@ -1012,7 +1019,7 @@ def eval_task7(case_data, results, fhir_api_base) -> EvalOutcome:
         agent_value = extract_numeric_value(agent_result[0])
         ref_value = ref_sol[0] if ref_sol else None
         if agent_value is not None and ref_value is not None:
-            if abs(agent_value - ref_value) < 0.1:
+            if agent_value == ref_value:
                 return EvalOutcome.success()
     
     # Direct comparison for backward compatibility
@@ -1021,7 +1028,7 @@ def eval_task7(case_data, results, fhir_api_base) -> EvalOutcome:
     
     return EvalOutcome.failure(
         FailureType.ANSWER_MISMATCH,
-        [DetailedFailure.VALUE_TOLERANCE_EXCEEDED]
+        [DetailedFailure.ANSWER_VALUE_MISMATCH]
     )
 
 
@@ -1152,7 +1159,7 @@ def eval_task9(case_data, results, fhir_api_base) -> EvalOutcome:
         expected_dose = (3.5 - last_value) / 0.1 * 10
         dose_and_rate = dosage.get('doseAndRate', [{}])[0]
         actual_dose = dose_and_rate.get('doseQuantity', {}).get('value', 0)
-        if abs(actual_dose - expected_dose) > 0.1:
+        if actual_dose != expected_dose:
             failures.append(DetailedFailure.WRONG_DOSE_VALUE)
         if dose_and_rate.get('doseQuantity', {}).get('unit') != 'mEq':
             failures.append(DetailedFailure.WRONG_DOSE_UNIT)
@@ -1348,75 +1355,79 @@ def evaluate_task(case_data: dict, results: TaskOutput, fhir_api_base: str) -> E
 # MedAgentBench Prompt Template
 # ============================================================================
 
-# Fallback prompt template (used if MCP server is unreachable)
-# The canonical version lives in the MCP server at: medagentbench://prompts/system
-# Note: mcp_server_url is passed via DataPart, not embedded in the prompt
-FALLBACK_MEDAGENT_PROMPT = """You are an expert medical AI assistant that uses FHIR functions to assist medical professionals. You are given a question and a set of available FHIR tools. Based on the question, you will need to make one or more function/tool calls to achieve the purpose.
-
-Instructions:
-1. Use the provided FHIR tools to query patient data, retrieve medical records, create orders, and perform other medical record operations as needed.
-
-2. Read the arguments carefully for each tool before deciding which are the suitable arguments to use. Some arguments are too general and some are more relevant to the question.
-
-3. CRITICAL: You MUST provide ALL required arguments for each tool call. Follow the EXACT format shown in the tool descriptions. Use example URIs exactly as written in the tool descriptions (do not substitute alternatives). Do not rely on your own FHIR knowledge for parameter structures.
-
-4. Make as many tool calls as needed to gather the information required to answer the question.
-
-5. When you have gathered all necessary information and have the final answer(s), you MUST respond with ONLY the finish format (make sure the list is JSON loadable):
-FINISH([answer1, answer2, ...])
-
-IMPORTANT: Your final response MUST be in the FINISH format with no other text. The list inside FINISH() must be valid JSON.
-
-Task Context: {context}
-
-Question: {question}"""
-
-
-async def fetch_system_prompt_from_mcp(mcp_server_url: str) -> str | None:
+async def fetch_system_prompt_from_mcp(mcp_server_url: str) -> str:
     """Fetch the system prompt template from MCP server.
     
     Args:
         mcp_server_url: Base URL of the MCP server (e.g., http://localhost:8002)
         
     Returns:
-        The prompt template string, or None if fetch fails.
+        The prompt template string.
+        
+    Raises:
+        RuntimeError: If the MCP server is unreachable or returns invalid response.
     """
-    # MCP resources are accessed via the /mcp endpoint with JSON-RPC
     mcp_endpoint = f"{mcp_server_url.rstrip('/')}/mcp"
     
     try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            # Use MCP JSON-RPC protocol to read the resource
-            response = await client.post(
-                mcp_endpoint,
-                json={
-                    "jsonrpc": "2.0",
-                    "id": 1,
-                    "method": "resources/read",
-                    "params": {
-                        "uri": "medagentbench://prompts/system"
-                    }
-                },
-                headers={"Content-Type": "application/json"}
-            )
-            response.raise_for_status()
-            result = response.json()
-            
-            if "result" in result and "contents" in result["result"]:
-                contents = result["result"]["contents"]
-                if contents and len(contents) > 0:
-                    # Extract text from the first content item
-                    first_content = contents[0]
-                    if "text" in first_content:
-                        logger.info(f"Successfully fetched system prompt from MCP server")
-                        return first_content["text"]
-            
-            logger.warning(f"Unexpected MCP response format: {result}")
-            return None
-            
+        async with streamable_http_client(mcp_endpoint) as (read_stream, write_stream, _):
+            async with ClientSession(read_stream, write_stream) as session:
+                await session.initialize()
+                
+                # Read the system prompt resource
+                result = await session.read_resource("medagentbench://prompts/system")
+                
+                if result.contents and len(result.contents) > 0:
+                    first_content = result.contents[0]
+                    if hasattr(first_content, 'text') and first_content.text:
+                        logger.info("Successfully fetched system prompt from MCP server")
+                        return first_content.text
+                
+                raise RuntimeError(f"Unexpected MCP response format: {result}")
+                
+    except RuntimeError:
+        raise
     except Exception as e:
-        logger.warning(f"Failed to fetch system prompt from MCP server: {e}")
-        return None
+        raise RuntimeError(f"Failed to fetch system prompt from MCP server: {e}") from e
+
+
+async def fetch_tasks_from_mcp(mcp_server_url: str) -> list[dict]:
+    """Fetch evaluation tasks from MCP server.
+    
+    Args:
+        mcp_server_url: Base URL of the MCP server (e.g., http://localhost:8002)
+        
+    Returns:
+        List of task dictionaries.
+        
+    Raises:
+        RuntimeError: If the MCP server is unreachable or returns invalid response.
+    """
+    mcp_endpoint = f"{mcp_server_url.rstrip('/')}/mcp"
+    
+    try:
+        async with streamable_http_client(mcp_endpoint) as (read_stream, write_stream, _):
+            async with ClientSession(read_stream, write_stream) as session:
+                await session.initialize()
+                
+                # Read the tasks resource
+                result = await session.read_resource("medagentbench://tasks")
+                
+                if result.contents and len(result.contents) > 0:
+                    first_content = result.contents[0]
+                    if hasattr(first_content, 'text') and first_content.text:
+                        # Parse the JSON response
+                        data = json.loads(first_content.text)
+                        tasks = data.get("tasks", [])
+                        logger.info(f"Successfully fetched {len(tasks)} tasks from MCP server")
+                        return tasks
+                
+                raise RuntimeError(f"Unexpected MCP response format: {result}")
+                
+    except RuntimeError:
+        raise
+    except Exception as e:
+        raise RuntimeError(f"Failed to fetch tasks from MCP server: {e}") from e
 
 
 # ============================================================================
@@ -1431,35 +1442,56 @@ class Agent:
         self.messenger = Messenger()
         self.tasks: list[dict] = []
         self._cached_prompt: str | None = None  # Cached prompt template from MCP
+        self._cached_tasks: list[dict] | None = None  # Cached tasks from MCP
         self.file_writer = ThreadSafeFileWriter()  # Thread-safe file writer for parallel execution
     
     async def get_system_prompt(self, mcp_server_url: str) -> str:
         """Get the system prompt template, fetching from MCP server if not cached.
         
         The prompt template is fetched from the MCP server (medagentbench://prompts/system)
-        on first call and cached for subsequent uses. Falls back to hardcoded prompt
-        if MCP server is unreachable.
+        on first call and cached for subsequent uses.
         
         Args:
             mcp_server_url: Base URL of the MCP server
             
         Returns:
             The system prompt template string with placeholders.
+            
+        Raises:
+            RuntimeError: If the MCP server is unreachable.
         """
         if self._cached_prompt is not None:
             return self._cached_prompt
         
-        # Try to fetch from MCP server
-        prompt = await fetch_system_prompt_from_mcp(mcp_server_url)
-        
-        if prompt:
-            self._cached_prompt = prompt
-            logger.info("Using system prompt from MCP server")
-        else:
-            self._cached_prompt = FALLBACK_MEDAGENT_PROMPT
-            logger.warning("Using fallback system prompt (MCP fetch failed)")
+        # Fetch from MCP server (raises RuntimeError on failure)
+        self._cached_prompt = await fetch_system_prompt_from_mcp(mcp_server_url)
+        logger.info("Using system prompt from MCP server")
         
         return self._cached_prompt
+    
+    async def get_tasks(self, mcp_server_url: str) -> list[dict]:
+        """Get evaluation tasks, fetching from MCP server if not cached.
+        
+        The tasks are fetched from the MCP server (medagentbench://tasks)
+        on first call and cached for subsequent uses.
+        
+        Args:
+            mcp_server_url: Base URL of the MCP server
+            
+        Returns:
+            List of task dictionaries.
+            
+        Raises:
+            RuntimeError: If the MCP server is unreachable.
+        """
+        if self._cached_tasks is not None:
+            return self._cached_tasks
+        
+        # Fetch from MCP server (raises RuntimeError on failure)
+        self._cached_tasks = await fetch_tasks_from_mcp(mcp_server_url)
+        logger.info(f"Using {len(self._cached_tasks)} tasks from MCP server")
+        
+        return self._cached_tasks
 
     def validate_request(self, request: EvalRequest) -> tuple[bool, str]:
         missing_roles = set(self.required_roles) - set(request.participants.keys())
@@ -1472,60 +1504,10 @@ class Agent:
 
         return True, "ok"
 
-    def load_tasks(self, tasks_file: str) -> list[dict]:
-        """Load tasks from JSON file."""
-        if os.path.exists(tasks_file):
-            with open(tasks_file, 'r') as f:
-                return json.load(f)
-        logger.warning(f"Tasks file not found: {tasks_file}")
-        return []
-
     def sanitize_task_data(self, task_data: dict) -> dict:
         """Remove evaluation fields before sending to agent."""
         evaluation_fields = {'sol', 'eval_MRN'}
         return {k: v for k, v in task_data.items() if k not in evaluation_fields}
-
-    def extract_tool_history_from_text(self, response: str) -> tuple[str, list[dict]]:
-        """Extract tool call history from agent response text (legacy fallback).
-        
-        This is kept for backward compatibility with agents that embed XML tags.
-        New agents should use DataPart instead.
-        """
-        tool_history = []
-        clean_response = response
-        
-        pattern = r'<tool_history>\s*(.*?)\s*</tool_history>'
-        match = re.search(pattern, response, re.DOTALL)
-        
-        if match:
-            try:
-                tool_history = json.loads(match.group(1))
-            except json.JSONDecodeError:
-                logger.warning("Failed to parse tool_history JSON")
-            clean_response = re.sub(pattern, '', clean_response, flags=re.DOTALL).strip()
-        
-        return clean_response, tool_history
-
-    def extract_fhir_operations_from_text(self, response: str) -> tuple[str, list[dict]]:
-        """Extract FHIR operations metadata from agent response text (legacy fallback).
-        
-        This is kept for backward compatibility with agents that embed XML tags.
-        New agents should use DataPart instead.
-        """
-        fhir_ops = []
-        clean_response = response
-        
-        pattern = r'<fhir_operations>\s*(.*?)\s*</fhir_operations>'
-        match = re.search(pattern, response, re.DOTALL)
-        
-        if match:
-            try:
-                fhir_ops = json.loads(match.group(1))
-            except json.JSONDecodeError:
-                logger.warning("Failed to parse FHIR operations metadata")
-            clean_response = re.sub(pattern, '', response, flags=re.DOTALL).strip()
-        
-        return clean_response, fhir_ops
 
     def parse_finish_response(self, response: str) -> tuple[str | None, str]:
         """Parse FINISH format from response."""
@@ -1598,26 +1580,23 @@ class Agent:
 
         try:
             # Send to agent with structured config via DataPart
-            agent_response: AgentResponse = await self.messenger.talk_to_agent(
+            # Use task_messenger (per-task) instead of self.messenger (shared) to avoid asyncio.Lock errors
+            agent_response: AgentResponse = await task_messenger.talk_to_agent(
                 message=task_prompt,
                 url=agent_url,
                 new_conversation=True,
                 config=agent_config,
             )
             
-            # Extract metadata from structured response (preferred) or fallback to text parsing
+            # Extract metadata from structured response (DataPart)
             response_text = agent_response.text
             tool_history = agent_response.tool_history
             fhir_ops = agent_response.fhir_operations
             rounds = agent_response.rounds
             max_rounds_reached = agent_response.max_rounds_reached
             
-            # Fallback: If no structured metadata, try extracting from text (backward compatibility)
-            if not tool_history and not fhir_ops:
-                response_text, tool_history = self.extract_tool_history_from_text(response_text)
-                response_text, fhir_ops = self.extract_fhir_operations_from_text(response_text)
-            
             clean_response = response_text
+            tools_called = len(tool_history)  # Count total tool calls for this task
             
             # Add tool calls to history
             for tool_call in tool_history:
@@ -1662,6 +1641,7 @@ class Agent:
                         expected_answer=task_data.get('sol'),
                         time_used=time.time() - start_time,
                         rounds=rounds,
+                        tools_called=tools_called,
                         primary_failure=FailureType.MAX_ROUNDS_REACHED.value,
                         failure_details=[DetailedFailure.MAX_ITERATIONS_EXCEEDED.value],
                     )
@@ -1692,6 +1672,7 @@ class Agent:
                     expected_answer=task_data.get('sol'),
                     time_used=time.time() - start_time,
                     rounds=rounds,
+                    tools_called=tools_called,
                     primary_failure=eval_outcome.primary_failure if not eval_outcome.passed else None,
                     failure_details=eval_outcome.failure_details if not eval_outcome.passed else None,
                 )
@@ -1711,6 +1692,7 @@ class Agent:
                     expected_answer=task_data.get('sol'),
                     time_used=time.time() - start_time,
                     rounds=rounds,
+                    tools_called=tools_called,
                     primary_failure=FailureType.INVALID_FINISH_FORMAT.value,
                     failure_details=[DetailedFailure.NO_FINISH_FORMAT.value],
                 )
@@ -1731,6 +1713,7 @@ class Agent:
                 expected_answer=task_data.get('sol'),
                 time_used=time.time() - start_time,
                 rounds=0,
+                tools_called=0,  # Exception occurred, no tool calls tracked
                 primary_failure=FailureType.SYSTEM_ERROR.value,
                 failure_details=[f"exception: {str(e)}"],
             )
@@ -1766,8 +1749,15 @@ class Agent:
         num_tasks = request.config.get("num_tasks")
         task_ids = request.config.get("task_ids")
         max_rounds = int(request.config.get("max_rounds", 10))
-        mcp_server_url = str(request.config.get("mcp_server_url", "http://localhost:8002"))
-        fhir_api_base = str(request.config.get("fhir_api_base", "http://medagentbench.ddns.net:8080/fhir/"))
+        
+        # Service URLs from environment (required)
+        mcp_server_url = os.environ.get("MCP_SERVER_URL")
+        if not mcp_server_url:
+            raise RuntimeError("MCP_SERVER_URL environment variable is required")
+        
+        fhir_api_base = os.environ.get("MCP_FHIR_API_BASE")
+        if not fhir_api_base:
+            raise RuntimeError("MCP_FHIR_API_BASE environment variable is required")
 
         # Multi-worker parallelism configuration (MedAgentBench-style)
         # num_workers: Number of agent worker processes to spawn (each on different port)
@@ -1782,12 +1772,8 @@ class Agent:
         output_dir = get_output_dir(agent_name, domain)
         logger.info(f"Results will be written to {output_dir}")
         
-        # Load tasks
-        tasks_file = os.environ.get(
-            "MEDAGENTBENCH_TASKS_FILE",
-            "src/mcp/resources/tasks/tasks.json"
-        )
-        all_tasks = self.load_tasks(tasks_file)
+        # Fetch tasks from MCP server
+        all_tasks = await self.get_tasks(mcp_server_url)
         
         # Filter tasks
         if task_ids:
@@ -1858,6 +1844,7 @@ class Agent:
                             expected_answer=task.get('sol'),
                             time_used=0,
                             rounds=0,
+                            tools_called=0,
                         )
                 else:
                     worker_url = agent_url
@@ -1901,6 +1888,7 @@ class Agent:
                         expected_answer=task.get('sol'),
                         time_used=0,
                         rounds=0,
+                        tools_called=0,
                     )
                 finally:
                     loop.close()
@@ -1935,6 +1923,7 @@ class Agent:
                             expected_answer=task.get('sol'),
                             time_used=0,
                             rounds=0,
+                            tools_called=0,
                         ))
 
             # Process results
@@ -1975,6 +1964,12 @@ class Agent:
                 min_rounds = min(all_rounds)
                 max_rounds = max(all_rounds)
                 avg_rounds = round(sum(all_rounds) / len(all_rounds), 2)
+            
+            # Calculate tools_called statistics
+            avg_tools_called: float | None = None
+            if task_results:
+                all_tools = [r.tools_called for r in task_results.values()]
+                avg_tools_called = round(sum(all_tools) / len(all_tools), 2)
 
             eval_results = EvalResults(
                 domain=domain,
@@ -1985,6 +1980,7 @@ class Agent:
                 min_rounds=min_rounds,
                 max_rounds=max_rounds,
                 avg_rounds=avg_rounds,
+                avg_tools_called=avg_tools_called,
                 task_results=task_results,
                 time_used=time_used,
             )

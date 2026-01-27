@@ -8,6 +8,9 @@ endpoint = "http://localhost:9019"
 cmd = "python scenarios/medagentbench/agent/src/server.py --host 0.0.0.0 --port 9019"
 
 [config]
+# MedAgentBench evaluation configuration
+# Service URLs (MCP_SERVER_URL, MCP_FHIR_API_BASE) are configured in .env
+
 # Number of tasks to run (set to null or remove to run all tasks)
 num_tasks = 30
 
@@ -28,12 +31,6 @@ max_rounds = 8
 
 # Domain for evaluation
 domain = "medagentbench"
-
-# MCP server URL for FHIR tools
-mcp_server_url = "http://localhost:8002"
-
-# FHIR server base URL (must be reachable from evaluator container)
-fhir_api_base = "http://localhost:8080/fhir/"
 
 # Multi-Worker Parallel Execution Configuration
 num_workers = 10

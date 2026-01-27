@@ -3,7 +3,6 @@
 import json
 import logging
 import os
-import re
 from typing import Any
 
 from dotenv import load_dotenv
@@ -21,13 +20,12 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("medagentbench_agent")
 
-# Configuration from environment (defaults for local development)
-DEFAULT_MCP_SERVER_URL = os.environ.get("mcp_server_url", "http://localhost:8002")
-DEFAULT_FHIR_API_BASE = os.environ.get("fhir_api_base", "http://localhost:8080/fhir/").rstrip("/")
+# Configuration from environment (required)
+MCP_SERVER_URL = os.environ.get("MCP_SERVER_URL")  # Can be overridden via DataPart config
 
-# LLM configuration
+# LLM configuration (required)
 # LLM_MODEL: The model identifier in LiteLLM format (e.g., "openai/gpt-4o-mini", "anthropic/claude-3.5-sonnet")
-LLM_MODEL = os.environ.get("MEDAGENT_LLM_MODEL", "openai/gpt-4o-mini")
+LLM_MODEL = "openai/gpt-4o-mini"
 
 # LLM_PROVIDER: Optional provider override (e.g., "openai", "anthropic", "google", "azure")
 # Set to None (or leave empty) to let LiteLLM auto-detect from the model string prefix
@@ -51,25 +49,12 @@ def extract_config_from_message(message: Message) -> dict[str, Any]:
     return {}
 
 
-def extract_mcp_server_url_from_text(text: str) -> str | None:
-    """Extract MCP server URL from task prompt text (legacy fallback).
-    
-    Looks for pattern: 'MCP server at: <url>'
-    This is kept for backward compatibility with older evaluators.
-    """
-    pattern = r'MCP server at:\s*(https?://[^\s]+)'
-    match = re.search(pattern, text)
-    if match:
-        return match.group(1).rstrip('/')
-    return None
-
-
 class Agent:
     def __init__(self):
-        self.mcp_server_url = DEFAULT_MCP_SERVER_URL
+        self.mcp_server_url = MCP_SERVER_URL  # Can be overridden via DataPart config
         self.model = LLM_MODEL
         self.llm_provider = LLM_PROVIDER  # None means auto-detect from model string
-        self.max_iterations = 10  # Default, can be overridden via config
+        self.max_iterations: int | None = None  # Must be provided via config
 
     async def discover_tools(self, session: ClientSession) -> list[dict[str, Any]]:
         """Discover available tools from MCP server."""
@@ -180,7 +165,7 @@ class Agent:
                     is_error = isinstance(tool_result, dict) and "error" in tool_result
                     logger.info(f"  TOOL RESULT: {'ERROR' if is_error else 'SUCCESS'}")
                     result_preview = json.dumps(tool_result)
-                    logger.info(f"  RESULT DATA: {result_preview}")
+                    logger.debug(f"  RESULT DATA: {result_preview}")
 
                     # Track tool call for history
                     tool_history.append({
@@ -194,7 +179,7 @@ class Agent:
                     if isinstance(tool_result, dict) and "fhir_post" in tool_result:
                         fhir_post = tool_result["fhir_post"]
                         fhir_posts.append(fhir_post)
-                        logger.info(f"Tracked FHIR POST to {fhir_post['fhir_url']}")
+                        logger.debug(f"Tracked FHIR POST to {fhir_post['fhir_url']}")
 
                     messages.append({
                         "role": "tool",
@@ -207,10 +192,10 @@ class Agent:
 
             content = message.get("content")
             if content:
-                logger.info("-" * 60)
-                logger.info("MODEL RESPONSE (no tool calls):")
-                logger.info(f"  {content[:500]}{'...' if len(content) > 500 else ''}")
-                logger.info("-" * 60)
+                logger.debug("-" * 60)
+                logger.debug("MODEL RESPONSE (no tool calls):")
+                logger.debug(f"  {content[:500]}{'...' if len(content) > 500 else ''}")
+                logger.debug("-" * 60)
                 # Return content and metadata separately (no XML embedding)
                 metadata = {
                     "tool_history": tool_history,
@@ -229,30 +214,6 @@ class Agent:
         }
         return result, metadata
 
-    async def _run_without_tools(self, messages: list[dict[str, Any]]) -> tuple[str, dict[str, Any]]:
-        """Run LLM without tools.
-        
-        Returns:
-            Tuple of (response_text, metadata_dict) - metadata will be empty for no-tool runs.
-        """
-        logger.info(f"Calling {self.model} without tools")
-        # Build completion kwargs - only include custom_llm_provider if explicitly set
-        completion_kwargs = {
-            "messages": messages,
-            "model": self.model,
-        }
-        if self.llm_provider:
-            completion_kwargs["custom_llm_provider"] = self.llm_provider
-        response = completion(**completion_kwargs)
-        message = response.choices[0].message.model_dump()
-        messages.append(message)
-        content = message.get("content", "")
-        metadata = {
-            "tool_history": [],
-            "fhir_operations": [],
-        }
-        return content, metadata
-
     async def run(self, message: Message, updater: TaskUpdater) -> None:
         """Execute the agent task with MCP tool support."""
         user_input = get_message_text(message)
@@ -262,25 +223,20 @@ class Agent:
             new_agent_text_message("Processing request..."),
         )
 
-        # Extract config from DataPart (preferred) or fallback to text regex
+        # Extract config from DataPart (required)
         config = extract_config_from_message(message)
         
         if "mcp_server_url" in config:
-            # New approach: mcp_server_url from structured DataPart
             self.mcp_server_url = config["mcp_server_url"]
             logger.info(f"Extracted MCP server URL from DataPart config: {self.mcp_server_url}")
         
-        if "max_iterations" in config:
-            self.max_iterations = int(config["max_iterations"])
-            logger.info(f"Extracted max_iterations from DataPart config: {self.max_iterations}")
-        else:
-            # Fallback: try regex extraction from prompt text (backward compatibility)
-            mcp_url = extract_mcp_server_url_from_text(user_input)
-            if mcp_url:
-                self.mcp_server_url = mcp_url
-                logger.info(f"Extracted MCP server URL from prompt text (fallback): {mcp_url}")
-            else:
-                logger.info(f"Using default MCP server URL: {self.mcp_server_url}")
+        if not self.mcp_server_url:
+            raise RuntimeError("mcp_server_url must be provided via DataPart config or MCP_SERVER_URL environment variable")
+        
+        if "max_iterations" not in config:
+            raise RuntimeError("max_iterations must be provided via DataPart config")
+        self.max_iterations = int(config["max_iterations"])
+        logger.info(f"Extracted max_iterations from DataPart config: {self.max_iterations}")
 
         messages = [{"role": "user", "content": user_input}]
 
@@ -303,23 +259,23 @@ class Agent:
                     logger.info("=" * 60)
                     logger.info(f"TOOL DISCOVERY: Found {len(mcp_tools)} tools")
                     for t in mcp_tools:
-                        logger.info(f"  - {t['name']}: {t['description'][:80]}...")
+                        logger.info(f"  - {t['name']}")
                     logger.info("=" * 60)
 
                     if mcp_tools:
                         openai_tools = self.convert_tools_to_openai_format(mcp_tools)
                         # Log full tool schemas for debugging
-                        logger.info("TOOL SCHEMAS SENT TO LLM:")
+                        logger.debug("TOOL SCHEMAS SENT TO LLM:")
                         for tool in openai_tools:
                             func = tool.get("function", {})
-                            logger.info(f"  {func.get('name')}:")
+                            logger.debug(f"  {func.get('name')}:")
                             params = func.get("parameters", {})
                             required = params.get("required", [])
                             props = params.get("properties", {})
-                            logger.info(f"    Required: {required}")
+                            logger.debug(f"    Required: {required}")
                             for prop_name, prop_schema in props.items():
-                                logger.info(f"    - {prop_name}: {prop_schema.get('type', 'unknown')} - {prop_schema.get('description', 'no desc')}")
-                        logger.info("=" * 60)
+                                logger.debug(f"    - {prop_name}: {prop_schema.get('type', 'unknown')} - {prop_schema.get('description', 'no desc')}")
+                        logger.debug("=" * 60)
                         final_content, metadata = await self._run_with_mcp(
                             messages, session, openai_tools
                         )
