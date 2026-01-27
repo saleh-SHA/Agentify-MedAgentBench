@@ -165,7 +165,7 @@ class Agent:
                     is_error = isinstance(tool_result, dict) and "error" in tool_result
                     logger.info(f"  TOOL RESULT: {'ERROR' if is_error else 'SUCCESS'}")
                     result_preview = json.dumps(tool_result)
-                    logger.info(f"  RESULT DATA: {result_preview}")
+                    logger.debug(f"  RESULT DATA: {result_preview}")
 
                     # Track tool call for history
                     tool_history.append({
@@ -179,7 +179,7 @@ class Agent:
                     if isinstance(tool_result, dict) and "fhir_post" in tool_result:
                         fhir_post = tool_result["fhir_post"]
                         fhir_posts.append(fhir_post)
-                        logger.info(f"Tracked FHIR POST to {fhir_post['fhir_url']}")
+                        logger.debug(f"Tracked FHIR POST to {fhir_post['fhir_url']}")
 
                     messages.append({
                         "role": "tool",
@@ -192,10 +192,10 @@ class Agent:
 
             content = message.get("content")
             if content:
-                logger.info("-" * 60)
-                logger.info("MODEL RESPONSE (no tool calls):")
-                logger.info(f"  {content[:500]}{'...' if len(content) > 500 else ''}")
-                logger.info("-" * 60)
+                logger.debug("-" * 60)
+                logger.debug("MODEL RESPONSE (no tool calls):")
+                logger.debug(f"  {content[:500]}{'...' if len(content) > 500 else ''}")
+                logger.debug("-" * 60)
                 # Return content and metadata separately (no XML embedding)
                 metadata = {
                     "tool_history": tool_history,
@@ -213,30 +213,6 @@ class Agent:
             "max_rounds_reached": True,  # Flag for evaluator to detect early termination
         }
         return result, metadata
-
-    async def _run_without_tools(self, messages: list[dict[str, Any]]) -> tuple[str, dict[str, Any]]:
-        """Run LLM without tools.
-        
-        Returns:
-            Tuple of (response_text, metadata_dict) - metadata will be empty for no-tool runs.
-        """
-        logger.info(f"Calling {self.model} without tools")
-        # Build completion kwargs - only include custom_llm_provider if explicitly set
-        completion_kwargs = {
-            "messages": messages,
-            "model": self.model,
-        }
-        if self.llm_provider:
-            completion_kwargs["custom_llm_provider"] = self.llm_provider
-        response = completion(**completion_kwargs)
-        message = response.choices[0].message.model_dump()
-        messages.append(message)
-        content = message.get("content", "")
-        metadata = {
-            "tool_history": [],
-            "fhir_operations": [],
-        }
-        return content, metadata
 
     async def run(self, message: Message, updater: TaskUpdater) -> None:
         """Execute the agent task with MCP tool support."""
@@ -289,17 +265,17 @@ class Agent:
                     if mcp_tools:
                         openai_tools = self.convert_tools_to_openai_format(mcp_tools)
                         # Log full tool schemas for debugging
-                        logger.info("TOOL SCHEMAS SENT TO LLM:")
+                        logger.debug("TOOL SCHEMAS SENT TO LLM:")
                         for tool in openai_tools:
                             func = tool.get("function", {})
-                            logger.info(f"  {func.get('name')}:")
+                            logger.debug(f"  {func.get('name')}:")
                             params = func.get("parameters", {})
                             required = params.get("required", [])
                             props = params.get("properties", {})
-                            logger.info(f"    Required: {required}")
+                            logger.debug(f"    Required: {required}")
                             for prop_name, prop_schema in props.items():
-                                logger.info(f"    - {prop_name}: {prop_schema.get('type', 'unknown')} - {prop_schema.get('description', 'no desc')}")
-                        logger.info("=" * 60)
+                                logger.debug(f"    - {prop_name}: {prop_schema.get('type', 'unknown')} - {prop_schema.get('description', 'no desc')}")
+                        logger.debug("=" * 60)
                         final_content, metadata = await self._run_with_mcp(
                             messages, session, openai_tools
                         )
