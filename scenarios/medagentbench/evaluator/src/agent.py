@@ -123,7 +123,6 @@ class DetailedFailure(str, Enum):
     # Answer comparison failures
     ANSWER_VALUE_MISMATCH = "answer_value_mismatch"
     ANSWER_LENGTH_MISMATCH = "answer_length_mismatch"
-    VALUE_TOLERANCE_EXCEEDED = "value_tolerance_exceeded"
 
 
 @dataclass
@@ -955,12 +954,12 @@ def eval_task6(case_data, results, fhir_api_base) -> EvalOutcome:
             [DetailedFailure.ANSWER_LENGTH_MISMATCH]
         )
     
-    if abs(agent_result[0] - ref_sol[0]) < 0.1:
+    if agent_result[0] == ref_sol[0]:
         return EvalOutcome.success()
     else:
         return EvalOutcome.failure(
             FailureType.ANSWER_MISMATCH,
-            [DetailedFailure.VALUE_TOLERANCE_EXCEEDED]
+            [DetailedFailure.ANSWER_VALUE_MISMATCH]
         )
 
 
@@ -1020,7 +1019,7 @@ def eval_task7(case_data, results, fhir_api_base) -> EvalOutcome:
         agent_value = extract_numeric_value(agent_result[0])
         ref_value = ref_sol[0] if ref_sol else None
         if agent_value is not None and ref_value is not None:
-            if abs(agent_value - ref_value) < 0.1:
+            if agent_value == ref_value:
                 return EvalOutcome.success()
     
     # Direct comparison for backward compatibility
@@ -1029,7 +1028,7 @@ def eval_task7(case_data, results, fhir_api_base) -> EvalOutcome:
     
     return EvalOutcome.failure(
         FailureType.ANSWER_MISMATCH,
-        [DetailedFailure.VALUE_TOLERANCE_EXCEEDED]
+        [DetailedFailure.ANSWER_VALUE_MISMATCH]
     )
 
 
@@ -1160,7 +1159,7 @@ def eval_task9(case_data, results, fhir_api_base) -> EvalOutcome:
         expected_dose = (3.5 - last_value) / 0.1 * 10
         dose_and_rate = dosage.get('doseAndRate', [{}])[0]
         actual_dose = dose_and_rate.get('doseQuantity', {}).get('value', 0)
-        if abs(actual_dose - expected_dose) > 0.1:
+        if actual_dose != expected_dose:
             failures.append(DetailedFailure.WRONG_DOSE_VALUE)
         if dose_and_rate.get('doseQuantity', {}).get('unit') != 'mEq':
             failures.append(DetailedFailure.WRONG_DOSE_UNIT)

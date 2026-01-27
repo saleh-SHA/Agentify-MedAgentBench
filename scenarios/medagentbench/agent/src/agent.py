@@ -283,7 +283,7 @@ class Agent:
                     logger.info("=" * 60)
                     logger.info(f"TOOL DISCOVERY: Found {len(mcp_tools)} tools")
                     for t in mcp_tools:
-                        logger.info(f"  - {t['name']}: {t['description'][:80]}...")
+                        logger.info(f"  - {t['name']}")
                     logger.info("=" * 60)
 
                     if mcp_tools:

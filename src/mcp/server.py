@@ -350,7 +350,7 @@ def record_vital_observation(
     resourceType: Annotated[str, Field(description="Use 'Observation' for vitals observations.")],
     category: Annotated[List[VitalsCategoryElement], Field(description="Array of category objects. Each must contain coding with system='http://hl7.org/fhir/observation-category', code='vital-signs', display='Vital Signs'.")],
     code: Annotated[VitalsCodeObject, Field(description="Code object specifying what is being measured.")],
-    effectiveDateTime: Annotated[str, Field(description="The date and time the observation was taken, in ISO format (e.g., '2023-11-13T10:15:00+00:00').")],
+    effectiveDateTime: Annotated[str, Field(description="The date and time the observation was taken, in ISO format (e.g., '2020-10-11T10:15:00+00:00').")],
     status: Annotated[str, Field(description="The status of the observation. Only 'final' is supported. We do not support filing data that isn't finalized.")],
     valueString: Annotated[str, Field(description="Measurement value as a string (e.g., '122/80 mmHg' for BP.")],
     subject: Annotated[SubjectReference, Field(description="The patient this observation is about.")],
@@ -454,8 +454,8 @@ def create_service_request(
 
 @mcp.tool()
 def check_date_within_period(
-    date_to_check: Annotated[str, Field(description="The date to check, in ISO format (e.g., '2023-11-09T03:05:00+00:00').")],
-    reference_date: Annotated[str, Field(description="The reference date to compare against, in ISO format (e.g., '2023-11-13T10:15:00+00:00').")],
+    date_to_check: Annotated[str, Field(description="The date to check, in ISO format (e.g., '2020-10-11T03:05:00+00:00').")],
+    reference_date: Annotated[str, Field(description="The reference date to compare against, in ISO format (e.g., '2020-10-11T10:15:00+00:00').")],
     period_days: Annotated[int, Field(description="The number of days for the period. Use 365 for 1 year, 30 for 1 month, 7 for 1 week, etc.")],
 ) -> Dict[str, Any]:
     """Date Utility - Check if a date is within a specified period from a reference date. 
@@ -529,10 +529,10 @@ def calculate_age(
     Given a birth date and a reference date (typically the current date),
     calculates the patient's age in complete years (rounded down).
     
-    Example: To calculate age for someone born '1990-05-15' as of '2023-11-13':
-    - birth_date: '1990-05-15'
-    - reference_date: '2023-11-13T10:15:00+00:00'
-    - Result: age=33
+    Example: To calculate age for someone born '1985-08-22' as of '2024-03-15':
+    - birth_date: '1985-08-22'
+    - reference_date: '2024-03-15T14:30:00+00:00'
+    - Result: age=38
     """
     try:
         # Parse birth date - handle both simple date and ISO formats
