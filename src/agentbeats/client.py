@@ -16,7 +16,6 @@ from a2a.types import (
     DataPart,
 )
 
-
 DEFAULT_TIMEOUT = 300
 
 
@@ -82,4 +81,3 @@ async def send_message(message: str, base_url: str, context_id: str | None = Non
                 pass
 
         return outputs
-

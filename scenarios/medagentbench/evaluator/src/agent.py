@@ -37,9 +37,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("medagentbench_evaluator")
 
 # Output directory for runs.jsonl logging (required)
-OUTPUT_DIR = os.environ.get("MEDAGENT_OUTPUT_DIR")
-if not OUTPUT_DIR:
-    raise RuntimeError("MEDAGENT_OUTPUT_DIR environment variable is required")
+OUTPUT_DIR = "outputs/medagentbench"
 
 
 # ============================================================================
@@ -1750,14 +1748,16 @@ class Agent:
         task_ids = request.config.get("task_ids")
         max_rounds = int(request.config.get("max_rounds", 10))
         
-        # Service URLs from environment (required)
-        mcp_server_url = os.environ.get("MCP_SERVER_URL")
+        # Service URLs from config (required)
+        mcp_server_url = request.config.get("mcp_server_url")
         if not mcp_server_url:
-            raise RuntimeError("MCP_SERVER_URL environment variable is required")
+            raise RuntimeError("mcp_server_url must be set in scenario.toml [config] section")
+        mcp_server_url = str(mcp_server_url)
         
-        fhir_api_base = os.environ.get("MCP_FHIR_API_BASE")
+        fhir_api_base = request.config.get("fhir_api_base")
         if not fhir_api_base:
-            raise RuntimeError("MCP_FHIR_API_BASE environment variable is required")
+            raise RuntimeError("fhir_api_base must be set in scenario.toml [config] section")
+        fhir_api_base = str(fhir_api_base)
 
         # Multi-worker parallelism configuration (MedAgentBench-style)
         # num_workers: Number of agent worker processes to spawn (each on different port)
@@ -1900,6 +1900,35 @@ class Agent:
             logger.info(f"Starting ThreadPoolExecutor with {num_workers} workers")
             results = []
 
+            # Independent heartbeat mechanism using a separate async task
+            # This ensures heartbeats are sent even when workers are blocked
+            HEARTBEAT_INTERVAL = 25  # Send heartbeat every 25 seconds (below typical 30s timeout)
+            heartbeat_stop_event = asyncio.Event()
+            heartbeat_count = [0]  # Use list for mutable reference in closure
+            heartbeat_completed = [0]  # Track completed tasks for heartbeat messages (separate from thread's completed_count)
+            
+            async def heartbeat_task():
+                """Independent heartbeat coroutine that runs regardless of task execution state."""
+                while not heartbeat_stop_event.is_set():
+                    try:
+                        await asyncio.sleep(HEARTBEAT_INTERVAL)
+                        if heartbeat_stop_event.is_set():
+                            break
+                        heartbeat_count[0] += 1
+                        completed = heartbeat_completed[0]
+                        remaining = len(tasks) - completed
+                        await updater.update_status(
+                            TaskState.working,
+                            new_agent_text_message(f"Progress: {completed}/{len(tasks)} tasks completed ({remaining} remaining)"),
+                        )
+                    except asyncio.CancelledError:
+                        break
+                    except Exception as e:
+                        logger.warning(f"Heartbeat error (continuing): {e}")
+            
+            # Start independent heartbeat task
+            heartbeat_handle = asyncio.create_task(heartbeat_task())
+
             with ThreadPoolExecutor(max_workers=num_workers) as executor:
                 # Submit all tasks to the thread pool
                 futures = {
@@ -1908,23 +1937,47 @@ class Agent:
                 }
 
                 # Collect results as they complete
-                for future in as_completed(futures):
-                    task = futures[future]
-                    try:
-                        result = future.result()
-                        results.append(result)
-                    except Exception as e:
-                        logger.error(f"Task {task.get('id', 'unknown')} raised exception: {e}")
-                        results.append(TaskResult(
-                            task_id=task.get('id', 'unknown'),
-                            correct=False,
-                            status="error",
-                            agent_answer=str(e),
-                            expected_answer=task.get('sol'),
-                            time_used=0,
-                            rounds=0,
-                            tools_called=0,
-                        ))
+                pending_futures = set(futures.keys())
+                while pending_futures:
+                    # Wait for futures with a short timeout
+                    done_futures = set()
+                    for future in list(pending_futures):
+                        if future.done():
+                            done_futures.add(future)
+                    
+                    # Process completed futures
+                    for future in done_futures:
+                        pending_futures.discard(future)
+                        task = futures[future]
+                        try:
+                            result = future.result()
+                            results.append(result)
+                            heartbeat_completed[0] = len(results)  # Update for heartbeat
+                        except Exception as e:
+                            logger.error(f"Task {task.get('id', 'unknown')} raised exception: {e}")
+                            results.append(TaskResult(
+                                task_id=task.get('id', 'unknown'),
+                                correct=False,
+                                status="error",
+                                agent_answer=str(e),
+                                expected_answer=task.get('sol'),
+                                time_used=0,
+                                rounds=0,
+                                tools_called=0,
+                            ))
+                            heartbeat_completed[0] = len(results)  # Update for heartbeat
+                    
+                    # Small sleep to prevent busy-waiting and yield to heartbeat task
+                    if pending_futures:
+                        await asyncio.sleep(0.5)
+            
+            # Stop heartbeat task
+            heartbeat_stop_event.set()
+            heartbeat_handle.cancel()
+            try:
+                await heartbeat_handle
+            except asyncio.CancelledError:
+                pass
 
             # Process results
             for result in results:

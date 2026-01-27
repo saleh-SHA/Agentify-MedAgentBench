@@ -20,8 +20,8 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("medagentbench_agent")
 
-# Configuration from environment (required)
-MCP_SERVER_URL = os.environ.get("MCP_SERVER_URL")  # Can be overridden via DataPart config
+# MCP Server URL - provided via DataPart config from evaluator (configured in scenario.toml)
+MCP_SERVER_URL = None
 
 # LLM configuration (required)
 # LLM_MODEL: The model identifier in LiteLLM format (e.g., "openai/gpt-4o-mini", "anthropic/claude-3.5-sonnet")
@@ -51,7 +51,7 @@ def extract_config_from_message(message: Message) -> dict[str, Any]:
 
 class Agent:
     def __init__(self):
-        self.mcp_server_url = MCP_SERVER_URL  # Can be overridden via DataPart config
+        self.mcp_server_url = MCP_SERVER_URL  # Provided via DataPart config from evaluator
         self.model = LLM_MODEL
         self.llm_provider = LLM_PROVIDER  # None means auto-detect from model string
         self.max_iterations: int | None = None  # Must be provided via config
@@ -231,7 +231,7 @@ class Agent:
             logger.info(f"Extracted MCP server URL from DataPart config: {self.mcp_server_url}")
         
         if not self.mcp_server_url:
-            raise RuntimeError("mcp_server_url must be provided via DataPart config or MCP_SERVER_URL environment variable")
+            raise RuntimeError("mcp_server_url must be provided via DataPart config (configured in scenario.toml)")
         
         if "max_iterations" not in config:
             raise RuntimeError("max_iterations must be provided via DataPart config")
