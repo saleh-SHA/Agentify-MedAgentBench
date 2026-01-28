@@ -73,12 +73,13 @@ When you run the benchmark, here's what happens behind the scenes:
 The scenario runner reads the configuration file and starts three services:
 - A **FHIR server** (Docker container) containing synthetic patient data
 - An **MCP server** that exposes FHIR operations as discoverable tools
-- The **agent under test** that will attempt to complete the clinical tasks
+- The **agent under test (Purple Agent)** that will attempt to complete the clinical tasks
+- The **assessor (Green Agent)** that orchestrates the evaluation and validates results of the purple agent
 
 ### Step 2: Evaluation Begins
 The evaluator (called the "Green Agent") receives a list of tasks to run. For each task, it:
 
-1. **Constructs a prompt** using a system template that instructs the agent how to behave and what tools are available
+1. **Retrieves** the prompt and tasks definitions from the MCP server
 2. **Sends the prompt** to the agent via A2A protocol, along with configuration telling the agent where to find the MCP server
 3. **Waits for a response** in the format `FINISH([answer1, answer2, ...])`
 
@@ -87,7 +88,7 @@ When the agent (called the "Purple Agent") receives a task, it:
 
 1. **Connects to the MCP server** and discovers available tools (search_patients, create_medication_request, etc.)
 2. **Enters a tool-calling loop**: it sends the prompt to an LLM, which may request tool calls
-3. **Executes tool calls** through the MCP server, which queries or modifies the FHIR server
+3. **Executes tool calls** through the MCP server, which queries or mockingly modifies the FHIR server
 4. **Iterates** until the LLM produces a final answer or hits the maximum iteration limit
 5. **Returns the answer** along with metadata about what tools were called
 
@@ -96,6 +97,7 @@ The evaluator receives the agent's response and validates it against the expecte
 - Comparing the returned value to a reference answer
 - Checking that the correct FHIR endpoint was called
 - Validating that POST payloads contain all required fields with correct values
+- Validating the number of POST requests made
 - Ensuring read-only tasks didn't trigger any write operations
 
 ### Step 5: Results
