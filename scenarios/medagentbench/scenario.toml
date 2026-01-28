@@ -9,7 +9,13 @@ cmd = "python scenarios/medagentbench/agent/src/server.py --host 0.0.0.0 --port 
 
 [config]
 # MedAgentBench evaluation configuration
-# Service URLs (MCP_SERVER_URL, MCP_FHIR_API_BASE) are configured in .env
+
+# Service URLs (required)
+# FHIR Server URL - Start with: docker run -p 8080:8080 jyxsu6/medagentbench:latest
+fhir_api_base = "http://localhost:8080/fhir/"
+
+# MCP Server URL - Start with: uv run python -m src.mcp.server
+mcp_server_url = "http://localhost:8002"
 
 # Number of tasks to run (set to null or remove to run all tasks)
 num_tasks = 30

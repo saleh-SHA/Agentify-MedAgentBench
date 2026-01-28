@@ -140,7 +140,9 @@ class NoteObject(BaseModel):
 
 # Configuration from environment
 # FHIR_API_BASE is required - must be provided
-FHIR_API_BASE = "http://localhost:8080/fhir"
+FHIR_API_BASE = os.environ.get("MCP_FHIR_API_BASE")
+if not FHIR_API_BASE:
+    raise RuntimeError("FHIR_API_BASE environment variable is required")
 
 # Tasks and prompt files use bundled defaults (relative to this file's directory)
 _SCRIPT_DIR = Path(__file__).parent.resolve()

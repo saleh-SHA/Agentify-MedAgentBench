@@ -22,21 +22,91 @@ def _endpoint_is_listening(host: str, port: int) -> bool:
         return False
 
 
+def _get_pids_on_port(port: int) -> list[int]:
+    """Get list of PIDs using the specified port."""
+    try:
+        result = subprocess.run(
+            ["lsof", "-ti", f":{port}"],
+            capture_output=True,
+            text=True,
+            timeout=5
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            pids = []
+            for pid in result.stdout.strip().split('\n'):
+                pid = pid.strip()
+                if pid:
+                    try:
+                        pids.append(int(pid))
+                    except ValueError:
+                        pass
+            return pids
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        pass
+    return []
+
+
+def _kill_process_on_port(port: int) -> bool:
+    """Kill any process using the specified port. Returns True if port is freed."""
+    pids = _get_pids_on_port(port)
+    if not pids:
+        return True  # No process to kill, port is free
+    
+    # First try SIGTERM
+    for pid in pids:
+        try:
+            os.kill(pid, signal.SIGTERM)
+            print(f"  Sent SIGTERM to process {pid} on port {port}")
+        except ProcessLookupError:
+            pass
+    
+    # Wait for graceful termination
+    time.sleep(1)
+    
+    # Check if port is free now
+    if not _endpoint_is_listening("localhost", port):
+        return True
+    
+    # If still blocked, try SIGKILL on remaining processes
+    pids = _get_pids_on_port(port)
+    for pid in pids:
+        try:
+            os.kill(pid, signal.SIGKILL)
+            print(f"  Sent SIGKILL to process {pid} on port {port}")
+        except ProcessLookupError:
+            pass
+    
+    # Wait for forced termination
+    time.sleep(1)
+    
+    return not _endpoint_is_listening("localhost", port)
+
+
 def ensure_endpoints_unused(cfg: dict) -> None:
-    conflicts: list[str] = []
+    """Check and free up ports that will be used by agents."""
+    ports_to_check = []
 
     for p in cfg["participants"]:
-        if p.get("cmd") and _endpoint_is_listening(p["host"], p["port"]):
-            conflicts.append(f"{p['role']} ({p['host']}:{p['port']})")
+        if p.get("cmd"):
+            ports_to_check.append((p["port"], f"{p['role']} ({p['host']}:{p['port']})"))
 
-    if cfg["green_agent"].get("cmd") and _endpoint_is_listening(cfg["green_agent"]["host"], cfg["green_agent"]["port"]):
-        conflicts.append(f"green_agent ({cfg['green_agent']['host']}:{cfg['green_agent']['port']})")
+    if cfg["green_agent"].get("cmd"):
+        ports_to_check.append((cfg["green_agent"]["port"], f"green_agent ({cfg['green_agent']['host']}:{cfg['green_agent']['port']})"))
 
-    if conflicts:
-        print("Error: Some agent endpoints are already in use:")
-        for conflict in conflicts:
+    still_blocked = []
+    for port, desc in ports_to_check:
+        if _endpoint_is_listening("localhost", port):
+            print(f"Port {port} is in use ({desc}), attempting to free it...")
+            if not _kill_process_on_port(port):
+                still_blocked.append(desc)
+            else:
+                print(f"  Port {port} is now free.")
+
+    if still_blocked:
+        print("Error: Could not free the following ports:")
+        for conflict in still_blocked:
             print(f"  - {conflict}")
-        print("Pick different ports in the scenario TOML (both endpoint and cmd) or stop the process using them.")
+        print("Please manually stop the processes using these ports.")
         sys.exit(1)
 
 
