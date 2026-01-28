@@ -5,9 +5,11 @@ This project extends [MedAgentBench](https://github.com/stanfordmlgroup/MedAgent
 ## Table of Contents
 
 - [Overview](#overview)
+- [Extensions to MedAgentBench](#extensions-to-medagentbench)
 - [What Does This Benchmark Evaluate?](#what-does-this-benchmark-evaluate)
 - [How It Works](#how-it-works)
 - [Architecture](#architecture)
+  - [A2A Protocol Communication](#a2a-protocol-communication)
 - [Quick Start Guide](#quick-start-guide)
 - [Configuration](#configuration)
 - [Benchmark Tasks](#benchmark-tasks)
@@ -18,7 +20,7 @@ This project extends [MedAgentBench](https://github.com/stanfordmlgroup/MedAgent
 
 ## Overview
 
-Agentify-MedAgentBench is an evaluation framework designed to test whether AI agents can perform real clinical tasks in a simulated electronic health record (EHR) environment. Unlike traditional medical AI benchmarks that focus on question-answering, this benchmark challenges agents to actually *do things*: query patient records, interpret lab values, and create clinical orders when appropriate.
+Agentify-MedAgentBench is an evaluation framework designed to test whether AI agents can perform real clinical tasks in a simulated electronic health record (EHR) environment. Unlike traditional medical AI benchmarks that focus on question-answering, this benchmark challenges agents to actually _do things_: query patient records, interpret lab values, and create clinical orders when appropriate.
 
 The framework builds upon the original [MedAgentBench](https://github.com/stanfordmlgroup/MedAgentBench) benchmark developed by Stanford ML Group, which provides 300 clinically-derived tasks across 10 categories written by physicians, along with realistic patient profiles in a FHIR-compliant environment.
 
@@ -30,34 +32,121 @@ The framework builds upon the original [MedAgentBench](https://github.com/stanfo
 
 ---
 
+## Extensions to MedAgentBench
+
+Beyond the A2A and MCP protocol integrations, this implementation introduces significant enhancements to the evaluation framework. The original MedAgentBench used a pass/fail system; our version transforms it into a **comprehensive evaluation framework** with diagnostic capabilities, failure taxonomy, refined task prompts, and new tools with validated schema.
+
+### Structured Failure Tracking
+
+Instead of Pass/Fail metric, every failure now includes:
+
+- **Primary failure category**: For aggregate statistics across evaluation runs
+- **Detailed failure reasons**: For task-level diagnostics and debugging
+
+This two-level failure classification enables:
+
+- Aggregate failure analysis across runs
+- Identification of systematic agent weaknesses (Is the task inherently difficult? Is the agent not following the specified format?)
+- Better debugging of why specific tasks fail
+
+### Comprehensive Failure Taxonomy
+
+The evaluator categorizes failures into distinct types:
+
+| Category                   | Description                                     |
+| -------------------------- | ----------------------------------------------- |
+| `answer_mismatch`          | Returned value doesn't match expected answer    |
+| `readonly_violation`       | Agent made POST request on read-only task       |
+| `wrong_post_count`         | Incorrect number of POST requests               |
+| `payload_validation_error` | POST payload has incorrect fields or values     |
+| `max_rounds_reached`       | Agent didn't finish within iteration limit      |
+| `invalid_finish_format`    | Response not in required `FINISH([...])` format |
+
+### Robust POST Request Extraction
+
+- **Original method**: Fragile string parsing of agent responses
+- **New method**: Structured data extraction from MCP server responses returned via DataPart message (A2A)
+
+The MCP server now returns FHIR operation metadata in a structured format, making POST request validation more reliable.
+
+### Comprehensive Payload Validation
+
+A single evaluation run reveals **all issues** with a payload, not just the first one. For example, if a MedicationRequest has both an incorrect dose and wrong route, both failures are reported. This is much more useful for debugging and agent improvement.
+
+### Flexible Answer Comparison
+
+- **Original method**: Strict exact match only
+- **New method**: Handles common variations
+
+Agents that return `["191 mg/dL"]` instead of `[191]` are now correctly evaluated as passing, reducing false failures while maintaining evaluation integrity.
+
+### Comprehensive Metrics
+
+The evaluation output includes:
+
+- **Failure breakdown percentages**: Distribution of failure types across failed tasks
+- **Round statistics**: Min, max, and average tool-calling rounds per task
+- **Tool call counts**: Average number of tool invocations per task
+
+These metrics help identify whether agents are efficient in their reasoning or taking unnecessary steps.
+
+### MCP Server Integration
+
+- **Original method**: Tasks and prompts hardcoded or file-based
+- **New method**: Domain-specific MCP server for healthcare tasks, prompts, and tools
+
+Benefits of the MCP-based approach:
+
+- **Schema-strict tools**: Pydantic-typed tool definitions with validation
+- **Single source of truth**: Prompts, tasks, and tools served from one location
+- **Easy updates**: Modify tasks or prompts without touching evaluator code
+- **Standardized protocol**: Agents discover tools dynamically via MCP
+
+### Agentified Evaluation Benchmark
+
+The evaluation follows a true agent-to-agent architecture:
+
+- **Assessor (Green Agent)** and **Assessee (Purple Agent)** communicate via native A2A protocol
+- The Assessor provides the Assessee with task, prompt, and MCP configuration in a structured way
+- This separation enables plug-and-play agent evaluation—swap in any A2A-compliant assessee agent
+
+---
+
 ## What Does This Benchmark Evaluate?
 
 The benchmark tests an AI agent's ability to perform clinical reasoning tasks that a medical professional might encounter when working with an EHR system. These tasks fall into three categories:
 
 ### Read-Only Tasks
+
 The agent must query patient records and return specific information. For example:
-- *"What is the MRN of the patient named Peter Stafford with DOB 1932-12-29?"*
-- *"Calculate the average glucose level for patient S1234567 over the past 24 hours."*
+
+- _"What is the MRN of the patient named Peter Stafford with DOB 1932-12-29?"_
+- _"Calculate the average glucose level for patient S1234567 over the past 24 hours."_
 
 These tasks test whether the agent can correctly use search tools, interpret FHIR resources, and extract the relevant data.
 
 ### Action Tasks
+
 The agent must create new clinical records. For example:
-- *"Record a blood pressure of 118/77 mmHg for patient S6534835."*
-- *"Order an orthopedic consultation for patient S2703270 with an ACL tear."*
+
+- _"Record a blood pressure of 118/77 mmHg for patient S6534835."_
+- _"Order an orthopedic consultation for patient S2703270 with an ACL tear."_
 
 These tasks test whether the agent can construct valid FHIR resources with the correct codes, values, and references.
 
 ### Conditional Action Tasks
+
 The agent must first assess a clinical situation, then decide whether action is needed. For example:
-- *"Check the patient's magnesium level. If it's below 1.9 mg/dL, order IV magnesium replacement with appropriate dosing."*
-- *"Review the patient's most recent A1C. If it's more than a year old, order a new A1C test."*
+
+- _"Check the patient's magnesium level. If it's below 1.9 mg/dL, order IV magnesium replacement with appropriate dosing."_
+- _"Review the patient's most recent A1C. If it's more than a year old, order a new A1C test."_
 
 These are the most challenging tasks because they require clinical reasoning: the agent must understand thresholds, calculate appropriate doses, and avoid unnecessary interventions when lab values are normal.
 
 ### What Gets Measured
 
 For each task, the framework evaluates:
+
 - **Correctness**: Did the agent arrive at the right answer or take the right action?
 - **Appropriateness**: Did the agent avoid actions when they weren't needed (e.g., not ordering medication for normal lab values)?
 - **Payload Validity**: For POST operations, were all required FHIR fields present and correct?
@@ -70,13 +159,16 @@ For each task, the framework evaluates:
 When you run the benchmark, here's what happens behind the scenes:
 
 ### Step 1: Infrastructure Startup
+
 The scenario runner reads the configuration file and starts three services:
+
 - A **FHIR server** (Docker container) containing synthetic patient data
 - An **MCP server** that exposes FHIR operations as discoverable tools
 - The **agent under test (Purple Agent)** that will attempt to complete the clinical tasks
 - The **assessor (Green Agent)** that orchestrates the evaluation and validates results of the purple agent
 
 ### Step 2: Evaluation Begins
+
 The evaluator (called the "Green Agent") receives a list of tasks to run. For each task, it:
 
 1. **Retrieves** the prompt and tasks definitions from the MCP server
@@ -84,6 +176,7 @@ The evaluator (called the "Green Agent") receives a list of tasks to run. For ea
 3. **Waits for a response** in the format `FINISH([answer1, answer2, ...])`
 
 ### Step 3: Agent Execution
+
 When the agent (called the "Purple Agent") receives a task, it:
 
 1. **Connects to the MCP server** and discovers available tools (search_patients, create_medication_request, etc.)
@@ -93,7 +186,9 @@ When the agent (called the "Purple Agent") receives a task, it:
 5. **Returns the answer** along with metadata about what tools were called
 
 ### Step 4: Validation
+
 The evaluator receives the agent's response and validates it against the expected solution. Depending on the task type, this might involve:
+
 - Comparing the returned value to a reference answer
 - Checking that the correct FHIR endpoint was called
 - Validating that POST payloads contain all required fields with correct values
@@ -101,6 +196,7 @@ The evaluator receives the agent's response and validates it against the expecte
 - Ensuring read-only tasks didn't trigger any write operations
 
 ### Step 5: Results
+
 After all tasks complete, the framework writes detailed results showing pass/fail status, failure reasons, and aggregate metrics.
 
 ---
@@ -179,6 +275,59 @@ The system is organized into four layers, each with a specific responsibility:
 
 **Data Layer**: The simulated EHR. A FHIR server running in Docker contains synthetic patient records that the agent queries and modifies during evaluation.
 
+### A2A Protocol Communication
+
+The Agent-to-Agent (A2A) protocol enables standardized communication between the Evaluator (Green Agent) and the Medical AI Agent (Purple Agent). Here's how they interact:
+
+#### Communication Flow
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                     GREEN AGENT (Evaluator) :9009                            │
+└───────────────────────────────────┬─────────────────────────────────────────┘
+                                    │
+      1. GET /.well-known/agent.json│  ◄─── Agent Discovery
+                                    ▼
+                              AgentCard
+                    (capabilities, skills, endpoint)
+                                    │
+      2. POST / (A2A Message)       │  ◄─── Task Request
+         ├─ TextPart: prompt +      ▼
+         │  instructions
+         └─ DataPart: config
+            (mcp_server_url, etc.)
+                                    │
+      3. TaskStatusUpdateEvent      │  ◄─── Progress Updates
+         (state: working)           ▼
+                                    │
+      4. Task + Artifacts           │  ◄─── Final Response
+         ├─ TextPart: FINISH([...]) ▼
+         └─ DataPart: metadata
+            (tool call history, etc.)
+                                    │
+┌───────────────────────────────────┴─────────────────────────────────────────┐
+│                     PURPLE AGENT (Medical AI) :9019+                         │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### Key Protocol Concepts
+
+**Agent Discovery**: Before communication, the Evaluator fetches the agent's `AgentCard` from `/.well-known/agent.json`. This describes the agent's capabilities, supported input/output modes, and available skills.
+
+**Multi-Part Messages**: A2A messages contain multiple parts that separate human-readable content from machine-readable data:
+
+- **TextPart**: Contains the task prompt (system instructions + clinical question)
+- **DataPart**: Contains structured configuration (MCP server URL, max iterations)
+
+**Task Lifecycle**: Each task progresses through states: `submitted` → `working` → `completed/failed`. The agent sends status updates during processing and attaches artifacts containing the final response.
+
+**Response Structure**: The agent returns both the answer and evaluation metadata:
+
+- **TextPart**: The answer in `FINISH([...])` format
+- **DataPart**: Metadata including tool call history, FHIR operations performed, and iteration count
+
+This separation allows the Evaluator to assess not just the final answer, but also how the agent arrived at it—enabling detailed failure analysis, detailed evaluation and performance metrics.
+
 ---
 
 ## Quick Start Guide
@@ -188,6 +337,7 @@ This section walks you through running your first evaluation end-to-end.
 ### Prerequisites
 
 Before you begin, ensure you have:
+
 - Python 3.11 or higher
 - Docker installed and running
 - An OpenAI API key (or key for another LLM provider)
@@ -221,6 +371,7 @@ The `run.sh` script handles everything automatically - starting the FHIR server,
 ```
 
 This will:
+
 1. Start the FHIR server (Docker container with synthetic patient data) on port 8080
 2. Start the MCP server (Docker container with FHIR tools) on port 8002
 3. Run the MedAgentBench evaluation with the `--show-logs` flag
@@ -232,6 +383,7 @@ The `--show-logs` flag displays agent output so you can watch the evaluation pro
 ### Step 4: Review Results
 
 When the evaluation completes, results are written to:
+
 ```
 outputs/medagentbench/default_agent/medagentbench/
 ├── runs.jsonl      # Detailed per-task results
@@ -278,15 +430,15 @@ uv run agentbeats-run scenarios/medagentbench/scenario.toml --show-logs
 
 The evaluation is configured through `scenarios/medagentbench/scenario.toml`. This file defines the agent endpoints, server configurations, and evaluation parameters.
 
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `num_tasks` | `30` | Number of tasks to run. Set to `null` or remove to run all 300 tasks |
-| `task_ids` | (optional) | Specific task IDs to run. Overrides `num_tasks` if provided |
-| `max_rounds` | `8` | Maximum tool-calling iterations per task before timeout |
-| `domain` | `"medagentbench"` | Domain identifier for the evaluation |
-| `mcp_server_url` | `"http://localhost:8002"` | URL of the MCP server providing FHIR tools |
-| `fhir_api_base` | `"http://localhost:8080/fhir/"` | Base URL of the FHIR server |
-| `num_workers` | `10` | Number of parallel agent workers for concurrent task execution |
+| Parameter        | Default                         | Description                                                          |
+| ---------------- | ------------------------------- | -------------------------------------------------------------------- |
+| `num_tasks`      | `30`                            | Number of tasks to run. Set to `null` or remove to run all 300 tasks |
+| `task_ids`       | (optional)                      | Specific task IDs to run. Overrides `num_tasks` if provided          |
+| `max_rounds`     | `8`                             | Maximum tool-calling iterations per task before timeout              |
+| `domain`         | `"medagentbench"`               | Domain identifier for the evaluation                                 |
+| `mcp_server_url` | `"http://localhost:8002"`       | URL of the MCP server providing FHIR tools                           |
+| `fhir_api_base`  | `"http://localhost:8080/fhir/"` | Base URL of the FHIR server                                          |
+| `num_workers`    | `10`                            | Number of parallel agent workers for concurrent task execution       |
 
 ### Selecting Tasks
 
@@ -334,12 +486,12 @@ Each worker runs as a separate process on a different port (9019, 9020, etc.). M
 
 ### Environment Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `OPENAI_API_KEY` | - | API key for your LLM provider |
-| `MEDAGENT_LLM_MODEL` | `openai/gpt-4o-mini` | LiteLLM model identifier |
-| `MCP_FHIR_API_BASE` | `http://localhost:8080/fhir/` | FHIR server URL (used by MCP server) |
-| `MCP_SERVER_URL` | `http://localhost:8002` | MCP server URL (used by agent) |
+| Variable             | Default                       | Description                          |
+| -------------------- | ----------------------------- | ------------------------------------ |
+| `OPENAI_API_KEY`     | -                             | API key for your LLM provider        |
+| `MEDAGENT_LLM_MODEL` | `openai/gpt-4o-mini`          | LiteLLM model identifier             |
+| `MCP_FHIR_API_BASE`  | `http://localhost:8080/fhir/` | FHIR server URL (used by MCP server) |
+| `MCP_SERVER_URL`     | `http://localhost:8002`       | MCP server URL (used by agent)       |
 
 ---
 
@@ -347,18 +499,18 @@ Each worker runs as a separate process on a different port (9019, 9020, etc.). M
 
 The benchmark includes 300 tasks across 10 categories. Each category tests different clinical reasoning capabilities:
 
-| Category | Type | What It Tests |
-|----------|------|---------------|
-| **Task 1** | Read-only | Basic patient lookup by name and date of birth |
-| **Task 2** | Read-only | Age calculation from patient demographics |
-| **Task 3** | POST | Creating vital signs observations (blood pressure) |
-| **Task 4** | Read-only | Retrieving recent lab values (magnesium) |
-| **Task 5** | Conditional | Clinical decision-making for magnesium replacement |
-| **Task 6** | Read-only | Calculating aggregate values (average glucose) |
-| **Task 7** | Read-only | Finding most recent lab values (glucose) |
-| **Task 8** | POST | Creating specialist consultation requests |
-| **Task 9** | Conditional | Multi-step intervention for potassium deficiency |
-| **Task 10** | Conditional | Time-based decision-making for A1C testing |
+| Category    | Type        | What It Tests                                      |
+| ----------- | ----------- | -------------------------------------------------- |
+| **Task 1**  | Read-only   | Basic patient lookup by name and date of birth     |
+| **Task 2**  | Read-only   | Age calculation from patient demographics          |
+| **Task 3**  | POST        | Creating vital signs observations (blood pressure) |
+| **Task 4**  | Read-only   | Retrieving recent lab values (magnesium)           |
+| **Task 5**  | Conditional | Clinical decision-making for magnesium replacement |
+| **Task 6**  | Read-only   | Calculating aggregate values (average glucose)     |
+| **Task 7**  | Read-only   | Finding most recent lab values (glucose)           |
+| **Task 8**  | POST        | Creating specialist consultation requests          |
+| **Task 9**  | Conditional | Multi-step intervention for potassium deficiency   |
+| **Task 10** | Conditional | Time-based decision-making for A1C testing         |
 
 ### Example Task
 
@@ -375,6 +527,7 @@ Here's what a conditional task looks like:
 ```
 
 For this task, the agent must:
+
 1. Query the patient's magnesium observations
 2. Find the most recent value within 24 hours
 3. Determine it's 1.3 mg/dL (moderate deficiency)
@@ -436,14 +589,14 @@ This tells you the agent found the correct magnesium value but made errors in th
 
 ### Common Failure Types
 
-| Failure | What It Means |
-|---------|---------------|
-| `answer_mismatch` | The returned value didn't match the expected answer |
-| `readonly_violation` | The agent made a POST request on a read-only task |
-| `wrong_post_count` | The agent made too many or too few POST requests |
-| `payload_validation_error` | A POST payload had incorrect fields or values |
-| `max_rounds_reached` | The agent didn't finish within the iteration limit |
-| `invalid_finish_format` | The response wasn't in the required `FINISH([...])` format |
+| Failure                    | What It Means                                              |
+| -------------------------- | ---------------------------------------------------------- |
+| `answer_mismatch`          | The returned value didn't match the expected answer        |
+| `readonly_violation`       | The agent made a POST request on a read-only task          |
+| `wrong_post_count`         | The agent made too many or too few POST requests           |
+| `payload_validation_error` | A POST payload had incorrect fields or values              |
+| `max_rounds_reached`       | The agent didn't finish within the iteration limit         |
+| `invalid_finish_format`    | The response wasn't in the required `FINISH([...])` format |
 
 ---
 
@@ -478,6 +631,7 @@ Agentify-MedAgentBench/
 To test a different agent implementation, modify `scenarios/medagentbench/agent/src/agent.py`. The key method is `run()`, which receives a message and must return a response in the expected format.
 
 Your agent must:
+
 1. Connect to the MCP server URL provided in the message's `DataPart`
 2. Discover available tools via MCP
 3. Use an LLM to reason about the task and decide which tools to call
