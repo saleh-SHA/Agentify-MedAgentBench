@@ -31,6 +31,8 @@ num_tasks = 30
 #task_ids = ["task8_1", "task8_2", "task8_3", "task8_4", "task8_5", "task8_6", "task8_7", "task8_8", "task8_9", "task8_10"]
 #task_ids = ["task9_1", "task9_2", "task9_3", "task9_4", "task9_5", "task9_6", "task9_7", "task9_8", "task9_9", "task9_10"]
 #task_ids = ["task10_1", "task10_2", "task10_3", "task10_4", "task10_5", "task10_6", "task10_7", "task10_8", "task10_9", "task10_10"]
+task_ids = ["task11_1", "task11_2", "task11_3", "task11_4", "task11_5", "task11_6", "task11_7", "task11_8", "task11_9", "task11_10","task11_11", "task11_12", "task11_13", "task11_14", "task11_15", "task11_16", "task11_17", "task11_18", "task11_19", "task11_20","task11_21", "task11_22", "task11_23", "task11_24", "task11_25", "task11_26", "task11_27", "task11_28", "task11_29", "task11_30"]
+
 
 # Maximum tool-calling rounds per task
 max_rounds = 8

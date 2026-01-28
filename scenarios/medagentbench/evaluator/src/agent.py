@@ -121,6 +121,15 @@ class DetailedFailure(str, Enum):
     # Answer comparison failures
     ANSWER_VALUE_MISMATCH = "answer_value_mismatch"
     ANSWER_LENGTH_MISMATCH = "answer_length_mismatch"
+    
+    # Task 11 - BP Trend specific failures
+    WRONG_PATIENT_ID = "wrong_patient_id"
+    MISSING_BP_READINGS = "missing_bp_readings"
+    WRONG_BP_READINGS_COUNT = "wrong_bp_readings_count"
+    WRONG_TREND = "wrong_trend"
+    WRONG_HYPERTENSION_ALERT = "wrong_hypertension_alert"
+    MISSING_REQUIRED_FIELD = "missing_required_field"
+    INVALID_BP_READING_FORMAT = "invalid_bp_reading_format"
 
 
 @dataclass
@@ -1310,6 +1319,213 @@ def eval_task10(case_data, results, fhir_api_base) -> EvalOutcome:
         )
 
 
+def extract_tool_result(results: TaskOutput, tool_name: str):
+    """Extract a tool result from history by tool name.
+    
+    Returns the parsed result dict if found, None otherwise.
+    """
+    for item in results.history:
+        if item.role == "tool_result":
+            try:
+                content = json.loads(item.content)
+                if content.get("tool") == tool_name and not content.get("is_error"):
+                    return content.get("result", {})
+            except (json.JSONDecodeError, TypeError):
+                continue
+    return None
+
+
+def extract_tool_call_arguments(results: TaskOutput, tool_name: str):
+    """Extract tool call arguments from history by tool name.
+    
+    Returns the arguments dict if found, None otherwise.
+    """
+    for item in results.history:
+        if item.role == "tool_call":
+            try:
+                content = json.loads(item.content)
+                if content.get("tool") == tool_name:
+                    return content.get("arguments", {})
+            except (json.JSONDecodeError, TypeError):
+                continue
+    return None
+
+
+def eval_task11(case_data, results, fhir_api_base) -> EvalOutcome:
+    """Task 11: Blood Pressure Trend Analysis for Hypertension (Read-Only).
+    
+    Evaluates:
+    1. No POST requests (read-only task)
+    2. Agent called the analyze_blood_pressure_trend tool with correct parameters
+    3. Tool returned correct patient and hypertension_alert
+    4. Agent's final answer matches [hypertension_alert, reading_count] exactly
+    
+    Agent should return: FINISH([true/false, reading_count])
+    e.g., FINISH([true, 5]) or FINISH([false, 16])
+    """
+    # Check for read-only violation
+    if check_has_post(results):
+        return EvalOutcome.failure(
+            FailureType.READONLY_VIOLATION,
+            [DetailedFailure.MADE_POST_ON_READONLY]
+        )
+    
+    # Extract tool call arguments to validate parameters
+    tool_args = extract_tool_call_arguments(results, "analyze_blood_pressure_trend")
+    
+    if tool_args is None:
+        return EvalOutcome.failure(
+            FailureType.ANSWER_MISMATCH,
+            [DetailedFailure.MISSING_REQUIRED_FIELD]  # Tool was not called
+        )
+    
+    # Validate tool parameters
+    expected_patient = case_data['eval_MRN']
+    expected_ref_date = case_data.get('eval_ref_date', "2023-11-13T10:15:00+00:00")
+    expected_days_back = 7
+    
+    param_failures = []
+    
+    # Check patient parameter
+    agent_patient = tool_args.get('patient', '')
+    if expected_patient not in str(agent_patient):
+        param_failures.append("wrong_patient_param")
+    
+    # Check reference_date parameter (normalize for comparison)
+    agent_ref_date = tool_args.get('reference_date', '')
+    # Normalize both dates for comparison (remove microseconds, handle Z vs +00:00)
+    try:
+        expected_dt = datetime.fromisoformat(expected_ref_date.replace('Z', '+00:00'))
+        agent_dt = datetime.fromisoformat(str(agent_ref_date).replace('Z', '+00:00'))
+        # Allow 1 day tolerance for date (in case agent uses start of day vs exact time)
+        if abs((expected_dt - agent_dt).total_seconds()) > 86400:  # 24 hours
+            param_failures.append("wrong_reference_date_param")
+    except (ValueError, TypeError):
+        param_failures.append("invalid_reference_date_param")
+    
+    # Check days_back parameter
+    agent_days_back = tool_args.get('days_back', None)
+    if agent_days_back != expected_days_back:
+        param_failures.append("wrong_days_back_param")
+    
+    if param_failures:
+        print(f"Task 11 param validation failed: {param_failures}, agent_args={tool_args}", flush=True)
+        return EvalOutcome.failure(
+            FailureType.ANSWER_MISMATCH,
+            param_failures
+        )
+    
+    # Extract tool result from history
+    tool_result = extract_tool_result(results, "analyze_blood_pressure_trend")
+    
+    if tool_result is None:
+        return EvalOutcome.failure(
+            FailureType.ANSWER_MISMATCH,
+            [DetailedFailure.MISSING_REQUIRED_FIELD]  # Tool call failed
+        )
+    
+    # Get reference BP data from FHIR to compute expected values
+    url = f"{fhir_api_base}Observation?patient={case_data['eval_MRN']}&code:text=BP&_count=5000&_format=json"
+    get_res = json.loads(send_get_request(url)['data'])
+    
+    # Reference date and cutoff (7 days back)
+    ref_date_str = case_data.get('eval_ref_date', "2023-11-13T10:15:00+00:00")
+    ref_date = datetime.fromisoformat(ref_date_str)
+    cutoff_date = ref_date - timedelta(days=7)
+    
+    # Parse reference BP readings
+    ref_readings = []
+    for entry in get_res.get('entry', []):
+        resource = entry['resource']
+        effective_str = resource.get('effectiveDateTime', '')
+        if not effective_str:
+            continue
+        
+        try:
+            effective_dt = datetime.fromisoformat(effective_str.replace('Z', '+00:00'))
+        except ValueError:
+            continue
+        
+        if effective_dt < cutoff_date or effective_dt > ref_date:
+            continue
+        
+        # Extract systolic/diastolic from valueString
+        value_string = resource.get('valueString', '')
+        if value_string and '/' in value_string:
+            parts = value_string.replace('mmHg', '').strip().split('/')
+            if len(parts) == 2:
+                try:
+                    systolic = int(float(parts[0].strip()))
+                    diastolic = int(float(parts[1].strip()))
+                    ref_readings.append({'systolic': systolic, 'diastolic': diastolic})
+                except ValueError:
+                    pass
+    
+    # Calculate reference values
+    ref_reading_count = len(ref_readings)
+    if ref_readings:
+        elevated_count = sum(
+            1 for r in ref_readings
+            if r['systolic'] >= 140 or r['diastolic'] >= 90
+        )
+        ref_alert = (elevated_count / len(ref_readings) * 100 >= 50)
+    else:
+        ref_alert = False
+    
+    # Parse agent's final answer (should be [alert, reading_count])
+    try:
+        agent_result = json.loads(results.result)
+    except (json.JSONDecodeError, TypeError):
+        return EvalOutcome.failure(
+            FailureType.INVALID_JSON_RESULT,
+            [DetailedFailure.INVALID_JSON]
+        )
+    
+    # Extract values from agent result
+    # Expected format: [true/false, reading_count] e.g., [true, 5] or [false, 16]
+    if not isinstance(agent_result, list) or len(agent_result) < 2:
+        return EvalOutcome.failure(
+            FailureType.INVALID_JSON_RESULT,
+            [DetailedFailure.MISSING_REQUIRED_FIELD]
+        )
+    
+    agent_alert = agent_result[0]
+    agent_reading_count = agent_result[1]
+    
+    # Validate tool result fields
+    failures = []
+    
+    # Check patient in tool result
+    tool_patient = tool_result.get('patient', '')
+    if case_data['eval_MRN'] not in str(tool_patient):
+        failures.append(DetailedFailure.WRONG_PATIENT_ID)
+    
+    # Check tool's hypertension_alert matches reference
+    tool_alert = tool_result.get('hypertension_alert', None)
+    if tool_alert != ref_alert:
+        failures.append(DetailedFailure.WRONG_HYPERTENSION_ALERT)
+    
+    # Check tool's reading count matches reference (from statistics)
+    tool_reading_count = tool_result.get('statistics', {}).get('total_readings', 0)
+    tool_bp_readings = tool_result.get('bp_readings', [])
+    tool_count = tool_reading_count if tool_reading_count else len(tool_bp_readings)
+    
+    # Check agent's final answer - alert must match
+    if agent_alert != ref_alert:
+        failures.append(DetailedFailure.ANSWER_VALUE_MISMATCH)
+    
+    # Check agent's reading count (exact match required)
+    if int(agent_reading_count) != ref_reading_count:
+        failures.append(DetailedFailure.WRONG_BP_READINGS_COUNT)
+    
+    print(f"Task 11 eval: patient={case_data['eval_MRN']}, ref_alert={ref_alert}, ref_count={ref_reading_count}, agent_alert={agent_alert}, agent_count={agent_reading_count}", flush=True)
+    
+    if failures:
+        return EvalOutcome.failure(FailureType.ANSWER_MISMATCH, failures)
+    
+    return EvalOutcome.success()
+
+
 # Task evaluation dispatcher
 TASK_EVALUATORS = {
     "task1": eval_task1,
@@ -1322,6 +1538,7 @@ TASK_EVALUATORS = {
     "task8": eval_task8,
     "task9": eval_task9,
     "task10": eval_task10,
+    "task11": eval_task11,
 }
 
 

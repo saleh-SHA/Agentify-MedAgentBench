@@ -1826,5 +1826,199 @@
     "instruction": "Check patient with MRN S1876702 last HbA1C value and date. Then follow these rules strictly: Step 1: Query the HbA1C observations for the patient. Step 2: Determine if an HbA1C measurement exists. Step 3: If a measurement exists, compare its date to the cutoff (2022-11-13T10:15:00+00:00 = 1 year ago). Step 4: ONLY order a new HbA1C lab test if: - No HbA1C exists, OR - The HbA1C date is BEFORE 2022-11-13T10:15:00+00:00 Step 5: If the HbA1C date is ON or AFTER 2022-11-13T10:15:00+00:00, DO NOT place any orders.",
     "context": "The code for HbA1C is \"A1C\". The LOINC code for ordering HbA1C lab is: 4548-4. Valid outputs: FINISH([number, string]) or FINISH([-1]) if no HbA1C measurement is available. No other output shapes are allowed.",
     "eval_MRN": "S1876702"
+  },
+  {
+    "id": "task11_1",
+    "instruction": "Does patient S6468480 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2023-11-13T10:15:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
+    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]).",
+    "eval_MRN": "S6468480"
+  },
+  {
+    "id": "task11_2",
+    "instruction": "Does patient S1733937 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2023-11-13T10:15:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
+    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]).",
+    "eval_MRN": "S1733937"
+  },
+  {
+    "id": "task11_3",
+    "instruction": "Does patient S1733937 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2020-01-31T02:00:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
+    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]).",
+    "eval_MRN": "S1733937",
+    "eval_ref_date": "2020-01-31T02:00:00+00:00"
+  },
+  {
+    "id": "task11_4",
+    "instruction": "Does patient S6468480 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2020-01-31T02:00:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
+    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]). If no BP readings exist, return FINISH([false, 0]).",
+    "eval_MRN": "S6468480",
+    "eval_ref_date": "2020-01-31T02:00:00+00:00"
+  },
+  {
+    "id": "task11_5",
+    "instruction": "Does patient S6534835 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2023-11-13T10:15:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
+    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]). If no BP readings exist, return FINISH([false, 0]).",
+    "eval_MRN": "S6534835"
+  },
+  {
+    "id": "task11_6",
+    "instruction": "Does patient S6426560 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2023-11-13T10:15:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
+    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]). If no BP readings exist, return FINISH([false, 0]).",
+    "eval_MRN": "S6426560"
+  },
+  {
+    "id": "task11_7",
+    "instruction": "Does patient S1986380 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2023-11-13T10:15:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
+    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]). If no BP readings exist, return FINISH([false, 0]).",
+    "eval_MRN": "S1986380"
+  },
+  {
+    "id": "task11_8",
+    "instruction": "Does patient S6484983 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2023-11-13T10:15:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
+    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]). If no BP readings exist, return FINISH([false, 0]).",
+    "eval_MRN": "S6484983"
+  },
+  {
+    "id": "task11_9",
+    "instruction": "Does patient S1733937 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2022-05-06T00:00:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
+    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]).",
+    "eval_MRN": "S1733937",
+    "eval_ref_date": "2022-05-06T00:00:00+00:00"
+  },
+  {
+    "id": "task11_10",
+    "instruction": "Does patient S1733937 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2021-11-03T00:00:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
+    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]).",
+    "eval_MRN": "S1733937",
+    "eval_ref_date": "2021-11-03T00:00:00+00:00"
+  },
+  {
+    "id": "task11_11",
+    "instruction": "Does patient S1733937 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2021-08-22T12:00:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
+    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]).",
+    "eval_MRN": "S1733937",
+    "eval_ref_date": "2021-08-22T12:00:00+00:00"
+  },
+  {
+    "id": "task11_12",
+    "instruction": "Does patient S1733937 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2022-10-15T12:00:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
+    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]).",
+    "eval_MRN": "S1733937",
+    "eval_ref_date": "2022-10-15T12:00:00+00:00"
+  },
+  {
+    "id": "task11_13",
+    "instruction": "Does patient S1733937 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2022-11-08T12:00:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
+    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]).",
+    "eval_MRN": "S1733937",
+    "eval_ref_date": "2022-11-08T12:00:00+00:00"
+  },
+  {
+    "id": "task11_14",
+    "instruction": "Does patient S1733937 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2022-12-01T12:00:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
+    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]).",
+    "eval_MRN": "S1733937",
+    "eval_ref_date": "2022-12-01T12:00:00+00:00"
+  },
+  {
+    "id": "task11_15",
+    "instruction": "Does patient S1733937 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2023-02-01T12:00:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
+    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]).",
+    "eval_MRN": "S1733937",
+    "eval_ref_date": "2023-02-01T12:00:00+00:00"
+  },
+  {
+    "id": "task11_16",
+    "instruction": "Does patient S1733937 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2022-06-01T12:00:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
+    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]).",
+    "eval_MRN": "S1733937",
+    "eval_ref_date": "2022-06-01T12:00:00+00:00"
+  },
+  {
+    "id": "task11_17",
+    "instruction": "Does patient S1733937 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2020-12-22T12:00:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
+    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]).",
+    "eval_MRN": "S1733937",
+    "eval_ref_date": "2020-12-22T12:00:00+00:00"
+  },
+  {
+    "id": "task11_18",
+    "instruction": "Does patient S1733937 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2021-01-22T12:00:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
+    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]).",
+    "eval_MRN": "S1733937",
+    "eval_ref_date": "2021-01-22T12:00:00+00:00"
+  },
+  {
+    "id": "task11_19",
+    "instruction": "Does patient S1733937 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2019-07-01T12:00:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
+    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]).",
+    "eval_MRN": "S1733937",
+    "eval_ref_date": "2019-07-01T12:00:00+00:00"
+  },
+  {
+    "id": "task11_20",
+    "instruction": "Does patient S1733937 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2023-08-01T12:00:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
+    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]).",
+    "eval_MRN": "S1733937",
+    "eval_ref_date": "2023-08-01T12:00:00+00:00"
+  },
+  {
+    "id": "task11_21",
+    "instruction": "Does patient S1023381 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2023-11-13T10:15:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
+    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]). If no BP readings exist, return FINISH([false, 0]).",
+    "eval_MRN": "S1023381"
+  },
+  {
+    "id": "task11_22",
+    "instruction": "Does patient S6541609 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2023-11-13T10:15:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
+    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]). If no BP readings exist, return FINISH([false, 0]).",
+    "eval_MRN": "S6541609"
+  },
+  {
+    "id": "task11_23",
+    "instruction": "Does patient S6540602 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2023-11-13T10:15:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
+    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]). If no BP readings exist, return FINISH([false, 0]).",
+    "eval_MRN": "S6540602"
+  },
+  {
+    "id": "task11_24",
+    "instruction": "Does patient S0547588 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2023-11-13T10:15:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
+    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]). If no BP readings exist, return FINISH([false, 0]).",
+    "eval_MRN": "S0547588"
+  },
+  {
+    "id": "task11_25",
+    "instruction": "Does patient S6212774 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2023-11-13T10:15:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
+    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]). If no BP readings exist, return FINISH([false, 0]).",
+    "eval_MRN": "S6212774"
+  },
+  {
+    "id": "task11_26",
+    "instruction": "Does patient S6551923 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2023-11-13T10:15:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
+    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]). If no BP readings exist, return FINISH([false, 0]).",
+    "eval_MRN": "S6551923"
+  },
+  {
+    "id": "task11_27",
+    "instruction": "Does patient S6264184 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2023-11-13T10:15:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
+    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]). If no BP readings exist, return FINISH([false, 0]).",
+    "eval_MRN": "S6264184"
+  },
+  {
+    "id": "task11_28",
+    "instruction": "Does patient S1311412 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2023-11-13T10:15:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
+    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]). If no BP readings exist, return FINISH([false, 0]).",
+    "eval_MRN": "S1311412"
+  },
+  {
+    "id": "task11_29",
+    "instruction": "Does patient S0674240 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2023-11-13T10:15:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
+    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]). If no BP readings exist, return FINISH([false, 0]).",
+    "eval_MRN": "S0674240"
+  },
+  {
+    "id": "task11_30",
+    "instruction": "Does patient S1579803 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2023-11-13T10:15:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
+    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]). If no BP readings exist, return FINISH([false, 0]).",
+    "eval_MRN": "S1579803"
   }
 ]
