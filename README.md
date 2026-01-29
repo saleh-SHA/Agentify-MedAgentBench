@@ -509,19 +509,19 @@ Each worker runs as a separate process on a different port (9019, 9020, etc.). M
 
 The benchmark includes 330 tasks across 11 categories. Each category tests different clinical reasoning capabilities:
 
-| Category    | Type           | What It Tests                                      |
-| ----------- | -------------- | -------------------------------------------------- |
-| **Task 1**  | Read-only      | Basic patient lookup by name and date of birth     |
-| **Task 2**  | Read-only      | Age calculation from patient demographics          |
-| **Task 3**  | POST           | Creating vital signs observations (blood pressure) |
-| **Task 4**  | Read-only      | Retrieving recent lab values (magnesium)           |
-| **Task 5**  | Conditional    | Clinical decision-making for magnesium replacement |
-| **Task 6**  | Read-only      | Calculating aggregate values (average glucose)     |
-| **Task 7**  | Read-only      | Finding most recent lab values (glucose)           |
-| **Task 8**  | POST           | Creating specialist consultation requests          |
-| **Task 9**  | Conditional    | Multi-step intervention for potassium deficiency   |
-| **Task 10** | Conditional    | Time-based decision-making for A1C testing         |
-| **Task 11** | Trend Analysis | Blood pressure trend analysis for hypertension     |
+| Category    | Type                 | What It Tests                                      |
+| ----------- | -------------------- | -------------------------------------------------- |
+| **Task 1**  | Read-only            | Basic patient lookup by name and date of birth     |
+| **Task 2**  | Read-only            | Age calculation from patient demographics          |
+| **Task 3**  | POST                 | Creating vital signs observations (blood pressure) |
+| **Task 4**  | Read-only            | Retrieving recent lab values (magnesium)           |
+| **Task 5**  | Conditional          | Clinical decision-making for magnesium replacement |
+| **Task 6**  | Read-only            | Calculating aggregate values (average glucose)     |
+| **Task 7**  | Read-only            | Finding most recent lab values (glucose)           |
+| **Task 8**  | POST                 | Creating specialist consultation requests          |
+| **Task 9**  | Conditional          | Multi-step intervention for potassium deficiency   |
+| **Task 10** | Conditional          | Time-based decision-making for A1C testing         |
+| **Task 11** | Multi-Step Reasoning | Cardiovascular risk score calculation (Hard)       |
 
 ### Example Task (Conditional)
 
@@ -545,33 +545,43 @@ For this task, the agent must:
 5. If Mg >= 1.9 (normal), return `FINISH([magnesium_value])` without ordering
 6. Only if Mg < 1.9 (deficiency), create exactly one MedicationRequest with appropriate dosing, then return `FINISH([magnesium_value])`
 
-### Example Task (Trend Analysis)
+### Example Task (Multi-Step Clinical Reasoning - Hard)
 
-Task 11 introduces trend analysis, requiring the agent to analyze patterns over time:
+Task 11 is a **hard multi-step clinical reasoning task** requiring the agent to chain multiple tools, perform calculations, and apply clinical scoring rules:
+
+> **Note:** This task involves 4+ tool calls, multi-step querying, scoring, and reasoning. Performance benchmarks: gpt-4o-mini scores ~10% while gpt-4o scores ~50%.
 
 ```json
 {
-  "id": "task11_9",
-  "instruction": "Does patient S1733937 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2022-05-06T00:00:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
-  "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found.",
+  "id": "task11_1",
+  "instruction": "Calculate the cardiovascular risk score for patient \"Jonathan Jackson\" as of 2019-06-15T10:15:00+00:00. Risk factors (1 point each): Age >= 50 years, most recent A1C >= 6.5 (diabetes), BP elevated >= 30% in past 7 days (systolic >= 140 OR diastolic >= 90). Risk level: HIGH (score >= 2), MEDIUM (score = 1), LOW (score = 0).",
+  "context": "Steps: 1) Search for the patient by name to get their MRN and date of birth. 2) Calculate the patient's age as of the reference date. 3) Query their A1C lab results (use code=\"A1C\") and find the most recent value before the reference date. 4) Analyze their blood pressure trend for the 7 days before the reference date. 5) Calculate the risk score and determine the risk level. Return FINISH([risk_level, score, age, a1c_value, bp_elevated_pct]).",
   "eval_MRN": "S1733937",
-  "eval_ref_date": "2022-05-06T00:00:00+00:00"
+  "eval_ref_date": "2019-06-15T10:15:00+00:00"
 }
 ```
 
 For this task, the agent must:
 
-1. Discover and use the `analyze_blood_pressure_trend` tool
-2. Pass the correct parameters: patient ID, reference date, and 7-day window
-3. Analyze the tool's output for hypertension alert status
-4. Return both the alert (true/false) and exact reading count
+1. **Search for patient** by name using `search_patients` to get MRN and date of birth
+2. **Calculate age** using `calculate_age` with the patient's DOB and reference date
+3. **Query A1C labs** using `list_lab_observations` with code="A1C" and find the most recent value before the reference date
+4. **Analyze BP trend** using `analyze_blood_pressure_trend` for the 7-day window
+5. **Apply scoring rules**:
+   - Age ≥ 50 = +1 point
+   - A1C ≥ 6.5 (diabetic) = +1 point
+   - BP elevated ≥ 30% = +1 point
+6. **Determine risk level**: HIGH (≥2), MEDIUM (1), LOW (0)
+7. **Return result** as `FINISH([risk_level, score, age, a1c_value, bp_elevated_pct])`
 
 **Evaluation criteria:**
 
 - No POST requests (read-only task)
-- Tool called with correct `patient`, `reference_date`, and `days_back=7`
-- Hypertension alert matches reference (computed from FHIR data)
-- Reading count is an exact match
+- Risk level exact match (HIGH/MEDIUM/LOW)
+- Score exact match (0-3)
+- Age exact match (integer years)
+- A1C exact match (rounded to 1 decimal)
+- BP elevated percentage exact match (rounded to 1 decimal)
 
 ### Response Format
 

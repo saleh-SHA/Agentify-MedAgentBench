@@ -1,211 +1,271 @@
 [
   {
     "id": "task1_1",
-    "instruction": "What’s the MRN of the patient with name Peter Stafford and DOB of 1932-12-29? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What\u2019s the MRN of the patient with name Peter Stafford and DOB of 1932-12-29? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S6534835"],
+    "sol": [
+      "S6534835"
+    ],
     "eval_MRN": "S6534835"
   },
   {
     "id": "task1_2",
-    "instruction": "What’s the MRN of the patient with name Maria Alvarez and DOB of 1940-03-05? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What\u2019s the MRN of the patient with name Maria Alvarez and DOB of 1940-03-05? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S6426560"],
+    "sol": [
+      "S6426560"
+    ],
     "eval_MRN": "S6426560"
   },
   {
     "id": "task1_3",
-    "instruction": "What’s the MRN of the patient with name Dana Sandoval and DOB of 1989-04-19? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What\u2019s the MRN of the patient with name Dana Sandoval and DOB of 1989-04-19? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S1986380"],
+    "sol": [
+      "S1986380"
+    ],
     "eval_MRN": "S1986380"
   },
   {
     "id": "task1_4",
-    "instruction": "What’s the MRN of the patient with name James Snyder and DOB of 1953-08-03? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What\u2019s the MRN of the patient with name James Snyder and DOB of 1953-08-03? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S6484983"],
+    "sol": [
+      "S6484983"
+    ],
     "eval_MRN": "S6484983"
   },
   {
     "id": "task1_5",
-    "instruction": "What’s the MRN of the patient with name Justin Gould and DOB of 1943-05-19? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What\u2019s the MRN of the patient with name Justin Gould and DOB of 1943-05-19? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S2703270"],
+    "sol": [
+      "S2703270"
+    ],
     "eval_MRN": "S2703270"
   },
   {
     "id": "task1_6",
-    "instruction": "What’s the MRN of the patient with name Andrew Bishop and DOB of 1963-01-29? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What\u2019s the MRN of the patient with name Andrew Bishop and DOB of 1963-01-29? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S2874099"],
+    "sol": [
+      "S2874099"
+    ],
     "eval_MRN": "S2874099"
   },
   {
     "id": "task1_7",
-    "instruction": "What’s the MRN of the patient with name Kevin Vasquez and DOB of 1953-11-19? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What\u2019s the MRN of the patient with name Kevin Vasquez and DOB of 1953-11-19? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S6200102"],
+    "sol": [
+      "S6200102"
+    ],
     "eval_MRN": "S6200102"
   },
   {
     "id": "task1_8",
-    "instruction": "What’s the MRN of the patient with name Brian Buchanan and DOB of 1954-08-10? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What\u2019s the MRN of the patient with name Brian Buchanan and DOB of 1954-08-10? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S6530532"],
+    "sol": [
+      "S6530532"
+    ],
     "eval_MRN": "S6530532"
   },
   {
     "id": "task1_9",
-    "instruction": "What’s the MRN of the patient with name Katrina Golden and DOB of 1960-08-18? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What\u2019s the MRN of the patient with name Katrina Golden and DOB of 1960-08-18? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S6539215"],
+    "sol": [
+      "S6539215"
+    ],
     "eval_MRN": "S6539215"
   },
   {
     "id": "task1_10",
-    "instruction": "What’s the MRN of the patient with name Joshua Martinez and DOB of 1967-03-11? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What\u2019s the MRN of the patient with name Joshua Martinez and DOB of 1967-03-11? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S6264184"],
+    "sol": [
+      "S6264184"
+    ],
     "eval_MRN": "S6264184"
   },
   {
     "id": "task1_11",
-    "instruction": "What’s the MRN of the patient with name Glenda Hall and DOB of 1952-11-14? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What\u2019s the MRN of the patient with name Glenda Hall and DOB of 1952-11-14? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S6521727"],
+    "sol": [
+      "S6521727"
+    ],
     "eval_MRN": "S6521727"
   },
   {
     "id": "task1_12",
-    "instruction": "What’s the MRN of the patient with name Margaret Kidd and DOB of 1982-08-24? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What\u2019s the MRN of the patient with name Margaret Kidd and DOB of 1982-08-24? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S0789363"],
+    "sol": [
+      "S0789363"
+    ],
     "eval_MRN": "S0789363"
   },
   {
     "id": "task1_13",
-    "instruction": "What’s the MRN of the patient with name Emily Hicks and DOB of 1942-05-11? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What\u2019s the MRN of the patient with name Emily Hicks and DOB of 1942-05-11? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S2154941"],
+    "sol": [
+      "S2154941"
+    ],
     "eval_MRN": "S2154941"
   },
   {
     "id": "task1_14",
-    "instruction": "What’s the MRN of the patient with name Pamela Merritt and DOB of 1994-09-15? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What\u2019s the MRN of the patient with name Pamela Merritt and DOB of 1994-09-15? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S2197736"],
+    "sol": [
+      "S2197736"
+    ],
     "eval_MRN": "S2197736"
   },
   {
     "id": "task1_15",
-    "instruction": "What’s the MRN of the patient with name Denise Dunlap and DOB of 1945-09-20? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What\u2019s the MRN of the patient with name Denise Dunlap and DOB of 1945-09-20? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S3228213"],
+    "sol": [
+      "S3228213"
+    ],
     "eval_MRN": "S3228213"
   },
   {
     "id": "task1_16",
-    "instruction": "What’s the MRN of the patient with name Debra Dunn and DOB of 1969-05-12? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What\u2019s the MRN of the patient with name Debra Dunn and DOB of 1969-05-12? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S6551923"],
+    "sol": [
+      "S6551923"
+    ],
     "eval_MRN": "S6551923"
   },
   {
     "id": "task1_17",
-    "instruction": "What’s the MRN of the patient with name Shannon Palmer and DOB of 1956-11-16? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What\u2019s the MRN of the patient with name Shannon Palmer and DOB of 1956-11-16? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S2119664"],
+    "sol": [
+      "S2119664"
+    ],
     "eval_MRN": "S2119664"
   },
   {
     "id": "task1_18",
-    "instruction": "What’s the MRN of the patient with name Melissa Nguyen and DOB of 1973-08-14? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What\u2019s the MRN of the patient with name Melissa Nguyen and DOB of 1973-08-14? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S2863714"],
+    "sol": [
+      "S2863714"
+    ],
     "eval_MRN": "S2863714"
   },
   {
     "id": "task1_19",
-    "instruction": "What’s the MRN of the patient with name Tim Ramos and DOB of 1959-04-28? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What\u2019s the MRN of the patient with name Tim Ramos and DOB of 1959-04-28? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S6192632"],
+    "sol": [
+      "S6192632"
+    ],
     "eval_MRN": "S6192632"
   },
   {
     "id": "task1_20",
-    "instruction": "What’s the MRN of the patient with name Christopher Cruz and DOB of 1940-08-28? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What\u2019s the MRN of the patient with name Christopher Cruz and DOB of 1940-08-28? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S0658561"],
+    "sol": [
+      "S0658561"
+    ],
     "eval_MRN": "S0658561"
   },
   {
     "id": "task1_21",
-    "instruction": "What’s the MRN of the patient with name Tina Anderson and DOB of 1959-01-24? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What\u2019s the MRN of the patient with name Tina Anderson and DOB of 1959-01-24? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S0547588"],
+    "sol": [
+      "S0547588"
+    ],
     "eval_MRN": "S0547588"
   },
   {
     "id": "task1_22",
-    "instruction": "What’s the MRN of the patient with name Robert Gardner and DOB of 1975-05-30? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What\u2019s the MRN of the patient with name Robert Gardner and DOB of 1975-05-30? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S0722219"],
+    "sol": [
+      "S0722219"
+    ],
     "eval_MRN": "S0722219"
   },
   {
     "id": "task1_23",
-    "instruction": "What’s the MRN of the patient with name Julie Rodriguez and DOB of 1962-01-20? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What\u2019s the MRN of the patient with name Julie Rodriguez and DOB of 1962-01-20? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S3057899"],
+    "sol": [
+      "S3057899"
+    ],
     "eval_MRN": "S3057899"
   },
   {
     "id": "task1_24",
-    "instruction": "What’s the MRN of the patient with name Katherine Sutton and DOB of 1943-02-11? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What\u2019s the MRN of the patient with name Katherine Sutton and DOB of 1943-02-11? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S6538722"],
+    "sol": [
+      "S6538722"
+    ],
     "eval_MRN": "S6538722"
   },
   {
     "id": "task1_25",
-    "instruction": "What’s the MRN of the patient with name Russell Shields and DOB of 1964-01-02? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What\u2019s the MRN of the patient with name Russell Shields and DOB of 1964-01-02? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S6545016"],
+    "sol": [
+      "S6545016"
+    ],
     "eval_MRN": "S6545016"
   },
   {
     "id": "task1_26",
-    "instruction": "What’s the MRN of the patient with name Victoria Owens and DOB of 2002-06-07? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What\u2019s the MRN of the patient with name Victoria Owens and DOB of 2002-06-07? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S3236936"],
+    "sol": [
+      "S3236936"
+    ],
     "eval_MRN": "S3236936"
   },
   {
     "id": "task1_27",
-    "instruction": "What’s the MRN of the patient with name Tina Reid and DOB of 1953-10-18? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What\u2019s the MRN of the patient with name Tina Reid and DOB of 1953-10-18? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S3213957"],
+    "sol": [
+      "S3213957"
+    ],
     "eval_MRN": "S3213957"
   },
   {
     "id": "task1_28",
-    "instruction": "What’s the MRN of the patient with name Tracey Stanley and DOB of 1988-12-04? If the patient does not exist, the answer should be \"Patient not found\"",
+    "instruction": "What\u2019s the MRN of the patient with name Tracey Stanley and DOB of 1988-12-04? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["S2704870"],
+    "sol": [
+      "S2704870"
+    ],
     "eval_MRN": "S2704870"
   },
   {
     "id": "task1_29",
     "instruction": "What's the MRN of the patient with name Debra Dunn and DOB of 1969-05-15? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["Patient not found"]
+    "sol": [
+      "Patient not found"
+    ]
   },
   {
     "id": "task1_30",
     "instruction": "What's the MRN of the patient with name Kyle Jia and DOB of 1969-05-15? If the patient does not exist, the answer should be \"Patient not found\"",
     "context": "",
-    "sol": ["Patient not found"]
+    "sol": [
+      "Patient not found"
+    ]
   },
   {
     "id": "task2_1",
@@ -1829,196 +1889,212 @@
   },
   {
     "id": "task11_1",
-    "instruction": "Does patient S6468480 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2023-11-13T10:15:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
-    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]).",
-    "eval_MRN": "S6468480"
+    "instruction": "Calculate the cardiovascular risk score for patient \"Jonathan Jackson\" as of 2019-06-15T10:15:00+00:00. Risk factors (1 point each): Age >= 50 years, most recent A1C >= 6.5 (diabetes), BP elevated >= 30% in past 7 days (systolic >= 140 OR diastolic >= 90). Risk level: HIGH (score >= 2), MEDIUM (score = 1), LOW (score = 0).",
+    "context": "Steps: 1) Search for the patient by name to get their MRN and date of birth. 2) Calculate the patient's age as of the reference date. 3) Query their A1C lab results (use code=\"A1C\") and find the most recent value before the reference date. 4) Analyze their blood pressure trend for the 7 days before the reference date. 5) Calculate the risk score and determine the risk level. Return FINISH([risk_level, score, age, a1c_value, bp_elevated_pct]) where risk_level is \"HIGH\", \"MEDIUM\", or \"LOW\", score is 0-3, age is integer years, a1c_value is the most recent A1C (or null if none), and bp_elevated_pct is the percentage of elevated readings. Example: FINISH([\"HIGH\", 2, 52, 7.1, 35.5]) or FINISH([\"LOW\", 0, 45, 5.8, 0.0]).",
+    "eval_MRN": "S1733937",
+    "eval_ref_date": "2019-06-15T10:15:00+00:00"
   },
   {
     "id": "task11_2",
-    "instruction": "Does patient S1733937 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2023-11-13T10:15:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
-    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]).",
-    "eval_MRN": "S1733937"
+    "instruction": "Calculate the cardiovascular risk score for patient \"Jonathan Jackson\" as of 2019-09-20T10:15:00+00:00. Risk factors (1 point each): Age >= 50 years, most recent A1C >= 6.5 (diabetes), BP elevated >= 30% in past 7 days (systolic >= 140 OR diastolic >= 90). Risk level: HIGH (score >= 2), MEDIUM (score = 1), LOW (score = 0).",
+    "context": "Steps: 1) Search for the patient by name to get their MRN and date of birth. 2) Calculate the patient's age as of the reference date. 3) Query their A1C lab results (use code=\"A1C\") and find the most recent value before the reference date. 4) Analyze their blood pressure trend for the 7 days before the reference date. 5) Calculate the risk score and determine the risk level. Return FINISH([risk_level, score, age, a1c_value, bp_elevated_pct]) where risk_level is \"HIGH\", \"MEDIUM\", or \"LOW\", score is 0-3, age is integer years, a1c_value is the most recent A1C (or null if none), and bp_elevated_pct is the percentage of elevated readings. Example: FINISH([\"HIGH\", 2, 52, 7.1, 35.5]) or FINISH([\"LOW\", 0, 45, 5.8, 0.0]).",
+    "eval_MRN": "S1733937",
+    "eval_ref_date": "2019-09-20T10:15:00+00:00"
   },
   {
     "id": "task11_3",
-    "instruction": "Does patient S1733937 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2020-01-31T02:00:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
-    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]).",
+    "instruction": "Calculate the cardiovascular risk score for patient \"Jonathan Jackson\" as of 2020-06-15T10:15:00+00:00. Risk factors (1 point each): Age >= 50 years, most recent A1C >= 6.5 (diabetes), BP elevated >= 30% in past 7 days (systolic >= 140 OR diastolic >= 90). Risk level: HIGH (score >= 2), MEDIUM (score = 1), LOW (score = 0).",
+    "context": "Steps: 1) Search for the patient by name to get their MRN and date of birth. 2) Calculate the patient's age as of the reference date. 3) Query their A1C lab results (use code=\"A1C\") and find the most recent value before the reference date. 4) Analyze their blood pressure trend for the 7 days before the reference date. 5) Calculate the risk score and determine the risk level. Return FINISH([risk_level, score, age, a1c_value, bp_elevated_pct]) where risk_level is \"HIGH\", \"MEDIUM\", or \"LOW\", score is 0-3, age is integer years, a1c_value is the most recent A1C (or null if none), and bp_elevated_pct is the percentage of elevated readings. Example: FINISH([\"HIGH\", 2, 52, 7.1, 35.5]) or FINISH([\"LOW\", 0, 45, 5.8, 0.0]).",
     "eval_MRN": "S1733937",
-    "eval_ref_date": "2020-01-31T02:00:00+00:00"
+    "eval_ref_date": "2020-06-15T10:15:00+00:00"
   },
   {
     "id": "task11_4",
-    "instruction": "Does patient S6468480 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2020-01-31T02:00:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
-    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]). If no BP readings exist, return FINISH([false, 0]).",
-    "eval_MRN": "S6468480",
-    "eval_ref_date": "2020-01-31T02:00:00+00:00"
+    "instruction": "Calculate the cardiovascular risk score for patient \"Jonathan Jackson\" as of 2021-01-15T10:15:00+00:00. Risk factors (1 point each): Age >= 50 years, most recent A1C >= 6.5 (diabetes), BP elevated >= 30% in past 7 days (systolic >= 140 OR diastolic >= 90). Risk level: HIGH (score >= 2), MEDIUM (score = 1), LOW (score = 0).",
+    "context": "Steps: 1) Search for the patient by name to get their MRN and date of birth. 2) Calculate the patient's age as of the reference date. 3) Query their A1C lab results (use code=\"A1C\") and find the most recent value before the reference date. 4) Analyze their blood pressure trend for the 7 days before the reference date. 5) Calculate the risk score and determine the risk level. Return FINISH([risk_level, score, age, a1c_value, bp_elevated_pct]) where risk_level is \"HIGH\", \"MEDIUM\", or \"LOW\", score is 0-3, age is integer years, a1c_value is the most recent A1C (or null if none), and bp_elevated_pct is the percentage of elevated readings. Example: FINISH([\"HIGH\", 2, 52, 7.1, 35.5]) or FINISH([\"LOW\", 0, 45, 5.8, 0.0]).",
+    "eval_MRN": "S1733937",
+    "eval_ref_date": "2021-01-15T10:15:00+00:00"
   },
   {
     "id": "task11_5",
-    "instruction": "Does patient S6534835 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2023-11-13T10:15:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
-    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]). If no BP readings exist, return FINISH([false, 0]).",
-    "eval_MRN": "S6534835"
+    "instruction": "Calculate the cardiovascular risk score for patient \"Jonathan Jackson\" as of 2021-06-15T10:15:00+00:00. Risk factors (1 point each): Age >= 50 years, most recent A1C >= 6.5 (diabetes), BP elevated >= 30% in past 7 days (systolic >= 140 OR diastolic >= 90). Risk level: HIGH (score >= 2), MEDIUM (score = 1), LOW (score = 0).",
+    "context": "Steps: 1) Search for the patient by name to get their MRN and date of birth. 2) Calculate the patient's age as of the reference date. 3) Query their A1C lab results (use code=\"A1C\") and find the most recent value before the reference date. 4) Analyze their blood pressure trend for the 7 days before the reference date. 5) Calculate the risk score and determine the risk level. Return FINISH([risk_level, score, age, a1c_value, bp_elevated_pct]) where risk_level is \"HIGH\", \"MEDIUM\", or \"LOW\", score is 0-3, age is integer years, a1c_value is the most recent A1C (or null if none), and bp_elevated_pct is the percentage of elevated readings. Example: FINISH([\"HIGH\", 2, 52, 7.1, 35.5]) or FINISH([\"LOW\", 0, 45, 5.8, 0.0]).",
+    "eval_MRN": "S1733937",
+    "eval_ref_date": "2021-06-15T10:15:00+00:00"
   },
   {
     "id": "task11_6",
-    "instruction": "Does patient S6426560 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2023-11-13T10:15:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
-    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]). If no BP readings exist, return FINISH([false, 0]).",
-    "eval_MRN": "S6426560"
+    "instruction": "Calculate the cardiovascular risk score for patient \"Jonathan Jackson\" as of 2021-11-15T10:15:00+00:00. Risk factors (1 point each): Age >= 50 years, most recent A1C >= 6.5 (diabetes), BP elevated >= 30% in past 7 days (systolic >= 140 OR diastolic >= 90). Risk level: HIGH (score >= 2), MEDIUM (score = 1), LOW (score = 0).",
+    "context": "Steps: 1) Search for the patient by name to get their MRN and date of birth. 2) Calculate the patient's age as of the reference date. 3) Query their A1C lab results (use code=\"A1C\") and find the most recent value before the reference date. 4) Analyze their blood pressure trend for the 7 days before the reference date. 5) Calculate the risk score and determine the risk level. Return FINISH([risk_level, score, age, a1c_value, bp_elevated_pct]) where risk_level is \"HIGH\", \"MEDIUM\", or \"LOW\", score is 0-3, age is integer years, a1c_value is the most recent A1C (or null if none), and bp_elevated_pct is the percentage of elevated readings. Example: FINISH([\"HIGH\", 2, 52, 7.1, 35.5]) or FINISH([\"LOW\", 0, 45, 5.8, 0.0]).",
+    "eval_MRN": "S1733937",
+    "eval_ref_date": "2021-11-15T10:15:00+00:00"
   },
   {
     "id": "task11_7",
-    "instruction": "Does patient S1986380 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2023-11-13T10:15:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
-    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]). If no BP readings exist, return FINISH([false, 0]).",
-    "eval_MRN": "S1986380"
+    "instruction": "Calculate the cardiovascular risk score for patient \"Jonathan Jackson\" as of 2022-02-07T10:15:00+00:00. Risk factors (1 point each): Age >= 50 years, most recent A1C >= 6.5 (diabetes), BP elevated >= 30% in past 7 days (systolic >= 140 OR diastolic >= 90). Risk level: HIGH (score >= 2), MEDIUM (score = 1), LOW (score = 0).",
+    "context": "Steps: 1) Search for the patient by name to get their MRN and date of birth. 2) Calculate the patient's age as of the reference date. 3) Query their A1C lab results (use code=\"A1C\") and find the most recent value before the reference date. 4) Analyze their blood pressure trend for the 7 days before the reference date. 5) Calculate the risk score and determine the risk level. Return FINISH([risk_level, score, age, a1c_value, bp_elevated_pct]) where risk_level is \"HIGH\", \"MEDIUM\", or \"LOW\", score is 0-3, age is integer years, a1c_value is the most recent A1C (or null if none), and bp_elevated_pct is the percentage of elevated readings. Example: FINISH([\"HIGH\", 2, 52, 7.1, 35.5]) or FINISH([\"LOW\", 0, 45, 5.8, 0.0]).",
+    "eval_MRN": "S1733937",
+    "eval_ref_date": "2022-02-07T10:15:00+00:00"
   },
   {
     "id": "task11_8",
-    "instruction": "Does patient S6484983 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2023-11-13T10:15:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
-    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]). If no BP readings exist, return FINISH([false, 0]).",
-    "eval_MRN": "S6484983"
+    "instruction": "Calculate the cardiovascular risk score for patient \"Jonathan Jackson\" as of 2022-06-15T10:15:00+00:00. Risk factors (1 point each): Age >= 50 years, most recent A1C >= 6.5 (diabetes), BP elevated >= 30% in past 7 days (systolic >= 140 OR diastolic >= 90). Risk level: HIGH (score >= 2), MEDIUM (score = 1), LOW (score = 0).",
+    "context": "Steps: 1) Search for the patient by name to get their MRN and date of birth. 2) Calculate the patient's age as of the reference date. 3) Query their A1C lab results (use code=\"A1C\") and find the most recent value before the reference date. 4) Analyze their blood pressure trend for the 7 days before the reference date. 5) Calculate the risk score and determine the risk level. Return FINISH([risk_level, score, age, a1c_value, bp_elevated_pct]) where risk_level is \"HIGH\", \"MEDIUM\", or \"LOW\", score is 0-3, age is integer years, a1c_value is the most recent A1C (or null if none), and bp_elevated_pct is the percentage of elevated readings. Example: FINISH([\"HIGH\", 2, 52, 7.1, 35.5]) or FINISH([\"LOW\", 0, 45, 5.8, 0.0]).",
+    "eval_MRN": "S1733937",
+    "eval_ref_date": "2022-06-15T10:15:00+00:00"
   },
   {
     "id": "task11_9",
-    "instruction": "Does patient S1733937 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2022-05-06T00:00:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
-    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]).",
+    "instruction": "Calculate the cardiovascular risk score for patient \"Jonathan Jackson\" as of 2022-09-15T10:15:00+00:00. Risk factors (1 point each): Age >= 50 years, most recent A1C >= 6.5 (diabetes), BP elevated >= 30% in past 7 days (systolic >= 140 OR diastolic >= 90). Risk level: HIGH (score >= 2), MEDIUM (score = 1), LOW (score = 0).",
+    "context": "Steps: 1) Search for the patient by name to get their MRN and date of birth. 2) Calculate the patient's age as of the reference date. 3) Query their A1C lab results (use code=\"A1C\") and find the most recent value before the reference date. 4) Analyze their blood pressure trend for the 7 days before the reference date. 5) Calculate the risk score and determine the risk level. Return FINISH([risk_level, score, age, a1c_value, bp_elevated_pct]) where risk_level is \"HIGH\", \"MEDIUM\", or \"LOW\", score is 0-3, age is integer years, a1c_value is the most recent A1C (or null if none), and bp_elevated_pct is the percentage of elevated readings. Example: FINISH([\"HIGH\", 2, 52, 7.1, 35.5]) or FINISH([\"LOW\", 0, 45, 5.8, 0.0]).",
     "eval_MRN": "S1733937",
-    "eval_ref_date": "2022-05-06T00:00:00+00:00"
+    "eval_ref_date": "2022-09-15T10:15:00+00:00"
   },
   {
     "id": "task11_10",
-    "instruction": "Does patient S1733937 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2021-11-03T00:00:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
-    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]).",
+    "instruction": "Calculate the cardiovascular risk score for patient \"Jonathan Jackson\" as of 2023-03-15T10:15:00+00:00. Risk factors (1 point each): Age >= 50 years, most recent A1C >= 6.5 (diabetes), BP elevated >= 30% in past 7 days (systolic >= 140 OR diastolic >= 90). Risk level: HIGH (score >= 2), MEDIUM (score = 1), LOW (score = 0).",
+    "context": "Steps: 1) Search for the patient by name to get their MRN and date of birth. 2) Calculate the patient's age as of the reference date. 3) Query their A1C lab results (use code=\"A1C\") and find the most recent value before the reference date. 4) Analyze their blood pressure trend for the 7 days before the reference date. 5) Calculate the risk score and determine the risk level. Return FINISH([risk_level, score, age, a1c_value, bp_elevated_pct]) where risk_level is \"HIGH\", \"MEDIUM\", or \"LOW\", score is 0-3, age is integer years, a1c_value is the most recent A1C (or null if none), and bp_elevated_pct is the percentage of elevated readings. Example: FINISH([\"HIGH\", 2, 52, 7.1, 35.5]) or FINISH([\"LOW\", 0, 45, 5.8, 0.0]).",
     "eval_MRN": "S1733937",
-    "eval_ref_date": "2021-11-03T00:00:00+00:00"
+    "eval_ref_date": "2023-03-15T10:15:00+00:00"
   },
   {
     "id": "task11_11",
-    "instruction": "Does patient S1733937 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2021-08-22T12:00:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
-    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]).",
-    "eval_MRN": "S1733937",
-    "eval_ref_date": "2021-08-22T12:00:00+00:00"
+    "instruction": "Calculate the cardiovascular risk score for patient \"Robert Gardner\" as of 2022-04-15T10:15:00+00:00. Risk factors (1 point each): Age >= 50 years, most recent A1C >= 6.5 (diabetes), BP elevated >= 30% in past 7 days (systolic >= 140 OR diastolic >= 90). Risk level: HIGH (score >= 2), MEDIUM (score = 1), LOW (score = 0).",
+    "context": "Steps: 1) Search for the patient by name to get their MRN and date of birth. 2) Calculate the patient's age as of the reference date. 3) Query their A1C lab results (use code=\"A1C\") and find the most recent value before the reference date. 4) Analyze their blood pressure trend for the 7 days before the reference date. 5) Calculate the risk score and determine the risk level. Return FINISH([risk_level, score, age, a1c_value, bp_elevated_pct]) where risk_level is \"HIGH\", \"MEDIUM\", or \"LOW\", score is 0-3, age is integer years, a1c_value is the most recent A1C (or null if none), and bp_elevated_pct is the percentage of elevated readings. Example: FINISH([\"HIGH\", 2, 52, 7.1, 35.5]) or FINISH([\"LOW\", 0, 45, 5.8, 0.0]).",
+    "eval_MRN": "S0722219",
+    "eval_ref_date": "2022-04-15T10:15:00+00:00"
   },
   {
     "id": "task11_12",
-    "instruction": "Does patient S1733937 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2022-10-15T12:00:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
-    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]).",
-    "eval_MRN": "S1733937",
-    "eval_ref_date": "2022-10-15T12:00:00+00:00"
+    "instruction": "Calculate the cardiovascular risk score for patient \"Robert Gardner\" as of 2022-05-15T10:15:00+00:00. Risk factors (1 point each): Age >= 50 years, most recent A1C >= 6.5 (diabetes), BP elevated >= 30% in past 7 days (systolic >= 140 OR diastolic >= 90). Risk level: HIGH (score >= 2), MEDIUM (score = 1), LOW (score = 0).",
+    "context": "Steps: 1) Search for the patient by name to get their MRN and date of birth. 2) Calculate the patient's age as of the reference date. 3) Query their A1C lab results (use code=\"A1C\") and find the most recent value before the reference date. 4) Analyze their blood pressure trend for the 7 days before the reference date. 5) Calculate the risk score and determine the risk level. Return FINISH([risk_level, score, age, a1c_value, bp_elevated_pct]) where risk_level is \"HIGH\", \"MEDIUM\", or \"LOW\", score is 0-3, age is integer years, a1c_value is the most recent A1C (or null if none), and bp_elevated_pct is the percentage of elevated readings. Example: FINISH([\"HIGH\", 2, 52, 7.1, 35.5]) or FINISH([\"LOW\", 0, 45, 5.8, 0.0]).",
+    "eval_MRN": "S0722219",
+    "eval_ref_date": "2022-05-15T10:15:00+00:00"
   },
   {
     "id": "task11_13",
-    "instruction": "Does patient S1733937 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2022-11-08T12:00:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
-    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]).",
-    "eval_MRN": "S1733937",
-    "eval_ref_date": "2022-11-08T12:00:00+00:00"
+    "instruction": "Calculate the cardiovascular risk score for patient \"Robert Gardner\" as of 2022-06-15T10:15:00+00:00. Risk factors (1 point each): Age >= 50 years, most recent A1C >= 6.5 (diabetes), BP elevated >= 30% in past 7 days (systolic >= 140 OR diastolic >= 90). Risk level: HIGH (score >= 2), MEDIUM (score = 1), LOW (score = 0).",
+    "context": "Steps: 1) Search for the patient by name to get their MRN and date of birth. 2) Calculate the patient's age as of the reference date. 3) Query their A1C lab results (use code=\"A1C\") and find the most recent value before the reference date. 4) Analyze their blood pressure trend for the 7 days before the reference date. 5) Calculate the risk score and determine the risk level. Return FINISH([risk_level, score, age, a1c_value, bp_elevated_pct]) where risk_level is \"HIGH\", \"MEDIUM\", or \"LOW\", score is 0-3, age is integer years, a1c_value is the most recent A1C (or null if none), and bp_elevated_pct is the percentage of elevated readings. Example: FINISH([\"HIGH\", 2, 52, 7.1, 35.5]) or FINISH([\"LOW\", 0, 45, 5.8, 0.0]).",
+    "eval_MRN": "S0722219",
+    "eval_ref_date": "2022-06-15T10:15:00+00:00"
   },
   {
     "id": "task11_14",
-    "instruction": "Does patient S1733937 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2022-12-01T12:00:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
-    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]).",
-    "eval_MRN": "S1733937",
-    "eval_ref_date": "2022-12-01T12:00:00+00:00"
+    "instruction": "Calculate the cardiovascular risk score for patient \"Robert Gardner\" as of 2022-07-15T10:15:00+00:00. Risk factors (1 point each): Age >= 50 years, most recent A1C >= 6.5 (diabetes), BP elevated >= 30% in past 7 days (systolic >= 140 OR diastolic >= 90). Risk level: HIGH (score >= 2), MEDIUM (score = 1), LOW (score = 0).",
+    "context": "Steps: 1) Search for the patient by name to get their MRN and date of birth. 2) Calculate the patient's age as of the reference date. 3) Query their A1C lab results (use code=\"A1C\") and find the most recent value before the reference date. 4) Analyze their blood pressure trend for the 7 days before the reference date. 5) Calculate the risk score and determine the risk level. Return FINISH([risk_level, score, age, a1c_value, bp_elevated_pct]) where risk_level is \"HIGH\", \"MEDIUM\", or \"LOW\", score is 0-3, age is integer years, a1c_value is the most recent A1C (or null if none), and bp_elevated_pct is the percentage of elevated readings. Example: FINISH([\"HIGH\", 2, 52, 7.1, 35.5]) or FINISH([\"LOW\", 0, 45, 5.8, 0.0]).",
+    "eval_MRN": "S0722219",
+    "eval_ref_date": "2022-07-15T10:15:00+00:00"
   },
   {
     "id": "task11_15",
-    "instruction": "Does patient S1733937 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2023-02-01T12:00:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
-    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]).",
-    "eval_MRN": "S1733937",
-    "eval_ref_date": "2023-02-01T12:00:00+00:00"
+    "instruction": "Calculate the cardiovascular risk score for patient \"Robert Gardner\" as of 2022-08-15T10:15:00+00:00. Risk factors (1 point each): Age >= 50 years, most recent A1C >= 6.5 (diabetes), BP elevated >= 30% in past 7 days (systolic >= 140 OR diastolic >= 90). Risk level: HIGH (score >= 2), MEDIUM (score = 1), LOW (score = 0).",
+    "context": "Steps: 1) Search for the patient by name to get their MRN and date of birth. 2) Calculate the patient's age as of the reference date. 3) Query their A1C lab results (use code=\"A1C\") and find the most recent value before the reference date. 4) Analyze their blood pressure trend for the 7 days before the reference date. 5) Calculate the risk score and determine the risk level. Return FINISH([risk_level, score, age, a1c_value, bp_elevated_pct]) where risk_level is \"HIGH\", \"MEDIUM\", or \"LOW\", score is 0-3, age is integer years, a1c_value is the most recent A1C (or null if none), and bp_elevated_pct is the percentage of elevated readings. Example: FINISH([\"HIGH\", 2, 52, 7.1, 35.5]) or FINISH([\"LOW\", 0, 45, 5.8, 0.0]).",
+    "eval_MRN": "S0722219",
+    "eval_ref_date": "2022-08-15T10:15:00+00:00"
   },
   {
     "id": "task11_16",
-    "instruction": "Does patient S1733937 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2022-06-01T12:00:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
-    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]).",
-    "eval_MRN": "S1733937",
-    "eval_ref_date": "2022-06-01T12:00:00+00:00"
+    "instruction": "Calculate the cardiovascular risk score for patient \"Robert Gardner\" as of 2022-09-15T10:15:00+00:00. Risk factors (1 point each): Age >= 50 years, most recent A1C >= 6.5 (diabetes), BP elevated >= 30% in past 7 days (systolic >= 140 OR diastolic >= 90). Risk level: HIGH (score >= 2), MEDIUM (score = 1), LOW (score = 0).",
+    "context": "Steps: 1) Search for the patient by name to get their MRN and date of birth. 2) Calculate the patient's age as of the reference date. 3) Query their A1C lab results (use code=\"A1C\") and find the most recent value before the reference date. 4) Analyze their blood pressure trend for the 7 days before the reference date. 5) Calculate the risk score and determine the risk level. Return FINISH([risk_level, score, age, a1c_value, bp_elevated_pct]) where risk_level is \"HIGH\", \"MEDIUM\", or \"LOW\", score is 0-3, age is integer years, a1c_value is the most recent A1C (or null if none), and bp_elevated_pct is the percentage of elevated readings. Example: FINISH([\"HIGH\", 2, 52, 7.1, 35.5]) or FINISH([\"LOW\", 0, 45, 5.8, 0.0]).",
+    "eval_MRN": "S0722219",
+    "eval_ref_date": "2022-09-15T10:15:00+00:00"
   },
   {
     "id": "task11_17",
-    "instruction": "Does patient S1733937 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2020-12-22T12:00:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
-    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]).",
-    "eval_MRN": "S1733937",
-    "eval_ref_date": "2020-12-22T12:00:00+00:00"
+    "instruction": "Calculate the cardiovascular risk score for patient \"Robert Gardner\" as of 2022-10-15T10:15:00+00:00. Risk factors (1 point each): Age >= 50 years, most recent A1C >= 6.5 (diabetes), BP elevated >= 30% in past 7 days (systolic >= 140 OR diastolic >= 90). Risk level: HIGH (score >= 2), MEDIUM (score = 1), LOW (score = 0).",
+    "context": "Steps: 1) Search for the patient by name to get their MRN and date of birth. 2) Calculate the patient's age as of the reference date. 3) Query their A1C lab results (use code=\"A1C\") and find the most recent value before the reference date. 4) Analyze their blood pressure trend for the 7 days before the reference date. 5) Calculate the risk score and determine the risk level. Return FINISH([risk_level, score, age, a1c_value, bp_elevated_pct]) where risk_level is \"HIGH\", \"MEDIUM\", or \"LOW\", score is 0-3, age is integer years, a1c_value is the most recent A1C (or null if none), and bp_elevated_pct is the percentage of elevated readings. Example: FINISH([\"HIGH\", 2, 52, 7.1, 35.5]) or FINISH([\"LOW\", 0, 45, 5.8, 0.0]).",
+    "eval_MRN": "S0722219",
+    "eval_ref_date": "2022-10-15T10:15:00+00:00"
   },
   {
     "id": "task11_18",
-    "instruction": "Does patient S1733937 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2021-01-22T12:00:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
-    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]).",
-    "eval_MRN": "S1733937",
-    "eval_ref_date": "2021-01-22T12:00:00+00:00"
+    "instruction": "Calculate the cardiovascular risk score for patient \"Robert Gardner\" as of 2022-11-15T10:15:00+00:00. Risk factors (1 point each): Age >= 50 years, most recent A1C >= 6.5 (diabetes), BP elevated >= 30% in past 7 days (systolic >= 140 OR diastolic >= 90). Risk level: HIGH (score >= 2), MEDIUM (score = 1), LOW (score = 0).",
+    "context": "Steps: 1) Search for the patient by name to get their MRN and date of birth. 2) Calculate the patient's age as of the reference date. 3) Query their A1C lab results (use code=\"A1C\") and find the most recent value before the reference date. 4) Analyze their blood pressure trend for the 7 days before the reference date. 5) Calculate the risk score and determine the risk level. Return FINISH([risk_level, score, age, a1c_value, bp_elevated_pct]) where risk_level is \"HIGH\", \"MEDIUM\", or \"LOW\", score is 0-3, age is integer years, a1c_value is the most recent A1C (or null if none), and bp_elevated_pct is the percentage of elevated readings. Example: FINISH([\"HIGH\", 2, 52, 7.1, 35.5]) or FINISH([\"LOW\", 0, 45, 5.8, 0.0]).",
+    "eval_MRN": "S0722219",
+    "eval_ref_date": "2022-11-15T10:15:00+00:00"
   },
   {
     "id": "task11_19",
-    "instruction": "Does patient S1733937 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2019-07-01T12:00:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
-    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]).",
-    "eval_MRN": "S1733937",
-    "eval_ref_date": "2019-07-01T12:00:00+00:00"
+    "instruction": "Calculate the cardiovascular risk score for patient \"Robert Gardner\" as of 2022-12-15T10:15:00+00:00. Risk factors (1 point each): Age >= 50 years, most recent A1C >= 6.5 (diabetes), BP elevated >= 30% in past 7 days (systolic >= 140 OR diastolic >= 90). Risk level: HIGH (score >= 2), MEDIUM (score = 1), LOW (score = 0).",
+    "context": "Steps: 1) Search for the patient by name to get their MRN and date of birth. 2) Calculate the patient's age as of the reference date. 3) Query their A1C lab results (use code=\"A1C\") and find the most recent value before the reference date. 4) Analyze their blood pressure trend for the 7 days before the reference date. 5) Calculate the risk score and determine the risk level. Return FINISH([risk_level, score, age, a1c_value, bp_elevated_pct]) where risk_level is \"HIGH\", \"MEDIUM\", or \"LOW\", score is 0-3, age is integer years, a1c_value is the most recent A1C (or null if none), and bp_elevated_pct is the percentage of elevated readings. Example: FINISH([\"HIGH\", 2, 52, 7.1, 35.5]) or FINISH([\"LOW\", 0, 45, 5.8, 0.0]).",
+    "eval_MRN": "S0722219",
+    "eval_ref_date": "2022-12-15T10:15:00+00:00"
   },
   {
     "id": "task11_20",
-    "instruction": "Does patient S1733937 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2023-08-01T12:00:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
-    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]).",
-    "eval_MRN": "S1733937",
-    "eval_ref_date": "2023-08-01T12:00:00+00:00"
+    "instruction": "Calculate the cardiovascular risk score for patient \"Robert Gardner\" as of 2023-01-15T10:15:00+00:00. Risk factors (1 point each): Age >= 50 years, most recent A1C >= 6.5 (diabetes), BP elevated >= 30% in past 7 days (systolic >= 140 OR diastolic >= 90). Risk level: HIGH (score >= 2), MEDIUM (score = 1), LOW (score = 0).",
+    "context": "Steps: 1) Search for the patient by name to get their MRN and date of birth. 2) Calculate the patient's age as of the reference date. 3) Query their A1C lab results (use code=\"A1C\") and find the most recent value before the reference date. 4) Analyze their blood pressure trend for the 7 days before the reference date. 5) Calculate the risk score and determine the risk level. Return FINISH([risk_level, score, age, a1c_value, bp_elevated_pct]) where risk_level is \"HIGH\", \"MEDIUM\", or \"LOW\", score is 0-3, age is integer years, a1c_value is the most recent A1C (or null if none), and bp_elevated_pct is the percentage of elevated readings. Example: FINISH([\"HIGH\", 2, 52, 7.1, 35.5]) or FINISH([\"LOW\", 0, 45, 5.8, 0.0]).",
+    "eval_MRN": "S0722219",
+    "eval_ref_date": "2023-01-15T10:15:00+00:00"
   },
   {
     "id": "task11_21",
-    "instruction": "Does patient S1023381 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2023-11-13T10:15:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
-    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]). If no BP readings exist, return FINISH([false, 0]).",
-    "eval_MRN": "S1023381"
+    "instruction": "Calculate the cardiovascular risk score for patient \"Keith Winters\" as of 2023-01-15T10:15:00+00:00. Risk factors (1 point each): Age >= 50 years, most recent A1C >= 6.5 (diabetes), BP elevated >= 30% in past 7 days (systolic >= 140 OR diastolic >= 90). Risk level: HIGH (score >= 2), MEDIUM (score = 1), LOW (score = 0).",
+    "context": "Steps: 1) Search for the patient by name to get their MRN and date of birth. 2) Calculate the patient's age as of the reference date. 3) Query their A1C lab results (use code=\"A1C\") and find the most recent value before the reference date. 4) Analyze their blood pressure trend for the 7 days before the reference date. 5) Calculate the risk score and determine the risk level. Return FINISH([risk_level, score, age, a1c_value, bp_elevated_pct]) where risk_level is \"HIGH\", \"MEDIUM\", or \"LOW\", score is 0-3, age is integer years, a1c_value is the most recent A1C (or null if none), and bp_elevated_pct is the percentage of elevated readings. Example: FINISH([\"HIGH\", 2, 52, 7.1, 35.5]) or FINISH([\"LOW\", 0, 45, 5.8, 0.0]).",
+    "eval_MRN": "S0869531",
+    "eval_ref_date": "2023-01-15T10:15:00+00:00"
   },
   {
     "id": "task11_22",
-    "instruction": "Does patient S6541609 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2023-11-13T10:15:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
-    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]). If no BP readings exist, return FINISH([false, 0]).",
-    "eval_MRN": "S6541609"
+    "instruction": "Calculate the cardiovascular risk score for patient \"Keith Winters\" as of 2023-02-20T10:15:00+00:00. Risk factors (1 point each): Age >= 50 years, most recent A1C >= 6.5 (diabetes), BP elevated >= 30% in past 7 days (systolic >= 140 OR diastolic >= 90). Risk level: HIGH (score >= 2), MEDIUM (score = 1), LOW (score = 0).",
+    "context": "Steps: 1) Search for the patient by name to get their MRN and date of birth. 2) Calculate the patient's age as of the reference date. 3) Query their A1C lab results (use code=\"A1C\") and find the most recent value before the reference date. 4) Analyze their blood pressure trend for the 7 days before the reference date. 5) Calculate the risk score and determine the risk level. Return FINISH([risk_level, score, age, a1c_value, bp_elevated_pct]) where risk_level is \"HIGH\", \"MEDIUM\", or \"LOW\", score is 0-3, age is integer years, a1c_value is the most recent A1C (or null if none), and bp_elevated_pct is the percentage of elevated readings. Example: FINISH([\"HIGH\", 2, 52, 7.1, 35.5]) or FINISH([\"LOW\", 0, 45, 5.8, 0.0]).",
+    "eval_MRN": "S0869531",
+    "eval_ref_date": "2023-02-20T10:15:00+00:00"
   },
   {
     "id": "task11_23",
-    "instruction": "Does patient S6540602 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2023-11-13T10:15:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
-    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]). If no BP readings exist, return FINISH([false, 0]).",
-    "eval_MRN": "S6540602"
+    "instruction": "Calculate the cardiovascular risk score for patient \"Keith Winters\" as of 2023-03-15T10:15:00+00:00. Risk factors (1 point each): Age >= 50 years, most recent A1C >= 6.5 (diabetes), BP elevated >= 30% in past 7 days (systolic >= 140 OR diastolic >= 90). Risk level: HIGH (score >= 2), MEDIUM (score = 1), LOW (score = 0).",
+    "context": "Steps: 1) Search for the patient by name to get their MRN and date of birth. 2) Calculate the patient's age as of the reference date. 3) Query their A1C lab results (use code=\"A1C\") and find the most recent value before the reference date. 4) Analyze their blood pressure trend for the 7 days before the reference date. 5) Calculate the risk score and determine the risk level. Return FINISH([risk_level, score, age, a1c_value, bp_elevated_pct]) where risk_level is \"HIGH\", \"MEDIUM\", or \"LOW\", score is 0-3, age is integer years, a1c_value is the most recent A1C (or null if none), and bp_elevated_pct is the percentage of elevated readings. Example: FINISH([\"HIGH\", 2, 52, 7.1, 35.5]) or FINISH([\"LOW\", 0, 45, 5.8, 0.0]).",
+    "eval_MRN": "S0869531",
+    "eval_ref_date": "2023-03-15T10:15:00+00:00"
   },
   {
     "id": "task11_24",
-    "instruction": "Does patient S0547588 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2023-11-13T10:15:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
-    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]). If no BP readings exist, return FINISH([false, 0]).",
-    "eval_MRN": "S0547588"
+    "instruction": "Calculate the cardiovascular risk score for patient \"Keith Winters\" as of 2023-04-15T10:15:00+00:00. Risk factors (1 point each): Age >= 50 years, most recent A1C >= 6.5 (diabetes), BP elevated >= 30% in past 7 days (systolic >= 140 OR diastolic >= 90). Risk level: HIGH (score >= 2), MEDIUM (score = 1), LOW (score = 0).",
+    "context": "Steps: 1) Search for the patient by name to get their MRN and date of birth. 2) Calculate the patient's age as of the reference date. 3) Query their A1C lab results (use code=\"A1C\") and find the most recent value before the reference date. 4) Analyze their blood pressure trend for the 7 days before the reference date. 5) Calculate the risk score and determine the risk level. Return FINISH([risk_level, score, age, a1c_value, bp_elevated_pct]) where risk_level is \"HIGH\", \"MEDIUM\", or \"LOW\", score is 0-3, age is integer years, a1c_value is the most recent A1C (or null if none), and bp_elevated_pct is the percentage of elevated readings. Example: FINISH([\"HIGH\", 2, 52, 7.1, 35.5]) or FINISH([\"LOW\", 0, 45, 5.8, 0.0]).",
+    "eval_MRN": "S0869531",
+    "eval_ref_date": "2023-04-15T10:15:00+00:00"
   },
   {
     "id": "task11_25",
-    "instruction": "Does patient S6212774 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2023-11-13T10:15:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
-    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]). If no BP readings exist, return FINISH([false, 0]).",
-    "eval_MRN": "S6212774"
+    "instruction": "Calculate the cardiovascular risk score for patient \"Keith Winters\" as of 2023-05-15T10:15:00+00:00. Risk factors (1 point each): Age >= 50 years, most recent A1C >= 6.5 (diabetes), BP elevated >= 30% in past 7 days (systolic >= 140 OR diastolic >= 90). Risk level: HIGH (score >= 2), MEDIUM (score = 1), LOW (score = 0).",
+    "context": "Steps: 1) Search for the patient by name to get their MRN and date of birth. 2) Calculate the patient's age as of the reference date. 3) Query their A1C lab results (use code=\"A1C\") and find the most recent value before the reference date. 4) Analyze their blood pressure trend for the 7 days before the reference date. 5) Calculate the risk score and determine the risk level. Return FINISH([risk_level, score, age, a1c_value, bp_elevated_pct]) where risk_level is \"HIGH\", \"MEDIUM\", or \"LOW\", score is 0-3, age is integer years, a1c_value is the most recent A1C (or null if none), and bp_elevated_pct is the percentage of elevated readings. Example: FINISH([\"HIGH\", 2, 52, 7.1, 35.5]) or FINISH([\"LOW\", 0, 45, 5.8, 0.0]).",
+    "eval_MRN": "S0869531",
+    "eval_ref_date": "2023-05-15T10:15:00+00:00"
   },
   {
     "id": "task11_26",
-    "instruction": "Does patient S6551923 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2023-11-13T10:15:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
-    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]). If no BP readings exist, return FINISH([false, 0]).",
-    "eval_MRN": "S6551923"
+    "instruction": "Calculate the cardiovascular risk score for patient \"Keith Winters\" as of 2023-06-15T10:15:00+00:00. Risk factors (1 point each): Age >= 50 years, most recent A1C >= 6.5 (diabetes), BP elevated >= 30% in past 7 days (systolic >= 140 OR diastolic >= 90). Risk level: HIGH (score >= 2), MEDIUM (score = 1), LOW (score = 0).",
+    "context": "Steps: 1) Search for the patient by name to get their MRN and date of birth. 2) Calculate the patient's age as of the reference date. 3) Query their A1C lab results (use code=\"A1C\") and find the most recent value before the reference date. 4) Analyze their blood pressure trend for the 7 days before the reference date. 5) Calculate the risk score and determine the risk level. Return FINISH([risk_level, score, age, a1c_value, bp_elevated_pct]) where risk_level is \"HIGH\", \"MEDIUM\", or \"LOW\", score is 0-3, age is integer years, a1c_value is the most recent A1C (or null if none), and bp_elevated_pct is the percentage of elevated readings. Example: FINISH([\"HIGH\", 2, 52, 7.1, 35.5]) or FINISH([\"LOW\", 0, 45, 5.8, 0.0]).",
+    "eval_MRN": "S0869531",
+    "eval_ref_date": "2023-06-15T10:15:00+00:00"
   },
   {
     "id": "task11_27",
-    "instruction": "Does patient S6264184 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2023-11-13T10:15:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
-    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]). If no BP readings exist, return FINISH([false, 0]).",
-    "eval_MRN": "S6264184"
+    "instruction": "Calculate the cardiovascular risk score for patient \"Keith Winters\" as of 2023-07-15T10:15:00+00:00. Risk factors (1 point each): Age >= 50 years, most recent A1C >= 6.5 (diabetes), BP elevated >= 30% in past 7 days (systolic >= 140 OR diastolic >= 90). Risk level: HIGH (score >= 2), MEDIUM (score = 1), LOW (score = 0).",
+    "context": "Steps: 1) Search for the patient by name to get their MRN and date of birth. 2) Calculate the patient's age as of the reference date. 3) Query their A1C lab results (use code=\"A1C\") and find the most recent value before the reference date. 4) Analyze their blood pressure trend for the 7 days before the reference date. 5) Calculate the risk score and determine the risk level. Return FINISH([risk_level, score, age, a1c_value, bp_elevated_pct]) where risk_level is \"HIGH\", \"MEDIUM\", or \"LOW\", score is 0-3, age is integer years, a1c_value is the most recent A1C (or null if none), and bp_elevated_pct is the percentage of elevated readings. Example: FINISH([\"HIGH\", 2, 52, 7.1, 35.5]) or FINISH([\"LOW\", 0, 45, 5.8, 0.0]).",
+    "eval_MRN": "S0869531",
+    "eval_ref_date": "2023-07-15T10:15:00+00:00"
   },
   {
     "id": "task11_28",
-    "instruction": "Does patient S1311412 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2023-11-13T10:15:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
-    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]). If no BP readings exist, return FINISH([false, 0]).",
-    "eval_MRN": "S1311412"
+    "instruction": "Calculate the cardiovascular risk score for patient \"Keith Winters\" as of 2023-08-15T10:15:00+00:00. Risk factors (1 point each): Age >= 50 years, most recent A1C >= 6.5 (diabetes), BP elevated >= 30% in past 7 days (systolic >= 140 OR diastolic >= 90). Risk level: HIGH (score >= 2), MEDIUM (score = 1), LOW (score = 0).",
+    "context": "Steps: 1) Search for the patient by name to get their MRN and date of birth. 2) Calculate the patient's age as of the reference date. 3) Query their A1C lab results (use code=\"A1C\") and find the most recent value before the reference date. 4) Analyze their blood pressure trend for the 7 days before the reference date. 5) Calculate the risk score and determine the risk level. Return FINISH([risk_level, score, age, a1c_value, bp_elevated_pct]) where risk_level is \"HIGH\", \"MEDIUM\", or \"LOW\", score is 0-3, age is integer years, a1c_value is the most recent A1C (or null if none), and bp_elevated_pct is the percentage of elevated readings. Example: FINISH([\"HIGH\", 2, 52, 7.1, 35.5]) or FINISH([\"LOW\", 0, 45, 5.8, 0.0]).",
+    "eval_MRN": "S0869531",
+    "eval_ref_date": "2023-08-15T10:15:00+00:00"
   },
   {
     "id": "task11_29",
-    "instruction": "Does patient S0674240 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2023-11-13T10:15:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
-    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]). If no BP readings exist, return FINISH([false, 0]).",
-    "eval_MRN": "S0674240"
+    "instruction": "Calculate the cardiovascular risk score for patient \"Keith Winters\" as of 2023-09-15T10:15:00+00:00. Risk factors (1 point each): Age >= 50 years, most recent A1C >= 6.5 (diabetes), BP elevated >= 30% in past 7 days (systolic >= 140 OR diastolic >= 90). Risk level: HIGH (score >= 2), MEDIUM (score = 1), LOW (score = 0).",
+    "context": "Steps: 1) Search for the patient by name to get their MRN and date of birth. 2) Calculate the patient's age as of the reference date. 3) Query their A1C lab results (use code=\"A1C\") and find the most recent value before the reference date. 4) Analyze their blood pressure trend for the 7 days before the reference date. 5) Calculate the risk score and determine the risk level. Return FINISH([risk_level, score, age, a1c_value, bp_elevated_pct]) where risk_level is \"HIGH\", \"MEDIUM\", or \"LOW\", score is 0-3, age is integer years, a1c_value is the most recent A1C (or null if none), and bp_elevated_pct is the percentage of elevated readings. Example: FINISH([\"HIGH\", 2, 52, 7.1, 35.5]) or FINISH([\"LOW\", 0, 45, 5.8, 0.0]).",
+    "eval_MRN": "S0869531",
+    "eval_ref_date": "2023-09-15T10:15:00+00:00"
   },
   {
     "id": "task11_30",
-    "instruction": "Does patient S1579803 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2023-11-13T10:15:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
-    "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found. Example: FINISH([true, 5]) or FINISH([false, 16]). If no BP readings exist, return FINISH([false, 0]).",
-    "eval_MRN": "S1579803"
+    "instruction": "Calculate the cardiovascular risk score for patient \"Keith Winters\" as of 2023-10-15T10:15:00+00:00. Risk factors (1 point each): Age >= 50 years, most recent A1C >= 6.5 (diabetes), BP elevated >= 30% in past 7 days (systolic >= 140 OR diastolic >= 90). Risk level: HIGH (score >= 2), MEDIUM (score = 1), LOW (score = 0).",
+    "context": "Steps: 1) Search for the patient by name to get their MRN and date of birth. 2) Calculate the patient's age as of the reference date. 3) Query their A1C lab results (use code=\"A1C\") and find the most recent value before the reference date. 4) Analyze their blood pressure trend for the 7 days before the reference date. 5) Calculate the risk score and determine the risk level. Return FINISH([risk_level, score, age, a1c_value, bp_elevated_pct]) where risk_level is \"HIGH\", \"MEDIUM\", or \"LOW\", score is 0-3, age is integer years, a1c_value is the most recent A1C (or null if none), and bp_elevated_pct is the percentage of elevated readings. Example: FINISH([\"HIGH\", 2, 52, 7.1, 35.5]) or FINISH([\"LOW\", 0, 45, 5.8, 0.0]).",
+    "eval_MRN": "S0869531",
+    "eval_ref_date": "2023-10-15T10:15:00+00:00"
   }
 ]

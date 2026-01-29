@@ -1359,18 +1359,24 @@ def extract_tool_call_arguments(results: TaskOutput, tool_name: str):
 
 
 def eval_task11(case_data, results, fhir_api_base) -> EvalOutcome:
-    """Task 11: Blood Pressure Trend Analysis for Hypertension (Read-Only).
+    """Task 11: Cardiovascular Risk Score Calculation (Read-Only, Multi-Step).
     
     Evaluates:
     1. No POST requests (read-only task)
-    2. Agent called the analyze_blood_pressure_trend tool with correct parameters
-    3. Tool returned correct patient ID
-    4. Agent computed hypertension_alert correctly from elevated_percentage >= 50
-    5. Agent's final answer matches [hypertension_alert, reading_count] exactly
+    2. Agent called search_patients to find patient by name
+    3. Agent called list_lab_observations to get A1C values
+    4. Agent called analyze_blood_pressure_trend for BP analysis
+    5. Agent correctly calculated:
+       - Age from birthDate (>= 50 = +1 point)
+       - A1C diabetic status (>= 6.5 = +1 point)
+       - BP elevated status (>= 30% = +1 point)
+       - Risk level (HIGH >= 2, MEDIUM = 1, LOW = 0)
     
-    Agent should return: FINISH([true/false, reading_count])
-    e.g., FINISH([true, 5]) or FINISH([false, 16])
+    Agent should return: FINISH([risk_level, score, age, a1c_value, bp_elevated_pct])
+    e.g., FINISH(["HIGH", 2, 52, 7.1, 35.5]) or FINISH(["LOW", 0, 45, 5.8, 0.0])
     """
+    from datetime import timezone
+    
     # Check for read-only violation
     if check_has_post(results):
         return EvalOutcome.failure(
@@ -1378,109 +1384,99 @@ def eval_task11(case_data, results, fhir_api_base) -> EvalOutcome:
             [DetailedFailure.MADE_POST_ON_READONLY]
         )
     
-    # Extract tool call arguments to validate parameters
-    tool_args = extract_tool_call_arguments(results, "analyze_blood_pressure_trend")
-    
-    if tool_args is None:
-        return EvalOutcome.failure(
-            FailureType.ANSWER_MISMATCH,
-            [DetailedFailure.MISSING_REQUIRED_FIELD]  # Tool was not called
-        )
-    
-    # Validate tool parameters
-    expected_patient = case_data['eval_MRN']
+    # Get expected values from case_data
+    expected_mrn = case_data['eval_MRN']
     expected_ref_date = case_data.get('eval_ref_date', "2023-11-13T10:15:00+00:00")
-    expected_days_back = 7
     
-    param_failures = []
+    ref_date = datetime.fromisoformat(expected_ref_date.replace('Z', '+00:00'))
     
-    # Check patient parameter
-    agent_patient = tool_args.get('patient', '')
-    if expected_patient not in str(agent_patient):
-        param_failures.append("wrong_patient_param")
+    # ========== Calculate expected values from FHIR ==========
     
-    # Check reference_date parameter (normalize for comparison)
-    agent_ref_date = tool_args.get('reference_date', '')
-    # Normalize both dates for comparison (remove microseconds, handle Z vs +00:00)
-    try:
-        expected_dt = datetime.fromisoformat(expected_ref_date.replace('Z', '+00:00'))
-        agent_dt = datetime.fromisoformat(str(agent_ref_date).replace('Z', '+00:00'))
-        # Allow 1 day tolerance for date (in case agent uses start of day vs exact time)
-        if abs((expected_dt - agent_dt).total_seconds()) > 86400:  # 24 hours
-            param_failures.append("wrong_reference_date_param")
-    except (ValueError, TypeError):
-        param_failures.append("invalid_reference_date_param")
+    # 1. Get patient info for age calculation
+    patient_url = f"{fhir_api_base}Patient?identifier={expected_mrn}&_format=json"
+    patient_res = json.loads(send_get_request(patient_url)['data'])
     
-    # Check days_back parameter
-    agent_days_back = tool_args.get('days_back', None)
-    if agent_days_back != expected_days_back:
-        param_failures.append("wrong_days_back_param")
+    expected_age = None
+    if patient_res.get('entry'):
+        patient = patient_res['entry'][0]['resource']
+        birth_date_str = patient.get('birthDate', '')
+        if birth_date_str:
+            birth_date = datetime.strptime(birth_date_str, '%Y-%m-%d').replace(tzinfo=timezone.utc)
+            expected_age = (ref_date - birth_date).days // 365
     
-    if param_failures:
-        print(f"Task 11 param validation failed: {param_failures}, agent_args={tool_args}", flush=True)
-        return EvalOutcome.failure(
-            FailureType.ANSWER_MISMATCH,
-            param_failures
-        )
+    # 2. Get most recent A1C before ref_date
+    a1c_url = f"{fhir_api_base}Observation?patient={expected_mrn}&code:text=A1C&_count=200&_format=json"
+    a1c_res = json.loads(send_get_request(a1c_url)['data'])
     
-    # Extract tool result from history
-    tool_result = extract_tool_result(results, "analyze_blood_pressure_trend")
-    
-    if tool_result is None:
-        return EvalOutcome.failure(
-            FailureType.ANSWER_MISMATCH,
-            [DetailedFailure.MISSING_REQUIRED_FIELD]  # Tool call failed
-        )
-    
-    # Get reference BP data from FHIR to compute expected values
-    url = f"{fhir_api_base}Observation?patient={case_data['eval_MRN']}&code:text=BP&_count=200&_format=json"
-    get_res = json.loads(send_get_request(url)['data'])
-    
-    # Reference date and cutoff (7 days back)
-    ref_date_str = case_data.get('eval_ref_date', "2023-11-13T10:15:00+00:00")
-    ref_date = datetime.fromisoformat(ref_date_str)
-    cutoff_date = ref_date - timedelta(days=7)
-    
-    # Parse reference BP readings
-    ref_readings = []
-    for entry in get_res.get('entry', []):
+    expected_a1c = None
+    a1c_readings = []
+    for entry in a1c_res.get('entry', []):
         resource = entry['resource']
-        effective_str = resource.get('effectiveDateTime', '')
-        if not effective_str:
+        val = resource.get('valueQuantity', {}).get('value')
+        if val is None:
+            val = resource.get('valueString')
+        dt_str = resource.get('effectiveDateTime', '')
+        if val and dt_str:
+            try:
+                dt = datetime.fromisoformat(dt_str.replace('Z', '+00:00'))
+                val_f = float(val)
+                if val_f < 100 and dt <= ref_date:  # filter outliers
+                    a1c_readings.append({'date': dt, 'value': val_f})
+            except (ValueError, TypeError):
+                pass
+    
+    if a1c_readings:
+        a1c_readings.sort(key=lambda x: x['date'], reverse=True)
+        expected_a1c = round(a1c_readings[0]['value'], 1)
+    
+    # 3. Get BP elevated percentage
+    bp_url = f"{fhir_api_base}Observation?patient={expected_mrn}&code:text=BP&_count=200&_format=json"
+    bp_res = json.loads(send_get_request(bp_url)['data'])
+    
+    cutoff_date = ref_date - timedelta(days=7)
+    bp_readings = []
+    for entry in bp_res.get('entry', []):
+        resource = entry['resource']
+        dt_str = resource.get('effectiveDateTime', '')
+        val = resource.get('valueString', '')
+        if not dt_str or '/' not in val:
             continue
-        
         try:
-            effective_dt = datetime.fromisoformat(effective_str.replace('Z', '+00:00'))
-        except ValueError:
-            continue
-        
-        if effective_dt < cutoff_date or effective_dt > ref_date:
-            continue
-        
-        # Extract systolic/diastolic from valueString
-        value_string = resource.get('valueString', '')
-        if value_string and '/' in value_string:
-            parts = value_string.replace('mmHg', '').strip().split('/')
-            if len(parts) == 2:
-                try:
-                    systolic = int(float(parts[0].strip()))
-                    diastolic = int(float(parts[1].strip()))
-                    ref_readings.append({'systolic': systolic, 'diastolic': diastolic})
-                except ValueError:
-                    pass
+            dt = datetime.fromisoformat(dt_str.replace('Z', '+00:00'))
+            if cutoff_date <= dt <= ref_date:
+                parts = val.replace('mmHg', '').strip().split('/')
+                sys_v = int(float(parts[0].strip()))
+                dia_v = int(float(parts[1].strip()))
+                elevated = sys_v >= 140 or dia_v >= 90
+                bp_readings.append(elevated)
+        except (ValueError, TypeError):
+            pass
     
-    # Calculate reference values
-    ref_reading_count = len(ref_readings)
-    if ref_readings:
-        elevated_count = sum(
-            1 for r in ref_readings
-            if r['systolic'] >= 140 or r['diastolic'] >= 90
-        )
-        ref_alert = (elevated_count / len(ref_readings) * 100 >= 50)
+    if bp_readings:
+        expected_bp_pct = round(sum(bp_readings) / len(bp_readings) * 100, 1)
     else:
-        ref_alert = False
+        expected_bp_pct = 0.0
     
-    # Parse agent's final answer (should be [alert, reading_count])
+    # 4. Calculate expected risk score
+    expected_score = 0
+    if expected_age is not None and expected_age >= 50:
+        expected_score += 1
+    if expected_a1c is not None and expected_a1c >= 6.5:
+        expected_score += 1
+    if expected_bp_pct >= 30:
+        expected_score += 1
+    
+    if expected_score >= 2:
+        expected_level = "HIGH"
+    elif expected_score == 1:
+        expected_level = "MEDIUM"
+    else:
+        expected_level = "LOW"
+    
+    print(f"Task 11 expected: patient={expected_mrn}, age={expected_age}, a1c={expected_a1c}, bp_pct={expected_bp_pct}, score={expected_score}, level={expected_level}", flush=True)
+    
+    # ========== Parse and validate agent's answer ==========
+    
     try:
         agent_result = json.loads(results.result)
     except (json.JSONDecodeError, TypeError):
@@ -1489,41 +1485,64 @@ def eval_task11(case_data, results, fhir_api_base) -> EvalOutcome:
             [DetailedFailure.INVALID_JSON]
         )
     
-    # Extract values from agent result
-    # Expected format: [true/false, reading_count] e.g., [true, 5] or [false, 16]
-    if not isinstance(agent_result, list) or len(agent_result) < 2:
+    # Expected format: [risk_level, score, age, a1c_value, bp_elevated_pct]
+    if not isinstance(agent_result, list) or len(agent_result) < 5:
         return EvalOutcome.failure(
             FailureType.INVALID_JSON_RESULT,
             [DetailedFailure.MISSING_REQUIRED_FIELD]
         )
     
-    agent_alert = agent_result[0]
-    agent_reading_count = agent_result[1]
+    agent_level = agent_result[0]
+    agent_score = agent_result[1]
+    agent_age = agent_result[2]
+    agent_a1c = agent_result[3]
+    agent_bp_pct = agent_result[4]
     
-    # Validate tool result fields
+    print(f"Task 11 agent: level={agent_level}, score={agent_score}, age={agent_age}, a1c={agent_a1c}, bp_pct={agent_bp_pct}", flush=True)
+    
     failures = []
     
-    # Check patient in tool result
-    tool_patient = tool_result.get('patient', '')
-    if case_data['eval_MRN'] not in str(tool_patient):
-        failures.append(DetailedFailure.WRONG_PATIENT_ID)
+    # Check risk level (primary output) - exact match required
+    if str(agent_level).upper() != expected_level:
+        failures.append("wrong_risk_level")
     
-    # Note: hypertension_alert is no longer in tool result - agent must compute it from elevated_percentage
+    # Check score - exact match required
+    try:
+        if int(agent_score) != expected_score:
+            failures.append("wrong_risk_score")
+    except (ValueError, TypeError):
+        failures.append("invalid_score")
     
-    # Check tool's reading count matches reference (from statistics)
-    tool_reading_count = tool_result.get('statistics', {}).get('total_readings', 0)
-    tool_bp_readings = tool_result.get('bp_readings', [])
-    tool_count = tool_reading_count if tool_reading_count else len(tool_bp_readings)
+    # Check age - exact match required
+    try:
+        if expected_age is not None:
+            if agent_age is None:
+                failures.append("missing_age")
+            elif int(agent_age) != expected_age:
+                failures.append("wrong_age")
+    except (ValueError, TypeError):
+        failures.append("invalid_age")
     
-    # Check agent's final answer - alert must match
-    if agent_alert != ref_alert:
-        failures.append(DetailedFailure.ANSWER_VALUE_MISMATCH)
+    # Check A1C - exact match required (rounded to 1 decimal)
+    if expected_a1c is not None:
+        if agent_a1c is None:
+            failures.append("missing_a1c")
+        else:
+            try:
+                if round(float(agent_a1c), 1) != expected_a1c:
+                    failures.append("wrong_a1c")
+            except (ValueError, TypeError):
+                failures.append("invalid_a1c")
+    elif expected_a1c is None:
+        if agent_a1c is not None:
+            failures.append("unexpected_a1c")
     
-    # Check agent's reading count (exact match required)
-    if int(agent_reading_count) != ref_reading_count:
-        failures.append(DetailedFailure.WRONG_BP_READINGS_COUNT)
-    
-    print(f"Task 11 eval: patient={case_data['eval_MRN']}, ref_alert={ref_alert}, ref_count={ref_reading_count}, agent_alert={agent_alert}, agent_count={agent_reading_count}", flush=True)
+    # Check BP percentage - exact match required (rounded to 1 decimal)
+    try:
+        if round(float(agent_bp_pct), 1) != expected_bp_pct:
+            failures.append("wrong_bp_pct")
+    except (ValueError, TypeError):
+        failures.append("invalid_bp_pct")
     
     if failures:
         return EvalOutcome.failure(FailureType.ANSWER_MISMATCH, failures)

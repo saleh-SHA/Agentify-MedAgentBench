@@ -327,7 +327,7 @@ def list_patient_problems(
 @mcp.tool()
 def list_lab_observations(
     patient: Annotated[str, Field(description="Reference to a patient resource the observation is for.")],
-    code: Annotated[str, Field(description="The observation identifier (base name).")],
+    code: Annotated[str, Field(description="The observation code/name (e.g., 'A1C', 'Glucose', 'Creatinine'). Use the common lab name, not LOINC codes.")],
     date: Annotated[Optional[str], Field(description="Date/time when the specimen was obtained. Use FHIR date prefixes for ranges: 'ge' (>=), 'gt' (>), 'le' (<=), 'lt' (<). Supports full datetime precision: 'ge2023-11-12T10:15:00+00:00' for observations on or after that exact time. For 'last 24 hours' queries, calculate the precise cutoff datetime and use 'ge' prefix. Without prefix, searches for exact match only.")] = None,
 ) -> Dict[str, Any]:
     """Observation.Search (Labs) - Return component level data for lab results."""
@@ -740,7 +740,7 @@ def analyze_blood_pressure_trend(
         params = {
             "patient": patient,
             "code:text": "BP",  # Server-side filter for BP observations only
-            "_count": "200",
+            "_count": "200",  # Higher count to ensure we get all readings in date range
             "_format": "json"
         }
         result = _call_fhir("GET", "/Observation", params=params)
