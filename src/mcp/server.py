@@ -140,7 +140,7 @@ class NoteObject(BaseModel):
 
 # Configuration from environment
 # FHIR_API_BASE is required - must be provided
-FHIR_API_BASE = os.environ.get("MCP_FHIR_API_BASE")
+FHIR_API_BASE = os.environ.get("MCP_FHIR_API_BASE", "http://localhost:8080/fhir/")
 if not FHIR_API_BASE:
     raise RuntimeError("FHIR_API_BASE environment variable is required")
 
@@ -209,7 +209,10 @@ def _call_fhir(method: str, path: str, params: Optional[Dict] = None, body: Opti
     - payload: The request body that was sent
     - accepted: Whether the request was successful
     """
-    url = f"{FHIR_API_BASE}{path}"
+    # Normalize URL to avoid double slashes
+    base = FHIR_API_BASE.rstrip("/")
+    path = path.lstrip("/")
+    url = f"{base}/{path}"
     try:
         with httpx.Client(timeout=30.0) as client:
             result = {"url": url, "method": method}
@@ -268,9 +271,9 @@ def get_system_prompt() -> str:
 @mcp.tool()
 def search_patients(
     identifier: Annotated[Optional[str], Field(description="The patient's identifier.")] = None,
-    name: Annotated[Optional[str], Field(description="Any part of the patient's name. When discrete name parameters are used, such as family or given, this parameter is ignored.")] = None,
+    name: Annotated[Optional[str], Field(description="Any part of the patient's name.")] = None,
     family: Annotated[Optional[str], Field(description="The patient's family (last) name.")] = None,
-    given: Annotated[Optional[str], Field(description="The patient's given name. May include first and middle names.")] = None,
+    given: Annotated[Optional[str], Field(description="The patient's given (first) name.")] = None,
     birthdate: Annotated[Optional[str], Field(description="The patient's date of birth in the format YYYY-MM-DD.")] = None,
     gender: Annotated[Optional[str], Field(description="The patient's legal sex. The legal-sex parameter is preferred.")] = None,
     legal_sex: Annotated[Optional[str], Field(description="The patient's legal sex. Takes precedence over the gender search parameter.")] = None,
@@ -280,7 +283,7 @@ def search_patients(
     address_postalcode: Annotated[Optional[str], Field(description="The postal code for patient's home address.")] = None,
     telecom: Annotated[Optional[str], Field(description="The patient's phone number or email.")] = None,
 ) -> Dict[str, Any]:
-    """Patient.Search - Filter or search for patients based on demographics, identifiers, or contact information. Retrieves patient demographic information from a patient's chart for each matching patient record."""
+    """Patient.Search - Filter or search for patients based on demographics, identifiers, or contact information. Retrieves patient demographic information from a patient's chart for each matching patient record. When searching by name, prefer using the 'given' and 'family' parameters separately for more accurate matching. Otherwise use name parameter."""
     params = {}
     if identifier:
         params["identifier"] = identifier
@@ -325,10 +328,10 @@ def list_patient_problems(
 def list_lab_observations(
     patient: Annotated[str, Field(description="Reference to a patient resource the observation is for.")],
     code: Annotated[str, Field(description="The observation identifier (base name).")],
-    date: Annotated[Optional[str], Field(description="Date when the specimen was obtained.")] = None,
+    date: Annotated[Optional[str], Field(description="Date/time when the specimen was obtained. Use FHIR date prefixes for ranges: 'ge' (>=), 'gt' (>), 'le' (<=), 'lt' (<). Supports full datetime precision: 'ge2023-11-12T10:15:00+00:00' for observations on or after that exact time. For 'last 24 hours' queries, calculate the precise cutoff datetime and use 'ge' prefix. Without prefix, searches for exact match only.")] = None,
 ) -> Dict[str, Any]:
     """Observation.Search (Labs) - Return component level data for lab results."""
-    params = {"patient": patient, "code": code}
+    params = {"patient": patient, "code": code, "_count": "200"}
     if date:
         params["date"] = date
     return _call_fhir("GET", "/Observation", params=params)
@@ -338,7 +341,7 @@ def list_lab_observations(
 def list_vital_signs(
     patient: Annotated[str, Field(description="Reference to a patient resource the observation is for.")],
     category: Annotated[str, Field(description="Use 'vital-signs' to search for vitals observations.")],
-    date: Annotated[Optional[str], Field(description="The date range for when the observation was taken.")] = None,
+    date: Annotated[Optional[str], Field(description="Date/time when the observation was taken. Use FHIR date prefixes for ranges: 'ge' (>=), 'gt' (>), 'le' (<=), 'lt' (<). Supports full datetime precision: 'ge2023-11-12T10:15:00+00:00' for observations on or after that exact time. For 'last 24 hours' queries, calculate the precise cutoff datetime and use 'ge' prefix.")] = None,
 ) -> Dict[str, Any]:
     """Observation.Search (Vitals) - Retrieve vital sign data from a patient's chart, as well as any other non-duplicable data found in the patient's flowsheets across all encounters. This resource requires the use of encoded flowsheet IDs which are different for each organization and between production and non-production environments."""
     params = {"patient": patient, "category": category}
@@ -577,6 +580,39 @@ def calculate_age(
 
 
 @mcp.tool()
+def calculate_average(
+    values: Annotated[List[float], Field(description="List of numeric values to average.")],
+) -> Dict[str, Any]:
+    """Calculate the arithmetic mean (average) of a list of numbers.
+    
+    Use this tool when you need to compute the average of multiple values,
+    such as averaging lab results, vital signs, or other measurements.
+    
+    Example: To calculate the average of glucose readings [110, 95, 88, 102]:
+    - values: [110.0, 95.0, 88.0, 102.0]
+    - Result: average=98.75, count=4, sum=395.0
+    """
+    if not values:
+        return {
+            "error": "Cannot calculate average of empty list",
+            "values": values,
+            "count": 0,
+        }
+    
+    total = sum(values)
+    count = len(values)
+    average = total / count
+    
+    return {
+        "values": values,
+        "count": count,
+        "sum": total,
+        "average": average,
+        "message": f"Average of {count} values is {average}"
+    }
+
+
+@mcp.tool()
 def evaluate_potassium_level(
     potassium_value: Annotated[float, Field(description="The potassium level in mmol/L to evaluate.")],
     threshold: Annotated[float, Field(description="The threshold value in mmol/L.")],
@@ -663,6 +699,178 @@ def evaluate_magnesium_level(
             "infusion_hours": 4,
             "message": f"Magnesium {magnesium_value} mg/dL is severe deficiency (< 1.0).",
             "action": "ORDER_4G_OVER_4H"
+        }
+
+
+@mcp.tool()
+def analyze_blood_pressure_trend(
+    patient: Annotated[str, Field(description="The FHIR patient ID (MRN).")],
+    days_back: Annotated[int, Field(description="Number of days to look back for BP readings (e.g., 7 for past week).")],
+    reference_date: Annotated[str, Field(description="The reference date in ISO format (e.g., '2023-11-13T10:15:00+00:00').")],
+    systolic_threshold: Annotated[int, Field(description="Systolic BP threshold for hypertension (typically 140 mmHg).")] = 140,
+    diastolic_threshold: Annotated[int, Field(description="Diastolic BP threshold for hypertension (typically 90 mmHg).")] = 90,
+) -> Dict[str, Any]:
+    """Blood Pressure Trend Analysis - Analyze BP readings over time to detect hypertension patterns.
+    
+    Retrieves all BP observations for the patient within the specified time window
+    and analyzes the trend (rising, stable, or decreasing).
+    
+    Returns:
+    - patient: Patient ID
+    - bp_readings: List of readings with systolic, diastolic, datetime
+    - trend: 'rising', 'stable', or 'decreasing'
+    - statistics: Metrics including total_readings, elevated_count, elevated_percentage, avg systolic/diastolic
+    
+    NOTE: To determine hypertension alert, check if elevated_percentage >= 50.
+    A reading is "elevated" if systolic >= threshold OR diastolic >= threshold.
+    
+    Trend Calculation:
+    - Compares average of first half of readings vs second half
+    - 'rising' if second half avg is > 5 mmHg higher than first half
+    - 'decreasing' if second half avg is > 5 mmHg lower than first half
+    - 'stable' otherwise
+    """
+    try:
+        # Parse reference date
+        ref_date = datetime.fromisoformat(reference_date.replace('Z', '+00:00'))
+        cutoff_date = ref_date - timedelta(days=days_back)
+        
+        # Query BP observations directly using code:text filter for efficiency
+        # This filters server-side instead of fetching all vital-signs
+        params = {
+            "patient": patient,
+            "code:text": "BP",  # Server-side filter for BP observations only
+            "_count": "200",
+            "_format": "json"
+        }
+        result = _call_fhir("GET", "/Observation", params=params)
+        
+        if "error" in result:
+            return result
+        
+        response = result.get("response", {})
+        entries = response.get("entry", [])
+        
+        # Parse BP readings (all entries should be BP observations now)
+        bp_readings = []
+        for entry in entries:
+            resource = entry.get("resource", {})
+            
+            effective_dt_str = resource.get("effectiveDateTime", "")
+            
+            if not effective_dt_str:
+                continue
+                
+            try:
+                effective_dt = datetime.fromisoformat(effective_dt_str.replace('Z', '+00:00'))
+            except ValueError:
+                continue
+            
+            # Filter by date range
+            if effective_dt < cutoff_date or effective_dt > ref_date:
+                continue
+            
+            # Extract systolic/diastolic values
+            systolic = None
+            diastolic = None
+            
+            # Try valueString format "118/77 mmHg"
+            value_string = resource.get("valueString", "")
+            if value_string and "/" in value_string:
+                parts = value_string.replace("mmHg", "").strip().split("/")
+                if len(parts) == 2:
+                    try:
+                        systolic = int(float(parts[0].strip()))
+                        diastolic = int(float(parts[1].strip()))
+                    except ValueError:
+                        pass
+            
+            # Try component format (FHIR standard for BP)
+            if systolic is None or diastolic is None:
+                for component in resource.get("component", []):
+                    code_codings = component.get("code", {}).get("coding", [])
+                    for coding in code_codings:
+                        code = coding.get("code", "")
+                        if code in ["8480-6", "systolic"]:
+                            systolic = component.get("valueQuantity", {}).get("value")
+                        elif code in ["8462-4", "diastolic"]:
+                            diastolic = component.get("valueQuantity", {}).get("value")
+            
+            if systolic is not None and diastolic is not None:
+                bp_readings.append({
+                    "systolic": systolic,
+                    "diastolic": diastolic,
+                    "datetime": effective_dt_str
+                })
+        
+        # Sort by datetime (oldest first for trend analysis)
+        bp_readings.sort(key=lambda x: x["datetime"])
+        
+        # If no readings found
+        if not bp_readings:
+            return {
+                "patient": patient,
+                "bp_readings": [],
+                "trend": "unknown",
+                "statistics": {
+                    "total_readings": 0,
+                    "elevated_count": 0,
+                    "elevated_percentage": 0.0
+                },
+                "message": f"No BP readings found in the past {days_back} days."
+            }
+        
+        # Calculate elevated readings statistics (agent must determine hypertension_alert from elevated_percentage >= 50)
+        elevated_count = sum(
+            1 for r in bp_readings
+            if r["systolic"] >= systolic_threshold or r["diastolic"] >= diastolic_threshold
+        )
+        elevated_percentage = (elevated_count / len(bp_readings)) * 100
+        
+        # Calculate trend
+        trend = "stable"
+        if len(bp_readings) >= 2:
+            mid = len(bp_readings) // 2
+            first_half = bp_readings[:mid] if mid > 0 else bp_readings[:1]
+            second_half = bp_readings[mid:] if mid > 0 else bp_readings[1:]
+            
+            if first_half and second_half:
+                first_avg_sys = sum(r["systolic"] for r in first_half) / len(first_half)
+                second_avg_sys = sum(r["systolic"] for r in second_half) / len(second_half)
+                
+                diff = second_avg_sys - first_avg_sys
+                if diff > 5:
+                    trend = "rising"
+                elif diff < -5:
+                    trend = "decreasing"
+                else:
+                    trend = "stable"
+        
+        # Calculate statistics
+        avg_systolic = sum(r["systolic"] for r in bp_readings) / len(bp_readings)
+        avg_diastolic = sum(r["diastolic"] for r in bp_readings) / len(bp_readings)
+        
+        return {
+            "patient": patient,
+            "bp_readings": bp_readings,
+            "trend": trend,
+            "statistics": {
+                "total_readings": len(bp_readings),
+                "elevated_count": elevated_count,
+                "elevated_percentage": round(elevated_percentage, 1),
+                "avg_systolic": round(avg_systolic, 1),
+                "avg_diastolic": round(avg_diastolic, 1)
+            },
+            "thresholds": {
+                "systolic": systolic_threshold,
+                "diastolic": diastolic_threshold
+            }
+        }
+        
+    except Exception as e:
+        return {
+            "error": f"Failed to analyze BP trend: {str(e)}",
+            "patient": patient
         }
 
 

@@ -780,7 +780,7 @@ def eval_task4(case_data, results, fhir_api_base) -> EvalOutcome:
         )
     
     # Calculate reference solution
-    url = f"{fhir_api_base}Observation?patient={case_data['eval_MRN']}&code=MG&_count=5000&_format=json"
+    url = f"{fhir_api_base}Observation?patient={case_data['eval_MRN']}&code=MG&_count=200&_format=json"
     get_res = json.loads(send_get_request(url)['data'])
     cutoff = datetime.fromisoformat("2023-11-13T10:15:00+00:00")
     last_meas, last_value = None, None
@@ -815,7 +815,7 @@ def eval_task4(case_data, results, fhir_api_base) -> EvalOutcome:
 def eval_task5(case_data, results, fhir_api_base) -> EvalOutcome:
     """Task 5: Magnesium Check with Conditional MedicationRequest."""
     # Get magnesium data
-    url = f"{fhir_api_base}Observation?patient={case_data['eval_MRN']}&code=MG&_count=5000&_format=json"
+    url = f"{fhir_api_base}Observation?patient={case_data['eval_MRN']}&code=MG&_count=200&_format=json"
     get_res = json.loads(send_get_request(url)['data'])
     cutoff = datetime.fromisoformat("2023-11-13T10:15:00+00:00")
     last_meas, last_value = None, None
@@ -932,7 +932,7 @@ def eval_task6(case_data, results, fhir_api_base) -> EvalOutcome:
         )
     
     # Calculate reference solution
-    url = f"{fhir_api_base}Observation?patient={case_data['eval_MRN']}&code=GLU&_count=5000&_format=json"
+    url = f"{fhir_api_base}Observation?patient={case_data['eval_MRN']}&code=GLU&_count=200&_format=json"
     get_res = json.loads(send_get_request(url)['data'])
     cutoff = datetime.fromisoformat("2023-11-13T10:15:00+00:00")
     glu_sum, glu_count = 0., 0.
@@ -1107,7 +1107,7 @@ def eval_task8(case_data, results, fhir_api_base) -> EvalOutcome:
 def eval_task9(case_data, results, fhir_api_base) -> EvalOutcome:
     """Task 9: Potassium Check with Conditional MedicationRequest + ServiceRequest."""
     # Get potassium data
-    url = f"{fhir_api_base}Observation?patient={case_data['eval_MRN']}&code=K&_count=5000&_format=json"
+    url = f"{fhir_api_base}Observation?patient={case_data['eval_MRN']}&code=K&_count=200&_format=json"
     get_res = json.loads(send_get_request(url)['data'])
     cutoff = datetime.fromisoformat("2023-11-13T10:15:00+00:00")
     last_meas, last_value = None, None
@@ -1158,7 +1158,14 @@ def eval_task9(case_data, results, fhir_api_base) -> EvalOutcome:
             failures.append(DetailedFailure.WRONG_AUTHORED_ON)
         
         dosage = payload.get('dosageInstruction', [{}])[0]
-        route = dosage.get('route', '').lower().strip() if dosage.get('route') else ''
+        route_raw = dosage.get('route', '')
+        # Handle both string format ("oral") and dict format ({"text": "oral"})
+        if isinstance(route_raw, dict):
+            route = route_raw.get('text', '').lower().strip()
+        elif isinstance(route_raw, str):
+            route = route_raw.lower().strip()
+        else:
+            route = ''
         if route != 'oral':
             failures.append(DetailedFailure.WRONG_ROUTE)
         
@@ -1230,7 +1237,7 @@ def eval_task9(case_data, results, fhir_api_base) -> EvalOutcome:
 def eval_task10(case_data, results, fhir_api_base) -> EvalOutcome:
     """Task 10: A1C Check with Conditional ServiceRequest."""
     # Get A1C data
-    url = f"{fhir_api_base}Observation?patient={case_data['eval_MRN']}&code=A1C&_count=5000&_format=json"
+    url = f"{fhir_api_base}Observation?patient={case_data['eval_MRN']}&code=A1C&_count=200&_format=json"
     get_res = json.loads(send_get_request(url)['data'])
     cutoff = datetime.fromisoformat("2023-11-13T10:15:00+00:00")
     last_meas, last_value, last_time = None, None, None
@@ -1357,8 +1364,9 @@ def eval_task11(case_data, results, fhir_api_base) -> EvalOutcome:
     Evaluates:
     1. No POST requests (read-only task)
     2. Agent called the analyze_blood_pressure_trend tool with correct parameters
-    3. Tool returned correct patient and hypertension_alert
-    4. Agent's final answer matches [hypertension_alert, reading_count] exactly
+    3. Tool returned correct patient ID
+    4. Agent computed hypertension_alert correctly from elevated_percentage >= 50
+    5. Agent's final answer matches [hypertension_alert, reading_count] exactly
     
     Agent should return: FINISH([true/false, reading_count])
     e.g., FINISH([true, 5]) or FINISH([false, 16])
@@ -1425,7 +1433,7 @@ def eval_task11(case_data, results, fhir_api_base) -> EvalOutcome:
         )
     
     # Get reference BP data from FHIR to compute expected values
-    url = f"{fhir_api_base}Observation?patient={case_data['eval_MRN']}&code:text=BP&_count=5000&_format=json"
+    url = f"{fhir_api_base}Observation?patient={case_data['eval_MRN']}&code:text=BP&_count=200&_format=json"
     get_res = json.loads(send_get_request(url)['data'])
     
     # Reference date and cutoff (7 days back)
@@ -1500,10 +1508,7 @@ def eval_task11(case_data, results, fhir_api_base) -> EvalOutcome:
     if case_data['eval_MRN'] not in str(tool_patient):
         failures.append(DetailedFailure.WRONG_PATIENT_ID)
     
-    # Check tool's hypertension_alert matches reference
-    tool_alert = tool_result.get('hypertension_alert', None)
-    if tool_alert != ref_alert:
-        failures.append(DetailedFailure.WRONG_HYPERTENSION_ALERT)
+    # Note: hypertension_alert is no longer in tool result - agent must compute it from elevated_percentage
     
     # Check tool's reading count matches reference (from statistics)
     tool_reading_count = tool_result.get('statistics', {}).get('total_readings', 0)
