@@ -10,6 +10,7 @@ This project extends [MedAgentBench](https://github.com/stanfordmlgroup/MedAgent
 - [How It Works](#how-it-works)
 - [Architecture](#architecture)
   - [A2A Protocol Communication](#a2a-protocol-communication)
+  - [Key Architectural Design Principles](#key-architectural-design-principles)
 - [Quick Start Guide](#quick-start-guide)
 - [Configuration](#configuration)
 - [Benchmark Tasks](#benchmark-tasks)
@@ -206,63 +207,7 @@ After all tasks complete, the framework writes detailed results showing pass/fai
 The system is organized into four layers, each with a specific responsibility:
 
 <div align="center">
-
-```
-       ┌─────────────────────────────────────────┐
-       │         ORCHESTRATION LAYER             │
-       ├─────────────────────────────────────────┤
-       │  ┌─────────────────────────────────┐    │
-       │  │  Scenario Runner (agentbeats)   │    │
-       │  └───────────────┬─────────────────┘    │
-       │                  ▼                      │
-       │  ┌─────────────────────────────────┐    │
-       │  │  Client CLI (sends EvalRequest) │    │
-       │  └───────────────┬─────────────────┘    │
-       └──────────────────┼──────────────────────┘
-                          │ A2A
-                          ▼
-       ┌─────────────────────────────────────────┐
-       │           A2A AGENT LAYER               │
-       ├─────────────────────────────────────────┤
-       │  ┌─────────────────────────────────┐    │
-       │  │   EVALUATOR (Green Agent)       │    │
-       │  │   :9009                          │    │
-       │  │   • Orchestrates tasks          │    │
-       │  │   • Validates responses         │    │
-       │  └───────────────┬─────────────────┘    │
-       │                  │ A2A                  │
-       │                  ▼                      │
-       │  ┌─────────────────────────────────┐    │
-       │  │   AGENT (Purple Agent)          │    │
-       │  │   :9019+                         │    │
-       │  │   • LLM + tool-calling loop     │    │
-       │  │   • Returns FINISH([...])       │    │
-       │  └───────────────┬─────────────────┘    │
-       └──────────────────┼──────────────────────┘
-                          │ MCP
-                          ▼
-       ┌─────────────────────────────────────────┐
-       │          MCP SERVER LAYER               │
-       ├─────────────────────────────────────────┤
-       │  ┌─────────────────────────────────┐    │
-       │  │   FastMCP Server :8002          │    │
-       │  │   • FHIR tools (search, create) │    │
-       │  │   • Resources (tasks, prompts)  │    │
-       │  └───────────────┬─────────────────┘    │
-       └──────────────────┼──────────────────────┘
-                          │ FHIR REST
-                          ▼
-       ┌─────────────────────────────────────────┐
-       │            DATA LAYER                   │
-       ├─────────────────────────────────────────┤
-       │  ┌─────────────────────────────────┐    │
-       │  │   FHIR Server (Docker) :8080    │    │
-       │  │   • Patient, Observation        │    │
-       │  │   • MedicationRequest, etc.     │    │
-       │  └─────────────────────────────────┘    │
-       └─────────────────────────────────────────┘
-```
-
+  <img src="images/Architecture.png" alt="MedAgentBench Architecture" width="800"/>
 </div>
 
 ### Layer Descriptions
@@ -281,34 +226,9 @@ The Agent-to-Agent (A2A) protocol enables standardized communication between the
 
 #### Communication Flow
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                     GREEN AGENT (Evaluator) :9009                            │
-└───────────────────────────────────┬─────────────────────────────────────────┘
-                                    │
-      1. GET /.well-known/agent.json│  ◄─── Agent Discovery
-                                    ▼
-                              AgentCard
-                    (capabilities, skills, endpoint)
-                                    │
-      2. POST / (A2A Message)       │  ◄─── Task Request
-         ├─ TextPart: prompt +      ▼
-         │  instructions
-         └─ DataPart: config
-            (mcp_server_url, etc.)
-                                    │
-      3. TaskStatusUpdateEvent      │  ◄─── Progress Updates
-         (state: working)           ▼
-                                    │
-      4. Task + Artifacts           │  ◄─── Final Response
-         ├─ TextPart: FINISH([...]) ▼
-         └─ DataPart: metadata
-            (tool call history, etc.)
-                                    │
-┌───────────────────────────────────┴─────────────────────────────────────────┐
-│                     PURPLE AGENT (Medical AI) :9019+                         │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
+<div align="center">
+  <img src="images/Communication_flow.png" alt="A2A Communication Flow" width="700"/>
+</div>
 
 #### Key Protocol Concepts
 
@@ -327,6 +247,96 @@ The Agent-to-Agent (A2A) protocol enables standardized communication between the
 - **DataPart**: Metadata including tool call history, FHIR operations performed, and iteration count
 
 This separation allows the Evaluator to assess not just the final answer, but also how the agent arrived at it—enabling detailed failure analysis, detailed evaluation and performance metrics.
+
+### Key Architectural Design Principles
+
+The architecture embodies several design principles that enable modularity, flexibility, and robust evaluation:
+
+#### 1. Separation of Concerns
+
+Each component has a well-defined responsibility:
+
+| Component      | Responsibility                                                                |
+| -------------- | ----------------------------------------------------------------------------- |
+| **MCP Server** | Owns **data** (tasks, prompts) and **tools** (FHIR operations)                |
+| **Evaluator**  | Owns **evaluation logic** (task orchestration, validation, metrics)           |
+| **Agent**      | Owns **reasoning logic** (LLM interaction, tool selection, answer generation) |
+
+This separation means you can modify task definitions without touching evaluation code, or swap in a different agent implementation without affecting the tool layer.
+
+#### 2. DataPart for Structured Configuration
+
+The `mcp_server_url` and other configuration are **not embedded in the prompt**. Instead, they're passed via A2A's `DataPart` alongside the prompt:
+
+```
+Message to Agent:
+├─ TextPart: "Check patient S0636132's magnesium level..."  (human-readable prompt)
+└─ DataPart: {"mcp_server_url": "http://localhost:8002", "max_iterations": 8}  (machine config)
+```
+
+This keeps **instructions separate from infrastructure configuration**, making the system more maintainable and the prompts cleaner.
+
+#### 3. MCP for Dynamic Tool Discovery
+
+The Agent doesn't hardcode tool definitions. Instead, it **discovers tools at runtime** from the MCP server:
+
+```python
+# Agent connects to MCP and discovers available tools
+tools = await session.list_tools()  # Returns: search_patients, create_medication_request, etc.
+```
+
+Benefits:
+
+- **Flexibility**: Add new tools by updating the MCP server—no agent code changes required
+- **Realism**: Mirrors how real-world agents interact with unfamiliar systems
+- **Decoupling**: Tool schemas are defined once (in MCP server) and used everywhere
+
+#### 4. FHIR POST Tracking Without Database Mutation
+
+The MCP server **logs POST operations without actually mutating the FHIR database**. When a tool like `create_medication_request` is called, it returns:
+
+```json
+{
+  "status_code": 200,
+  "response": "Action executed successfully.",
+  "fhir_post": {
+    "fhir_url": "http://localhost:8080/fhir/MedicationRequest",
+    "parameters": { ... payload ... },
+    "accepted": true
+  }
+}
+```
+
+The `fhir_post` field is tracked by the Agent and passed back to the Evaluator for validation. This enables:
+
+- **Reproducible evaluation**: The FHIR database state doesn't change between tasks
+- **Reliable validation**: POST payloads are captured exactly as sent, not reconstructed from string parsing
+- **No server reset needed**: Run hundreds of tasks without database contamination
+
+#### 5. Parallel Execution with Worker Pool
+
+When `num_workers > 1`, the framework spawns multiple Agent processes for true parallel execution:
+
+```
+num_workers = 5
+
+Worker Pool:
+├─ Agent Worker 1 → http://localhost:9019
+├─ Agent Worker 2 → http://localhost:9020
+├─ Agent Worker 3 → http://localhost:9021
+├─ Agent Worker 4 → http://localhost:9022
+└─ Agent Worker 5 → http://localhost:9023
+
+Tasks distributed across workers via ThreadPoolExecutor
+```
+
+Each worker:
+
+- Runs as a separate process on a dedicated port
+- Has its own MCP connection to avoid session conflicts
+- Processes tasks independently, enabling concurrent evaluation
+
+This significantly reduces evaluation time for large task sets while maintaining isolation between task executions.
 
 ---
 
