@@ -389,181 +389,181 @@
   },
   {
     "id": "task3_1",
-    "instruction": "I just measured the blood pressure for patient with MRN of S2380121, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH(['Blood pressure recorded successfully.']).",
+    "instruction": "I just measured the blood pressure for patient with MRN of S2380121, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH([\"Blood pressure recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The flowsheet ID for blood pressure is BP.",
     "eval_MRN": "S2380121"
   },
   {
     "id": "task3_2",
-    "instruction": "I just measured the blood pressure for patient with MRN of S1353305, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH(['Blood pressure recorded successfully.']).",
+    "instruction": "I just measured the blood pressure for patient with MRN of S1353305, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH([\"Blood pressure recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The flowsheet ID for blood pressure is BP.",
     "eval_MRN": "S1353305"
   },
   {
     "id": "task3_3",
-    "instruction": "I just measured the blood pressure for patient with MRN of S6352985, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH(['Blood pressure recorded successfully.']).",
+    "instruction": "I just measured the blood pressure for patient with MRN of S6352985, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH([\"Blood pressure recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The flowsheet ID for blood pressure is BP.",
     "eval_MRN": "S6352985"
   },
   {
     "id": "task3_4",
-    "instruction": "I just measured the blood pressure for patient with MRN of S3228213, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH(['Blood pressure recorded successfully.']).",
+    "instruction": "I just measured the blood pressure for patient with MRN of S3228213, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH([\"Blood pressure recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The flowsheet ID for blood pressure is BP.",
     "eval_MRN": "S3228213"
   },
   {
     "id": "task3_5",
-    "instruction": "I just measured the blood pressure for patient with MRN of S1521703, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH(['Blood pressure recorded successfully.']).",
+    "instruction": "I just measured the blood pressure for patient with MRN of S1521703, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH([\"Blood pressure recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The flowsheet ID for blood pressure is BP.",
     "eval_MRN": "S1521703"
   },
   {
     "id": "task3_6",
-    "instruction": "I just measured the blood pressure for patient with MRN of S6415739, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH(['Blood pressure recorded successfully.']).",
+    "instruction": "I just measured the blood pressure for patient with MRN of S6415739, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH([\"Blood pressure recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The flowsheet ID for blood pressure is BP.",
     "eval_MRN": "S6415739"
   },
   {
     "id": "task3_7",
-    "instruction": "I just measured the blood pressure for patient with MRN of S1579803, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH(['Blood pressure recorded successfully.']).",
+    "instruction": "I just measured the blood pressure for patient with MRN of S1579803, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH([\"Blood pressure recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The flowsheet ID for blood pressure is BP.",
     "eval_MRN": "S1579803"
   },
   {
     "id": "task3_8",
-    "instruction": "I just measured the blood pressure for patient with MRN of S2033286, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH(['Blood pressure recorded successfully.']).",
+    "instruction": "I just measured the blood pressure for patient with MRN of S2033286, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH([\"Blood pressure recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The flowsheet ID for blood pressure is BP.",
     "eval_MRN": "S2033286"
   },
   {
     "id": "task3_9",
-    "instruction": "I just measured the blood pressure for patient with MRN of S1986380, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH(['Blood pressure recorded successfully.']).",
+    "instruction": "I just measured the blood pressure for patient with MRN of S1986380, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH([\"Blood pressure recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The flowsheet ID for blood pressure is BP.",
     "eval_MRN": "S1986380"
   },
   {
     "id": "task3_10",
-    "instruction": "I just measured the blood pressure for patient with MRN of S2703270, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH(['Blood pressure recorded successfully.']).",
+    "instruction": "I just measured the blood pressure for patient with MRN of S2703270, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH([\"Blood pressure recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The flowsheet ID for blood pressure is BP.",
     "eval_MRN": "S2703270"
   },
   {
     "id": "task3_11",
-    "instruction": "I just measured the blood pressure for patient with MRN of S2111822, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH(['Blood pressure recorded successfully.']).",
+    "instruction": "I just measured the blood pressure for patient with MRN of S2111822, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH([\"Blood pressure recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The flowsheet ID for blood pressure is BP.",
     "eval_MRN": "S2111822"
   },
   {
     "id": "task3_12",
-    "instruction": "I just measured the blood pressure for patient with MRN of S6541353, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH(['Blood pressure recorded successfully.']).",
+    "instruction": "I just measured the blood pressure for patient with MRN of S6541353, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH([\"Blood pressure recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The flowsheet ID for blood pressure is BP.",
     "eval_MRN": "S6541353"
   },
   {
     "id": "task3_13",
-    "instruction": "I just measured the blood pressure for patient with MRN of S0547588, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH(['Blood pressure recorded successfully.']).",
+    "instruction": "I just measured the blood pressure for patient with MRN of S0547588, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH([\"Blood pressure recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The flowsheet ID for blood pressure is BP.",
     "eval_MRN": "S0547588"
   },
   {
     "id": "task3_14",
-    "instruction": "I just measured the blood pressure for patient with MRN of S6534835, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH(['Blood pressure recorded successfully.']).",
+    "instruction": "I just measured the blood pressure for patient with MRN of S6534835, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH([\"Blood pressure recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The flowsheet ID for blood pressure is BP.",
     "eval_MRN": "S6534835"
   },
   {
     "id": "task3_15",
-    "instruction": "I just measured the blood pressure for patient with MRN of S3070524, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH(['Blood pressure recorded successfully.']).",
+    "instruction": "I just measured the blood pressure for patient with MRN of S3070524, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH([\"Blood pressure recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The flowsheet ID for blood pressure is BP.",
     "eval_MRN": "S3070524"
   },
   {
     "id": "task3_16",
-    "instruction": "I just measured the blood pressure for patient with MRN of S6192632, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH(['Blood pressure recorded successfully.']).",
+    "instruction": "I just measured the blood pressure for patient with MRN of S6192632, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH([\"Blood pressure recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The flowsheet ID for blood pressure is BP.",
     "eval_MRN": "S6192632"
   },
   {
     "id": "task3_17",
-    "instruction": "I just measured the blood pressure for patient with MRN of S6538722, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH(['Blood pressure recorded successfully.']).",
+    "instruction": "I just measured the blood pressure for patient with MRN of S6538722, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH([\"Blood pressure recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The flowsheet ID for blood pressure is BP.",
     "eval_MRN": "S6538722"
   },
   {
     "id": "task3_18",
-    "instruction": "I just measured the blood pressure for patient with MRN of S1777769, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH(['Blood pressure recorded successfully.']).",
+    "instruction": "I just measured the blood pressure for patient with MRN of S1777769, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH([\"Blood pressure recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The flowsheet ID for blood pressure is BP.",
     "eval_MRN": "S1777769"
   },
   {
     "id": "task3_19",
-    "instruction": "I just measured the blood pressure for patient with MRN of S6537563, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH(['Blood pressure recorded successfully.']).",
+    "instruction": "I just measured the blood pressure for patient with MRN of S6537563, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH([\"Blood pressure recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The flowsheet ID for blood pressure is BP.",
     "eval_MRN": "S6537563"
   },
   {
     "id": "task3_20",
-    "instruction": "I just measured the blood pressure for patient with MRN of S6222362, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH(['Blood pressure recorded successfully.']).",
+    "instruction": "I just measured the blood pressure for patient with MRN of S6222362, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH([\"Blood pressure recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The flowsheet ID for blood pressure is BP.",
     "eval_MRN": "S6222362"
   },
   {
     "id": "task3_21",
-    "instruction": "I just measured the blood pressure for patient with MRN of S3241217, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH(['Blood pressure recorded successfully.']).",
+    "instruction": "I just measured the blood pressure for patient with MRN of S3241217, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH([\"Blood pressure recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The flowsheet ID for blood pressure is BP.",
     "eval_MRN": "S3241217"
   },
   {
     "id": "task3_22",
-    "instruction": "I just measured the blood pressure for patient with MRN of S6329254, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH(['Blood pressure recorded successfully.']).",
+    "instruction": "I just measured the blood pressure for patient with MRN of S6329254, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH([\"Blood pressure recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The flowsheet ID for blood pressure is BP.",
     "eval_MRN": "S6329254"
   },
   {
     "id": "task3_23",
-    "instruction": "I just measured the blood pressure for patient with MRN of S6549951, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH(['Blood pressure recorded successfully.']).",
+    "instruction": "I just measured the blood pressure for patient with MRN of S6549951, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH([\"Blood pressure recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The flowsheet ID for blood pressure is BP.",
     "eval_MRN": "S6549951"
   },
   {
     "id": "task3_24",
-    "instruction": "I just measured the blood pressure for patient with MRN of S2119664, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH(['Blood pressure recorded successfully.']).",
+    "instruction": "I just measured the blood pressure for patient with MRN of S2119664, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH([\"Blood pressure recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The flowsheet ID for blood pressure is BP.",
     "eval_MRN": "S2119664"
   },
   {
     "id": "task3_25",
-    "instruction": "I just measured the blood pressure for patient with MRN of S1736710, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH(['Blood pressure recorded successfully.']).",
+    "instruction": "I just measured the blood pressure for patient with MRN of S1736710, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH([\"Blood pressure recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The flowsheet ID for blood pressure is BP.",
     "eval_MRN": "S1736710"
   },
   {
     "id": "task3_26",
-    "instruction": "I just measured the blood pressure for patient with MRN of S1152319, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH(['Blood pressure recorded successfully.']).",
+    "instruction": "I just measured the blood pressure for patient with MRN of S1152319, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH([\"Blood pressure recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The flowsheet ID for blood pressure is BP.",
     "eval_MRN": "S1152319"
   },
   {
     "id": "task3_27",
-    "instruction": "I just measured the blood pressure for patient with MRN of S6550627, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH(['Blood pressure recorded successfully.']).",
+    "instruction": "I just measured the blood pressure for patient with MRN of S6550627, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH([\"Blood pressure recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The flowsheet ID for blood pressure is BP.",
     "eval_MRN": "S6550627"
   },
   {
     "id": "task3_28",
-    "instruction": "I just measured the blood pressure for patient with MRN of S1733937, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH(['Blood pressure recorded successfully.']).",
+    "instruction": "I just measured the blood pressure for patient with MRN of S1733937, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH([\"Blood pressure recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The flowsheet ID for blood pressure is BP.",
     "eval_MRN": "S1733937"
   },
   {
     "id": "task3_29",
-    "instruction": "I just measured the blood pressure for patient with MRN of S3236936, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH(['Blood pressure recorded successfully.']).",
+    "instruction": "I just measured the blood pressure for patient with MRN of S3236936, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH([\"Blood pressure recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The flowsheet ID for blood pressure is BP.",
     "eval_MRN": "S3236936"
   },
   {
     "id": "task3_30",
-    "instruction": "I just measured the blood pressure for patient with MRN of S6531922, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH(['Blood pressure recorded successfully.']).",
+    "instruction": "I just measured the blood pressure for patient with MRN of S6531922, and it is \"118/77 mmHg\". Record this blood pressure reading and immediately respond with FINISH([\"Blood pressure recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The flowsheet ID for blood pressure is BP.",
     "eval_MRN": "S6531922"
   },
@@ -1289,361 +1289,361 @@
   },
   {
     "id": "task8_1",
-    "instruction": "Order orthopedic surgery referral for patient S2016972 and immediately respond with FINISH(['Order recorded successfully.']). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
+    "instruction": "Order orthopedic surgery referral for patient S2016972 and immediately respond with FINISH([\"Order recorded successfully.\"]). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The SNOMED code for orthopedic surgery referral is 306181000000106.",
     "eval_MRN": "S2016972"
   },
   {
     "id": "task8_2",
-    "instruction": "Order orthopedic surgery referral for patient S1986380 and immediately respond with FINISH(['Order recorded successfully.']). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
+    "instruction": "Order orthopedic surgery referral for patient S1986380 and immediately respond with FINISH([\"Order recorded successfully.\"]). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The SNOMED code for orthopedic surgery referral is 306181000000106.",
     "eval_MRN": "S1986380"
   },
   {
     "id": "task8_3",
-    "instruction": "Order orthopedic surgery referral for patient S1478444 and immediately respond with FINISH(['Order recorded successfully.']). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
+    "instruction": "Order orthopedic surgery referral for patient S1478444 and immediately respond with FINISH([\"Order recorded successfully.\"]). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The SNOMED code for orthopedic surgery referral is 306181000000106.",
     "eval_MRN": "S1478444"
   },
   {
     "id": "task8_4",
-    "instruction": "Order orthopedic surgery referral for patient S2748981 and immediately respond with FINISH(['Order recorded successfully.']). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
+    "instruction": "Order orthopedic surgery referral for patient S2748981 and immediately respond with FINISH([\"Order recorded successfully.\"]). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The SNOMED code for orthopedic surgery referral is 306181000000106.",
     "eval_MRN": "S2748981"
   },
   {
     "id": "task8_5",
-    "instruction": "Order orthopedic surgery referral for patient S6550627 and immediately respond with FINISH(['Order recorded successfully.']). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
+    "instruction": "Order orthopedic surgery referral for patient S6550627 and immediately respond with FINISH([\"Order recorded successfully.\"]). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The SNOMED code for orthopedic surgery referral is 306181000000106.",
     "eval_MRN": "S6550627"
   },
   {
     "id": "task8_6",
-    "instruction": "Order orthopedic surgery referral for patient S6212774 and immediately respond with FINISH(['Order recorded successfully.']). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
+    "instruction": "Order orthopedic surgery referral for patient S6212774 and immediately respond with FINISH([\"Order recorded successfully.\"]). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The SNOMED code for orthopedic surgery referral is 306181000000106.",
     "eval_MRN": "S6212774"
   },
   {
     "id": "task8_7",
-    "instruction": "Order orthopedic surgery referral for patient S2863714 and immediately respond with FINISH(['Order recorded successfully.']). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
+    "instruction": "Order orthopedic surgery referral for patient S2863714 and immediately respond with FINISH([\"Order recorded successfully.\"]). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The SNOMED code for orthopedic surgery referral is 306181000000106.",
     "eval_MRN": "S2863714"
   },
   {
     "id": "task8_8",
-    "instruction": "Order orthopedic surgery referral for patient S6534835 and immediately respond with FINISH(['Order recorded successfully.']). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
+    "instruction": "Order orthopedic surgery referral for patient S6534835 and immediately respond with FINISH([\"Order recorded successfully.\"]). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The SNOMED code for orthopedic surgery referral is 306181000000106.",
     "eval_MRN": "S6534835"
   },
   {
     "id": "task8_9",
-    "instruction": "Order orthopedic surgery referral for patient S1023381 and immediately respond with FINISH(['Order recorded successfully.']). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
+    "instruction": "Order orthopedic surgery referral for patient S1023381 and immediately respond with FINISH([\"Order recorded successfully.\"]). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The SNOMED code for orthopedic surgery referral is 306181000000106.",
     "eval_MRN": "S1023381"
   },
   {
     "id": "task8_10",
-    "instruction": "Order orthopedic surgery referral for patient S6415739 and immediately respond with FINISH(['Order recorded successfully.']). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
+    "instruction": "Order orthopedic surgery referral for patient S6415739 and immediately respond with FINISH([\"Order recorded successfully.\"]). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The SNOMED code for orthopedic surgery referral is 306181000000106.",
     "eval_MRN": "S6415739"
   },
   {
     "id": "task8_11",
-    "instruction": "Order orthopedic surgery referral for patient S3114648 and immediately respond with FINISH(['Order recorded successfully.']). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
+    "instruction": "Order orthopedic surgery referral for patient S3114648 and immediately respond with FINISH([\"Order recorded successfully.\"]). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The SNOMED code for orthopedic surgery referral is 306181000000106.",
     "eval_MRN": "S3114648"
   },
   {
     "id": "task8_12",
-    "instruction": "Order orthopedic surgery referral for patient S1521703 and immediately respond with FINISH(['Order recorded successfully.']). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
+    "instruction": "Order orthopedic surgery referral for patient S1521703 and immediately respond with FINISH([\"Order recorded successfully.\"]). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The SNOMED code for orthopedic surgery referral is 306181000000106.",
     "eval_MRN": "S1521703"
   },
   {
     "id": "task8_13",
-    "instruction": "Order orthopedic surgery referral for patient S6547257 and immediately respond with FINISH(['Order recorded successfully.']). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
+    "instruction": "Order orthopedic surgery referral for patient S6547257 and immediately respond with FINISH([\"Order recorded successfully.\"]). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The SNOMED code for orthopedic surgery referral is 306181000000106.",
     "eval_MRN": "S6547257"
   },
   {
     "id": "task8_14",
-    "instruction": "Order orthopedic surgery referral for patient S3241217 and immediately respond with FINISH(['Order recorded successfully.']). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
+    "instruction": "Order orthopedic surgery referral for patient S3241217 and immediately respond with FINISH([\"Order recorded successfully.\"]). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The SNOMED code for orthopedic surgery referral is 306181000000106.",
     "eval_MRN": "S3241217"
   },
   {
     "id": "task8_15",
-    "instruction": "Order orthopedic surgery referral for patient S6227720 and immediately respond with FINISH(['Order recorded successfully.']). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
+    "instruction": "Order orthopedic surgery referral for patient S6227720 and immediately respond with FINISH([\"Order recorded successfully.\"]). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The SNOMED code for orthopedic surgery referral is 306181000000106.",
     "eval_MRN": "S6227720"
   },
   {
     "id": "task8_16",
-    "instruction": "Order orthopedic surgery referral for patient S6541609 and immediately respond with FINISH(['Order recorded successfully.']). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
+    "instruction": "Order orthopedic surgery referral for patient S6541609 and immediately respond with FINISH([\"Order recorded successfully.\"]). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The SNOMED code for orthopedic surgery referral is 306181000000106.",
     "eval_MRN": "S6541609"
   },
   {
     "id": "task8_17",
-    "instruction": "Order orthopedic surgery referral for patient S2111822 and immediately respond with FINISH(['Order recorded successfully.']). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
+    "instruction": "Order orthopedic surgery referral for patient S2111822 and immediately respond with FINISH([\"Order recorded successfully.\"]). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The SNOMED code for orthopedic surgery referral is 306181000000106.",
     "eval_MRN": "S2111822"
   },
   {
     "id": "task8_18",
-    "instruction": "Order orthopedic surgery referral for patient S6426560 and immediately respond with FINISH(['Order recorded successfully.']). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
+    "instruction": "Order orthopedic surgery referral for patient S6426560 and immediately respond with FINISH([\"Order recorded successfully.\"]). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The SNOMED code for orthopedic surgery referral is 306181000000106.",
     "eval_MRN": "S6426560"
   },
   {
     "id": "task8_19",
-    "instruction": "Order orthopedic surgery referral for patient S6530813 and immediately respond with FINISH(['Order recorded successfully.']). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
+    "instruction": "Order orthopedic surgery referral for patient S6530813 and immediately respond with FINISH([\"Order recorded successfully.\"]). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The SNOMED code for orthopedic surgery referral is 306181000000106.",
     "eval_MRN": "S6530813"
   },
   {
     "id": "task8_20",
-    "instruction": "Order orthopedic surgery referral for patient S2197736 and immediately respond with FINISH(['Order recorded successfully.']). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
+    "instruction": "Order orthopedic surgery referral for patient S2197736 and immediately respond with FINISH([\"Order recorded successfully.\"]). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The SNOMED code for orthopedic surgery referral is 306181000000106.",
     "eval_MRN": "S2197736"
   },
   {
     "id": "task8_21",
-    "instruction": "Order orthopedic surgery referral for patient S6330912 and immediately respond with FINISH(['Order recorded successfully.']). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
+    "instruction": "Order orthopedic surgery referral for patient S6330912 and immediately respond with FINISH([\"Order recorded successfully.\"]). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The SNOMED code for orthopedic surgery referral is 306181000000106.",
     "eval_MRN": "S6330912"
   },
   {
     "id": "task8_22",
-    "instruction": "Order orthopedic surgery referral for patient S1715871 and immediately respond with FINISH(['Order recorded successfully.']). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
+    "instruction": "Order orthopedic surgery referral for patient S1715871 and immediately respond with FINISH([\"Order recorded successfully.\"]). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The SNOMED code for orthopedic surgery referral is 306181000000106.",
     "eval_MRN": "S1715871"
   },
   {
     "id": "task8_23",
-    "instruction": "Order orthopedic surgery referral for patient S6545016 and immediately respond with FINISH(['Order recorded successfully.']). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
+    "instruction": "Order orthopedic surgery referral for patient S6545016 and immediately respond with FINISH([\"Order recorded successfully.\"]). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The SNOMED code for orthopedic surgery referral is 306181000000106.",
     "eval_MRN": "S6545016"
   },
   {
     "id": "task8_24",
-    "instruction": "Order orthopedic surgery referral for patient S3032536 and immediately respond with FINISH(['Order recorded successfully.']). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
+    "instruction": "Order orthopedic surgery referral for patient S3032536 and immediately respond with FINISH([\"Order recorded successfully.\"]). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The SNOMED code for orthopedic surgery referral is 306181000000106.",
     "eval_MRN": "S3032536"
   },
   {
     "id": "task8_25",
-    "instruction": "Order orthopedic surgery referral for patient S6192632 and immediately respond with FINISH(['Order recorded successfully.']). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
+    "instruction": "Order orthopedic surgery referral for patient S6192632 and immediately respond with FINISH([\"Order recorded successfully.\"]). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The SNOMED code for orthopedic surgery referral is 306181000000106.",
     "eval_MRN": "S6192632"
   },
   {
     "id": "task8_26",
-    "instruction": "Order orthopedic surgery referral for patient S6549951 and immediately respond with FINISH(['Order recorded successfully.']). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
+    "instruction": "Order orthopedic surgery referral for patient S6549951 and immediately respond with FINISH([\"Order recorded successfully.\"]). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The SNOMED code for orthopedic surgery referral is 306181000000106.",
     "eval_MRN": "S6549951"
   },
   {
     "id": "task8_27",
-    "instruction": "Order orthopedic surgery referral for patient S1579803 and immediately respond with FINISH(['Order recorded successfully.']). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
+    "instruction": "Order orthopedic surgery referral for patient S1579803 and immediately respond with FINISH([\"Order recorded successfully.\"]). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The SNOMED code for orthopedic surgery referral is 306181000000106.",
     "eval_MRN": "S1579803"
   },
   {
     "id": "task8_28",
-    "instruction": "Order orthopedic surgery referral for patient S3236936 and immediately respond with FINISH(['Order recorded successfully.']). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
+    "instruction": "Order orthopedic surgery referral for patient S3236936 and immediately respond with FINISH([\"Order recorded successfully.\"]). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The SNOMED code for orthopedic surgery referral is 306181000000106.",
     "eval_MRN": "S3236936"
   },
   {
     "id": "task8_29",
-    "instruction": "Order orthopedic surgery referral for patient S6307599 and immediately respond with FINISH(['Order recorded successfully.']). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
+    "instruction": "Order orthopedic surgery referral for patient S6307599 and immediately respond with FINISH([\"Order recorded successfully.\"]). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The SNOMED code for orthopedic surgery referral is 306181000000106.",
     "eval_MRN": "S6307599"
   },
   {
     "id": "task8_30",
-    "instruction": "Order orthopedic surgery referral for patient S0722219 and immediately respond with FINISH(['Order recorded successfully.']). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
+    "instruction": "Order orthopedic surgery referral for patient S0722219 and immediately respond with FINISH([\"Order recorded successfully.\"]). Specify within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\" within the free text of the referral, \"Situation: acute left knee injury, Background: radiology report indicates ACL tear. Assessment: ACL tear grade II. Recommendation: request for Orthopedic service to evaluate and provide management recommendations.\"",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The SNOMED code for orthopedic surgery referral is 306181000000106.",
     "eval_MRN": "S0722219"
   },
   {
     "id": "task9_1",
-    "instruction": "Check patient S3241217's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH(['No order placed.']) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH(['Order recorded successfully.']).",
+    "instruction": "Check patient S3241217's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH([\"No order placed.\"]) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH([\"Order recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for QUERYING existing potassium observations is \"K\". The LOINC code 2823-3 is only used when ORDERING new tests. The NDC for replacement potassium is 40032-917-01. Dosing instructions: for every 0.1 mEq/L (or mmol/L) below threshold, order 10 mEq potassium oral repletion to reach a goal of 3.5 serum level. CRITICAL: If evaluation status is NORMAL, you must finish immediately without creating any orders.",
     "eval_MRN": "S3241217"
   },
   {
     "id": "task9_2",
-    "instruction": "Check patient S1023381's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH(['No order placed.']) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH(['Order recorded successfully.']).",
+    "instruction": "Check patient S1023381's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH([\"No order placed.\"]) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH([\"Order recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for QUERYING existing potassium observations is \"K\". The LOINC code 2823-3 is only used when ORDERING new tests. The NDC for replacement potassium is 40032-917-01. Dosing instructions: for every 0.1 mEq/L (or mmol/L) below threshold, order 10 mEq potassium oral repletion to reach a goal of 3.5 serum level. CRITICAL: If evaluation status is NORMAL, you must finish immediately without creating any orders.",
     "eval_MRN": "S1023381"
   },
   {
     "id": "task9_3",
-    "instruction": "Check patient S6550627's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH(['No order placed.']) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH(['Order recorded successfully.']).",
+    "instruction": "Check patient S6550627's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH([\"No order placed.\"]) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH([\"Order recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for QUERYING existing potassium observations is \"K\". The LOINC code 2823-3 is only used when ORDERING new tests. The NDC for replacement potassium is 40032-917-01. Dosing instructions: for every 0.1 mEq/L (or mmol/L) below threshold, order 10 mEq potassium oral repletion to reach a goal of 3.5 serum level. CRITICAL: If evaluation status is NORMAL, you must finish immediately without creating any orders.",
     "eval_MRN": "S6550627"
   },
   {
     "id": "task9_4",
-    "instruction": "Check patient S1374652's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH(['No order placed.']) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH(['Order recorded successfully.']).",
+    "instruction": "Check patient S1374652's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH([\"No order placed.\"]) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH([\"Order recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for QUERYING existing potassium observations is \"K\". The LOINC code 2823-3 is only used when ORDERING new tests. The NDC for replacement potassium is 40032-917-01. Dosing instructions: for every 0.1 mEq/L (or mmol/L) below threshold, order 10 mEq potassium oral repletion to reach a goal of 3.5 serum level. CRITICAL: If evaluation status is NORMAL, you must finish immediately without creating any orders.",
     "eval_MRN": "S1374652"
   },
   {
     "id": "task9_5",
-    "instruction": "Check patient S1796597's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH(['No order placed.']) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH(['Order recorded successfully.']).",
+    "instruction": "Check patient S1796597's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH([\"No order placed.\"]) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH([\"Order recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for QUERYING existing potassium observations is \"K\". The LOINC code 2823-3 is only used when ORDERING new tests. The NDC for replacement potassium is 40032-917-01. Dosing instructions: for every 0.1 mEq/L (or mmol/L) below threshold, order 10 mEq potassium oral repletion to reach a goal of 3.5 serum level. CRITICAL: If evaluation status is NORMAL, you must finish immediately without creating any orders.",
     "eval_MRN": "S1796597"
   },
   {
     "id": "task9_6",
-    "instruction": "Check patient S6550473's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH(['No order placed.']) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH(['Order recorded successfully.']).",
+    "instruction": "Check patient S6550473's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH([\"No order placed.\"]) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH([\"Order recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for QUERYING existing potassium observations is \"K\". The LOINC code 2823-3 is only used when ORDERING new tests. The NDC for replacement potassium is 40032-917-01. Dosing instructions: for every 0.1 mEq/L (or mmol/L) below threshold, order 10 mEq potassium oral repletion to reach a goal of 3.5 serum level. CRITICAL: If evaluation status is NORMAL, you must finish immediately without creating any orders.",
     "eval_MRN": "S6550473"
   },
   {
     "id": "task9_7",
-    "instruction": "Check patient S6268253's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH(['No order placed.']) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH(['Order recorded successfully.']).",
+    "instruction": "Check patient S6268253's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH([\"No order placed.\"]) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH([\"Order recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for QUERYING existing potassium observations is \"K\". The LOINC code 2823-3 is only used when ORDERING new tests. The NDC for replacement potassium is 40032-917-01. Dosing instructions: for every 0.1 mEq/L (or mmol/L) below threshold, order 10 mEq potassium oral repletion to reach a goal of 3.5 serum level. CRITICAL: If evaluation status is NORMAL, you must finish immediately without creating any orders.",
     "eval_MRN": "S6268253"
   },
   {
     "id": "task9_8",
-    "instruction": "Check patient S1635224's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH(['No order placed.']) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH(['Order recorded successfully.']).",
+    "instruction": "Check patient S1635224's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH([\"No order placed.\"]) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH([\"Order recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for QUERYING existing potassium observations is \"K\". The LOINC code 2823-3 is only used when ORDERING new tests. The NDC for replacement potassium is 40032-917-01. Dosing instructions: for every 0.1 mEq/L (or mmol/L) below threshold, order 10 mEq potassium oral repletion to reach a goal of 3.5 serum level. CRITICAL: If evaluation status is NORMAL, you must finish immediately without creating any orders.",
     "eval_MRN": "S1635224"
   },
   {
     "id": "task9_9",
-    "instruction": "Check patient S6309742's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH(['No order placed.']) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH(['Order recorded successfully.']).",
+    "instruction": "Check patient S6309742's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH([\"No order placed.\"]) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH([\"Order recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for QUERYING existing potassium observations is \"K\". The LOINC code 2823-3 is only used when ORDERING new tests. The NDC for replacement potassium is 40032-917-01. Dosing instructions: for every 0.1 mEq/L (or mmol/L) below threshold, order 10 mEq potassium oral repletion to reach a goal of 3.5 serum level. CRITICAL: If evaluation status is NORMAL, you must finish immediately without creating any orders.",
     "eval_MRN": "S6309742"
   },
   {
     "id": "task9_10",
-    "instruction": "Check patient S3084624's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH(['No order placed.']) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH(['Order recorded successfully.']).",
+    "instruction": "Check patient S3084624's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH([\"No order placed.\"]) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH([\"Order recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for QUERYING existing potassium observations is \"K\". The LOINC code 2823-3 is only used when ORDERING new tests. The NDC for replacement potassium is 40032-917-01. Dosing instructions: for every 0.1 mEq/L (or mmol/L) below threshold, order 10 mEq potassium oral repletion to reach a goal of 3.5 serum level. CRITICAL: If evaluation status is NORMAL, you must finish immediately without creating any orders.",
     "eval_MRN": "S3084624"
   },
   {
     "id": "task9_11",
-    "instruction": "Check patient S3213957's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH(['No order placed.']) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH(['Order recorded successfully.']).",
+    "instruction": "Check patient S3213957's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH([\"No order placed.\"]) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH([\"Order recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for QUERYING existing potassium observations is \"K\". The LOINC code 2823-3 is only used when ORDERING new tests. The NDC for replacement potassium is 40032-917-01. Dosing instructions: for every 0.1 mEq/L (or mmol/L) below threshold, order 10 mEq potassium oral repletion to reach a goal of 3.5 serum level. CRITICAL: If evaluation status is NORMAL, you must finish immediately without creating any orders.",
     "eval_MRN": "S3213957"
   },
   {
     "id": "task9_12",
-    "instruction": "Check patient S6541353's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH(['No order placed.']) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH(['Order recorded successfully.']).",
+    "instruction": "Check patient S6541353's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH([\"No order placed.\"]) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH([\"Order recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for QUERYING existing potassium observations is \"K\". The LOINC code 2823-3 is only used when ORDERING new tests. The NDC for replacement potassium is 40032-917-01. Dosing instructions: for every 0.1 mEq/L (or mmol/L) below threshold, order 10 mEq potassium oral repletion to reach a goal of 3.5 serum level. CRITICAL: If evaluation status is NORMAL, you must finish immediately without creating any orders.",
     "eval_MRN": "S6541353"
   },
   {
     "id": "task9_13",
-    "instruction": "Check patient S3057899's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH(['No order placed.']) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH(['Order recorded successfully.']).",
+    "instruction": "Check patient S3057899's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH([\"No order placed.\"]) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH([\"Order recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for QUERYING existing potassium observations is \"K\". The LOINC code 2823-3 is only used when ORDERING new tests. The NDC for replacement potassium is 40032-917-01. Dosing instructions: for every 0.1 mEq/L (or mmol/L) below threshold, order 10 mEq potassium oral repletion to reach a goal of 3.5 serum level. CRITICAL: If evaluation status is NORMAL, you must finish immediately without creating any orders.",
     "eval_MRN": "S3057899"
   },
   {
     "id": "task9_14",
-    "instruction": "Check patient S6547257's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH(['No order placed.']) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH(['Order recorded successfully.']).",
+    "instruction": "Check patient S6547257's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH([\"No order placed.\"]) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH([\"Order recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for QUERYING existing potassium observations is \"K\". The LOINC code 2823-3 is only used when ORDERING new tests. The NDC for replacement potassium is 40032-917-01. Dosing instructions: for every 0.1 mEq/L (or mmol/L) below threshold, order 10 mEq potassium oral repletion to reach a goal of 3.5 serum level. CRITICAL: If evaluation status is NORMAL, you must finish immediately without creating any orders.",
     "eval_MRN": "S6547257"
   },
   {
     "id": "task9_15",
-    "instruction": "Check patient S0722219's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH(['No order placed.']) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH(['Order recorded successfully.']).",
+    "instruction": "Check patient S0722219's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH([\"No order placed.\"]) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH([\"Order recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for QUERYING existing potassium observations is \"K\". The LOINC code 2823-3 is only used when ORDERING new tests. The NDC for replacement potassium is 40032-917-01. Dosing instructions: for every 0.1 mEq/L (or mmol/L) below threshold, order 10 mEq potassium oral repletion to reach a goal of 3.5 serum level. CRITICAL: If evaluation status is NORMAL, you must finish immediately without creating any orders.",
     "eval_MRN": "S0722219"
   },
   {
     "id": "task9_16",
-    "instruction": "Check patient S2823623's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH(['No order placed.']) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH(['Order recorded successfully.']).",
+    "instruction": "Check patient S2823623's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH([\"No order placed.\"]) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH([\"Order recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for QUERYING existing potassium observations is \"K\". The LOINC code 2823-3 is only used when ORDERING new tests. The NDC for replacement potassium is 40032-917-01. Dosing instructions: for every 0.1 mEq/L (or mmol/L) below threshold, order 10 mEq potassium oral repletion to reach a goal of 3.5 serum level. CRITICAL: If evaluation status is NORMAL, you must finish immediately without creating any orders.",
     "eval_MRN": "S2823623"
   },
   {
     "id": "task9_17",
-    "instruction": "Check patient S6537563's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH(['No order placed.']) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH(['Order recorded successfully.']).",
+    "instruction": "Check patient S6537563's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH([\"No order placed.\"]) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH([\"Order recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for QUERYING existing potassium observations is \"K\". The LOINC code 2823-3 is only used when ORDERING new tests. The NDC for replacement potassium is 40032-917-01. Dosing instructions: for every 0.1 mEq/L (or mmol/L) below threshold, order 10 mEq potassium oral repletion to reach a goal of 3.5 serum level. CRITICAL: If evaluation status is NORMAL, you must finish immediately without creating any orders.",
     "eval_MRN": "S6537563"
   },
   {
     "id": "task9_18",
-    "instruction": "Check patient S2450227's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH(['No order placed.']) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH(['Order recorded successfully.']).",
+    "instruction": "Check patient S2450227's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH([\"No order placed.\"]) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH([\"Order recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for QUERYING existing potassium observations is \"K\". The LOINC code 2823-3 is only used when ORDERING new tests. The NDC for replacement potassium is 40032-917-01. Dosing instructions: for every 0.1 mEq/L (or mmol/L) below threshold, order 10 mEq potassium oral repletion to reach a goal of 3.5 serum level. CRITICAL: If evaluation status is NORMAL, you must finish immediately without creating any orders.",
     "eval_MRN": "S2450227"
   },
   {
     "id": "task9_19",
-    "instruction": "Check patient S6329254's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH(['No order placed.']) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH(['Order recorded successfully.']).",
+    "instruction": "Check patient S6329254's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH([\"No order placed.\"]) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH([\"Order recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for QUERYING existing potassium observations is \"K\". The LOINC code 2823-3 is only used when ORDERING new tests. The NDC for replacement potassium is 40032-917-01. Dosing instructions: for every 0.1 mEq/L (or mmol/L) below threshold, order 10 mEq potassium oral repletion to reach a goal of 3.5 serum level. CRITICAL: If evaluation status is NORMAL, you must finish immediately without creating any orders.",
     "eval_MRN": "S6329254"
   },
   {
     "id": "task9_20",
-    "instruction": "Check patient S3236936's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH(['No order placed.']) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH(['Order recorded successfully.']).",
+    "instruction": "Check patient S3236936's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH([\"No order placed.\"]) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH([\"Order recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for QUERYING existing potassium observations is \"K\". The LOINC code 2823-3 is only used when ORDERING new tests. The NDC for replacement potassium is 40032-917-01. Dosing instructions: for every 0.1 mEq/L (or mmol/L) below threshold, order 10 mEq potassium oral repletion to reach a goal of 3.5 serum level. CRITICAL: If evaluation status is NORMAL, you must finish immediately without creating any orders.",
     "eval_MRN": "S3236936"
   },
   {
     "id": "task9_21",
-    "instruction": "Check patient S6426560's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH(['No order placed.']) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH(['Order recorded successfully.']).",
+    "instruction": "Check patient S6426560's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH([\"No order placed.\"]) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH([\"Order recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for QUERYING existing potassium observations is \"K\". The LOINC code 2823-3 is only used when ORDERING new tests. The NDC for replacement potassium is 40032-917-01. Dosing instructions: for every 0.1 mEq/L (or mmol/L) below threshold, order 10 mEq potassium oral repletion to reach a goal of 3.5 serum level. CRITICAL: If evaluation status is NORMAL, you must finish immediately without creating any orders.",
     "eval_MRN": "S6426560"
   },
   {
     "id": "task9_22",
-    "instruction": "Check patient S6474456's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH(['No order placed.']) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH(['Order recorded successfully.']).",
+    "instruction": "Check patient S6474456's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH([\"No order placed.\"]) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH([\"Order recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for QUERYING existing potassium observations is \"K\". The LOINC code 2823-3 is only used when ORDERING new tests. The NDC for replacement potassium is 40032-917-01. Dosing instructions: for every 0.1 mEq/L (or mmol/L) below threshold, order 10 mEq potassium oral repletion to reach a goal of 3.5 serum level. CRITICAL: If evaluation status is NORMAL, you must finish immediately without creating any orders.",
     "eval_MRN": "S6474456"
   },
   {
     "id": "task9_23",
-    "instruction": "Check patient S0869531's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH(['No order placed.']) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH(['Order recorded successfully.']).",
+    "instruction": "Check patient S0869531's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH([\"No order placed.\"]) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH([\"Order recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for QUERYING existing potassium observations is \"K\". The LOINC code 2823-3 is only used when ORDERING new tests. The NDC for replacement potassium is 40032-917-01. Dosing instructions: for every 0.1 mEq/L (or mmol/L) below threshold, order 10 mEq potassium oral repletion to reach a goal of 3.5 serum level. CRITICAL: If evaluation status is NORMAL, you must finish immediately without creating any orders.",
     "eval_MRN": "S0869531"
   },
   {
     "id": "task9_24",
-    "instruction": "Check patient S2090974's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH(['No order placed.']) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH(['Order recorded successfully.']).",
+    "instruction": "Check patient S2090974's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH([\"No order placed.\"]) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH([\"Order recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for QUERYING existing potassium observations is \"K\". The LOINC code 2823-3 is only used when ORDERING new tests. The NDC for replacement potassium is 40032-917-01. Dosing instructions: for every 0.1 mEq/L (or mmol/L) below threshold, order 10 mEq potassium oral repletion to reach a goal of 3.5 serum level. CRITICAL: If evaluation status is NORMAL, you must finish immediately without creating any orders.",
     "eval_MRN": "S2090974"
   },
   {
     "id": "task9_25",
-    "instruction": "Check patient S2704870's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH(['No order placed.']) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH(['Order recorded successfully.']).",
+    "instruction": "Check patient S2704870's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH([\"No order placed.\"]) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH([\"Order recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for QUERYING existing potassium observations is \"K\". The LOINC code 2823-3 is only used when ORDERING new tests. The NDC for replacement potassium is 40032-917-01. Dosing instructions: for every 0.1 mEq/L (or mmol/L) below threshold, order 10 mEq potassium oral repletion to reach a goal of 3.5 serum level. CRITICAL: If evaluation status is NORMAL, you must finish immediately without creating any orders.",
     "eval_MRN": "S2704870"
   },
   {
     "id": "task9_26",
-    "instruction": "Check patient S6352985's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH(['No order placed.']) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH(['Order recorded successfully.']).",
+    "instruction": "Check patient S6352985's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH([\"No order placed.\"]) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH([\"Order recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for QUERYING existing potassium observations is \"K\". The LOINC code 2823-3 is only used when ORDERING new tests. The NDC for replacement potassium is 40032-917-01. Dosing instructions: for every 0.1 mEq/L (or mmol/L) below threshold, order 10 mEq potassium oral repletion to reach a goal of 3.5 serum level. CRITICAL: If evaluation status is NORMAL, you must finish immediately without creating any orders.",
     "eval_MRN": "S6352985"
   },
   {
     "id": "task9_27",
-    "instruction": "Check patient S1311412's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH(['No order placed.']) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH(['Order recorded successfully.']).",
+    "instruction": "Check patient S1311412's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH([\"No order placed.\"]) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH([\"Order recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for QUERYING existing potassium observations is \"K\". The LOINC code 2823-3 is only used when ORDERING new tests. The NDC for replacement potassium is 40032-917-01. Dosing instructions: for every 0.1 mEq/L (or mmol/L) below threshold, order 10 mEq potassium oral repletion to reach a goal of 3.5 serum level. CRITICAL: If evaluation status is NORMAL, you must finish immediately without creating any orders.",
     "eval_MRN": "S1311412"
   },
   {
     "id": "task9_28",
-    "instruction": "Check patient S3228213's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH(['No order placed.']) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH(['Order recorded successfully.']).",
+    "instruction": "Check patient S3228213's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH([\"No order placed.\"]) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH([\"Order recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for QUERYING existing potassium observations is \"K\". The LOINC code 2823-3 is only used when ORDERING new tests. The NDC for replacement potassium is 40032-917-01. Dosing instructions: for every 0.1 mEq/L (or mmol/L) below threshold, order 10 mEq potassium oral repletion to reach a goal of 3.5 serum level. CRITICAL: If evaluation status is NORMAL, you must finish immediately without creating any orders.",
     "eval_MRN": "S3228213"
   },
   {
     "id": "task9_29",
-    "instruction": "Check patient S6500497's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH(['No order placed.']) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH(['Order recorded successfully.']).",
+    "instruction": "Check patient S6500497's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH([\"No order placed.\"]) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH([\"Order recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for QUERYING existing potassium observations is \"K\". The LOINC code 2823-3 is only used when ORDERING new tests. The NDC for replacement potassium is 40032-917-01. Dosing instructions: for every 0.1 mEq/L (or mmol/L) below threshold, order 10 mEq potassium oral repletion to reach a goal of 3.5 serum level. CRITICAL: If evaluation status is NORMAL, you must finish immediately without creating any orders.",
     "eval_MRN": "S6500497"
   },
   {
     "id": "task9_30",
-    "instruction": "Check patient S6545016's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH(['No order placed.']) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH(['Order recorded successfully.']).",
+    "instruction": "Check patient S6545016's most recent potassium level. Step 1: Query potassium observations using code 'K'. Step 2: Find the most recent observation. Step 3: Evaluate the potassium level status (use threshold 3.5). Step 4: Check the evaluation result - if status is NORMAL, IMMEDIATELY respond with FINISH([\"No order placed.\"]) and do NOT make any other tool calls. Step 5: ONLY if status is LOW, order replacement potassium AND a morning serum potassium level test for the next day at 8am, then respond with FINISH([\"Order recorded successfully.\"]).",
     "context": "It's 2023-11-13T10:15:00+00:00 now. The code for QUERYING existing potassium observations is \"K\". The LOINC code 2823-3 is only used when ORDERING new tests. The NDC for replacement potassium is 40032-917-01. Dosing instructions: for every 0.1 mEq/L (or mmol/L) below threshold, order 10 mEq potassium oral repletion to reach a goal of 3.5 serum level. CRITICAL: If evaluation status is NORMAL, you must finish immediately without creating any orders.",
     "eval_MRN": "S6545016"
   },
