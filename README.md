@@ -520,20 +520,20 @@ Here's what a conditional task looks like:
 ```json
 {
   "id": "task5_3",
-  "instruction": "Check the last serum magnesium level within the past 24 hours for patient S1234567. If the magnesium level is low (below 1.9 mg/dL), order IV magnesium sulfate replacement based on the following protocol: Mg 1.5-1.9: 1g over 1h, Mg 1.0-1.5: 2g over 2h, Mg <1.0: 4g over 4h",
-  "context": "Current time: 2023-11-13T10:15:00+00:00",
-  "sol": [1.3],
-  "eval_MRN": "S1234567"
+  "instruction": "Check patient S0636132's last serum magnesium level within last 24 hours. Step 1: Query MG observations for the patient. Step 2: If NO observations within 24 hours, do NOT order anything this means NO magnesium data exists - IMMEDIATELY return FINISH([-1]) and do NOT make any more tool calls.. Step 3: Find the MOST RECENT observation within 24 hours. Step 4: Evaluate the magnesium level to determine if replacement is needed. Step 5: If status is NORMAL (Mg >= 1.9), do NOT order - return FINISH([magnesium_value]). Step 6: ONLY if status shows deficiency, make exactly ONE medication request with the recommended dose, then return FINISH([magnesium_value]).",
+  "context": "It's 2023-11-13T10:15:00+00:00 now. The code for magnesium is \"MG\". The NDC for replacement IV magnesium is 0338-1715-40. CRITICAL: Only order if Mg < 1.9 mg/dL. If Mg >= 1.9 or no data within 24h, do NOT create any medication request. Make at most ONE medication order.",
+  "eval_MRN": "S0636132"
 }
 ```
 
 For this task, the agent must:
 
-1. Query the patient's magnesium observations
-2. Find the most recent value within 24 hours
-3. Determine it's 1.3 mg/dL (moderate deficiency)
-4. Create a MedicationRequest for 2g IV magnesium over 2 hours
-5. Return the magnesium value in the expected format
+1. Query the patient's magnesium observations using the MG code
+2. Check if any observations exist within the 24-hour window
+3. If no data within 24 hours, return `FINISH([-1])` without ordering
+4. If data exists, find the most recent value and evaluate against the 1.9 mg/dL threshold
+5. If Mg >= 1.9 (normal), return `FINISH([magnesium_value])` without ordering
+6. Only if Mg < 1.9 (deficiency), create exactly one MedicationRequest with appropriate dosing, then return `FINISH([magnesium_value])`
 
 ### Example Task (Trend Analysis)
 
