@@ -449,7 +449,7 @@ By default, the benchmark runs a subset of tasks based on `num_tasks`. To run sp
 # Run specific tasks by ID
 task_ids = ["task1_1", "task1_2", "task3_1", "task5_1"]
 
-# Or run all tasks from a category
+# Or run tasks from a specific category
 task_ids = ["task5_1", "task5_2", "task5_3", "task5_4", "task5_5", "task5_6", "task5_7", "task5_8", "task5_9", "task5_10"]
 ```
 
@@ -464,7 +464,7 @@ The `max_rounds` setting controls how many tool-calling iterations the agent can
 max_rounds = 8
 ```
 
-Some complex tasks may require more iterations. If you see many `max_rounds_reached` failures, try increasing this value.
+Some complex tasks may require more iterations. If you see many `max_rounds_reached` failures, try increasing this value while maintaining this control variable for all the assessed agents for fair evaluation.
 
 ### Parallel Execution
 
@@ -497,22 +497,23 @@ Each worker runs as a separate process on a different port (9019, 9020, etc.). M
 
 ## Benchmark Tasks
 
-The benchmark includes 300 tasks across 10 categories. Each category tests different clinical reasoning capabilities:
+The benchmark includes 330 tasks across 11 categories. Each category tests different clinical reasoning capabilities:
 
-| Category    | Type        | What It Tests                                      |
-| ----------- | ----------- | -------------------------------------------------- |
-| **Task 1**  | Read-only   | Basic patient lookup by name and date of birth     |
-| **Task 2**  | Read-only   | Age calculation from patient demographics          |
-| **Task 3**  | POST        | Creating vital signs observations (blood pressure) |
-| **Task 4**  | Read-only   | Retrieving recent lab values (magnesium)           |
-| **Task 5**  | Conditional | Clinical decision-making for magnesium replacement |
-| **Task 6**  | Read-only   | Calculating aggregate values (average glucose)     |
-| **Task 7**  | Read-only   | Finding most recent lab values (glucose)           |
-| **Task 8**  | POST        | Creating specialist consultation requests          |
-| **Task 9**  | Conditional | Multi-step intervention for potassium deficiency   |
-| **Task 10** | Conditional | Time-based decision-making for A1C testing         |
+| Category    | Type           | What It Tests                                      |
+| ----------- | -------------- | -------------------------------------------------- |
+| **Task 1**  | Read-only      | Basic patient lookup by name and date of birth     |
+| **Task 2**  | Read-only      | Age calculation from patient demographics          |
+| **Task 3**  | POST           | Creating vital signs observations (blood pressure) |
+| **Task 4**  | Read-only      | Retrieving recent lab values (magnesium)           |
+| **Task 5**  | Conditional    | Clinical decision-making for magnesium replacement |
+| **Task 6**  | Read-only      | Calculating aggregate values (average glucose)     |
+| **Task 7**  | Read-only      | Finding most recent lab values (glucose)           |
+| **Task 8**  | POST           | Creating specialist consultation requests          |
+| **Task 9**  | Conditional    | Multi-step intervention for potassium deficiency   |
+| **Task 10** | Conditional    | Time-based decision-making for A1C testing         |
+| **Task 11** | Trend Analysis | Blood pressure trend analysis for hypertension     |
 
-### Example Task
+### Example Task (Conditional)
 
 Here's what a conditional task looks like:
 
@@ -533,6 +534,34 @@ For this task, the agent must:
 3. Determine it's 1.3 mg/dL (moderate deficiency)
 4. Create a MedicationRequest for 2g IV magnesium over 2 hours
 5. Return the magnesium value in the expected format
+
+### Example Task (Trend Analysis)
+
+Task 11 introduces trend analysis, requiring the agent to analyze patterns over time:
+
+```json
+{
+  "id": "task11_9",
+  "instruction": "Does patient S1733937 have a hypertension alert based on their blood pressure readings from the past 7 days (reference date: 2022-05-06T00:00:00+00:00)? A hypertension alert is true if >=50% of readings have systolic >= 140 OR diastolic >= 90.",
+  "context": "Return FINISH([hypertension_alert, reading_count]) where hypertension_alert is true/false and reading_count is the number of BP readings found.",
+  "eval_MRN": "S1733937",
+  "eval_ref_date": "2022-05-06T00:00:00+00:00"
+}
+```
+
+For this task, the agent must:
+
+1. Discover and use the `analyze_blood_pressure_trend` tool
+2. Pass the correct parameters: patient ID, reference date, and 7-day window
+3. Analyze the tool's output for hypertension alert status
+4. Return both the alert (true/false) and exact reading count
+
+**Evaluation criteria:**
+
+- No POST requests (read-only task)
+- Tool called with correct `patient`, `reference_date`, and `days_back=7`
+- Hypertension alert matches reference (computed from FHIR data)
+- Reading count is an exact match
 
 ### Response Format
 
