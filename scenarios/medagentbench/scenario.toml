@@ -18,7 +18,7 @@ fhir_api_base = "http://localhost:8080/fhir/"
 mcp_server_url = "http://localhost:8002"
 
 # Number of tasks to run (set to null or remove to run all tasks)
-num_tasks = 30
+num_tasks = 300
 
 # Specific task IDs to run (optional, overrides num_tasks if provided)
 #task_ids = ["task1_1", "task1_2", "task1_3", "task1_4", "task1_5", "task1_6", "task1_7", "task1_8", "task1_9", "task1_10"]
@@ -31,7 +31,7 @@ num_tasks = 30
 #task_ids = ["task8_1", "task8_2", "task8_3", "task8_4", "task8_5", "task8_6", "task8_7", "task8_8", "task8_9", "task8_10"]
 #task_ids = ["task9_1", "task9_2", "task9_3", "task9_4", "task9_5", "task9_6", "task9_7", "task9_8", "task9_9", "task9_10","task9_11", "task9_12", "task9_13", "task9_14", "task9_15", "task9_16", "task9_17", "task9_18", "task9_19", "task9_20","task9_21", "task9_22", "task9_23", "task9_24", "task9_25", "task9_26", "task9_27", "task9_28", "task9_29", "task9_30"]
 #task_ids = ["task10_1", "task10_2", "task10_3", "task10_4", "task10_5", "task10_6", "task10_7", "task10_8", "task10_9", "task10_10","task10_11", "task10_12", "task10_13", "task10_14", "task10_15", "task10_16", "task10_17", "task10_18", "task10_19", "task10_20","task10_21", "task10_22", "task10_23", "task10_24", "task10_25", "task10_26", "task10_27", "task10_28", "task10_29", "task10_30"]
-task_ids = ["task11_1", "task11_2", "task11_3", "task11_4", "task11_5", "task11_6", "task11_7", "task11_8", "task11_9", "task11_10","task11_11", "task11_12", "task11_13", "task11_14", "task11_15", "task11_16", "task11_17", "task11_18", "task11_19", "task11_20","task11_21", "task11_22", "task11_23", "task11_24", "task11_25", "task11_26", "task11_27", "task11_28", "task11_29", "task11_30"]
+#task_ids = ["task11_1", "task11_2", "task11_3", "task11_4", "task11_5", "task11_6", "task11_7", "task11_8", "task11_9", "task11_10","task11_11", "task11_12", "task11_13", "task11_14", "task11_15", "task11_16", "task11_17", "task11_18", "task11_19", "task11_20","task11_21", "task11_22", "task11_23", "task11_24", "task11_25", "task11_26", "task11_27", "task11_28", "task11_29", "task11_30"]
 
 # Maximum tool-calling rounds per task
 max_rounds = 8
@@ -40,4 +40,4 @@ max_rounds = 8
 domain = "medagentbench"
 
 # Multi-Worker Parallel Execution Configuration
-num_workers = 10
+num_workers = 2
