@@ -52,16 +52,54 @@ This two-level failure classification enables:
 
 ### Comprehensive Failure Taxonomy
 
-The evaluator categorizes failures into distinct types:
+The evaluator uses a two-level failure classification system:
+
+**Primary Failure Categories** (mutually exclusive, used for aggregate statistics):
 
 | Category                   | Description                                     |
 | -------------------------- | ----------------------------------------------- |
-| `answer_mismatch`          | Returned value doesn't match expected answer    |
+| `system_error`             | Unexpected system or runtime error              |
+| `invalid_finish_format`    | Response not in required `FINISH([...])` format |
+| `invalid_json_result`      | Result cannot be parsed as valid JSON           |
+| `max_rounds_reached`       | Agent didn't finish within iteration limit      |
 | `readonly_violation`       | Agent made POST request on read-only task       |
 | `wrong_post_count`         | Incorrect number of POST requests               |
+| `wrong_endpoint`           | POST sent to incorrect FHIR endpoint            |
 | `payload_validation_error` | POST payload has incorrect fields or values     |
-| `max_rounds_reached`       | Agent didn't finish within iteration limit      |
-| `invalid_finish_format`    | Response not in required `FINISH([...])` format |
+| `answer_mismatch`          | Returned value doesn't match expected answer    |
+
+**Detailed Failure Reasons** (multiple can apply per task, used for diagnostics):
+
+| Category                       | Description                               |
+| ------------------------------ | ----------------------------------------- |
+| **Format Failures**            |                                           |
+| `invalid_json`                 | Result is not valid JSON                  |
+| `no_finish_format`             | Missing `FINISH([...])` wrapper           |
+| `max_iterations_exceeded`      | Hit maximum tool-calling rounds           |
+| **Operation Failures**         |                                           |
+| `made_post_on_readonly`        | Created resource on read-only task        |
+| `wrong_number_of_posts`        | Too many or too few POST requests         |
+| `wrong_fhir_endpoint`          | Wrong FHIR resource endpoint              |
+| `wrong_resource_type`          | Payload has incorrect `resourceType`      |
+| **Observation Failures**       |                                           |
+| `wrong_category_system/code`   | Incorrect observation category coding     |
+| `wrong_effective_datetime`     | Incorrect timestamp                       |
+| `wrong_status`                 | Incorrect resource status                 |
+| `wrong_value_string`           | Incorrect observation value               |
+| `wrong_subject`                | Incorrect patient reference               |
+| **MedicationRequest Failures** |                                           |
+| `wrong_medication_system/code` | Incorrect medication coding (NDC)         |
+| `wrong_route`                  | Incorrect administration route            |
+| `wrong_dose_value/unit`        | Incorrect dosage amount or unit           |
+| `wrong_rate_value/unit`        | Incorrect infusion rate                   |
+| `wrong_intent`                 | Incorrect request intent                  |
+| **ServiceRequest Failures**    |                                           |
+| `wrong_code_system/code`       | Incorrect service/procedure coding        |
+| `wrong_priority`               | Incorrect request priority                |
+| `missing_note/wrong_note`      | Missing or incorrect clinical notes       |
+| **Answer Comparison Failures** |                                           |
+| `answer_value_mismatch`        | Returned value differs from expected      |
+| `answer_length_mismatch`       | Result array has wrong number of elements |
 
 ### Robust POST Request Extraction
 
@@ -110,6 +148,25 @@ The evaluation follows a true agent-to-agent architecture:
 - **Assessor (Green Agent)** and **Assessee (Purple Agent)** communicate via native A2A protocol
 - The Assessor provides the Assessee with task, prompt, and MCP configuration in a structured way
 - This separation enables plug-and-play agent evaluation—swap in any A2A-compliant assessee agent
+
+### Benchmark Results
+
+The improvements to the evaluation framework—including refined task prompts, schema-strict tools, and comprehensive validation—have led to significant accuracy gains:
+
+| Model  | Original MedAgentBench | Agentify-MedAgentBench (300 tasks) |
+| ------ | ---------------------- | ---------------------------------- |
+| GPT-4o | ~64%                   | **89.3%**                          |
+
+This 25+ percentage point improvement demonstrates the impact of clearer task specifications and robust tooling on agent performance.
+
+**Task 11 - Hard Multi-Step Reasoning (30 new tasks):**
+
+We introduced 30 new challenging tasks requiring multi-step clinical reasoning (cardiovascular risk score calculation). These tasks test the agent's ability to chain multiple tools, perform calculations, and apply clinical scoring rules.
+
+| Model       | Task 11 Accuracy |
+| ----------- | ---------------- |
+| GPT-4o      | 50%              |
+| GPT-4o-mini | 10%              |
 
 ---
 
@@ -636,17 +693,6 @@ Each line contains detailed information about one task:
 
 This tells you the agent found the correct magnesium value but made errors in the medication order payload.
 
-### Common Failure Types
-
-| Failure                    | What It Means                                              |
-| -------------------------- | ---------------------------------------------------------- |
-| `answer_mismatch`          | The returned value didn't match the expected answer        |
-| `readonly_violation`       | The agent made a POST request on a read-only task          |
-| `wrong_post_count`         | The agent made too many or too few POST requests           |
-| `payload_validation_error` | A POST payload had incorrect fields or values              |
-| `max_rounds_reached`       | The agent didn't finish within the iteration limit         |
-| `invalid_finish_format`    | The response wasn't in the required `FINISH([...])` format |
-
 ---
 
 ## Development
@@ -655,24 +701,40 @@ This tells you the agent found the correct magnesium value but made errors in th
 
 ```
 Agentify-MedAgentBench/
-├── run.sh                         # Main entry point - starts servers and runs evaluation
-├── fhir_mcp_launcher.sh           # Launches FHIR and MCP server containers
+├── run.sh                              # Main entry point - starts servers and runs evaluation
+├── fhir_mcp_launcher.sh                # Launches FHIR and MCP server containers
+├── pyproject.toml                      # Python project configuration and dependencies
+├── sample.env                          # Example environment variables
+├── images/                             # Architecture diagrams
+│   ├── Architecture.png
+│   └── Communication_flow.png
 ├── scenarios/medagentbench/
-│   ├── scenario.toml              # Evaluation configuration
-│   ├── agent/src/                 # The agent under test
-│   │   └── agent.py               # LLM + tool-calling logic
-│   └── evaluator/src/             # The evaluation harness
-│       └── agent.py               # Task validation logic
+│   ├── scenario.toml                   # Evaluation configuration
+│   ├── Dockerfile.medagentbench-agent
+│   ├── Dockerfile.medagentbench-evaluator
+│   ├── agent/src/                      # The agent under test (Purple Agent)
+│   │   ├── agent.py                    # LLM + tool-calling logic
+│   │   ├── executor.py                 # Task execution handler
+│   │   └── server.py                   # A2A server for agent
+│   └── evaluator/src/                  # The evaluation harness (Green Agent)
+│       ├── agent.py                    # Task validation logic
+│       ├── executor.py                 # Evaluation orchestration
+│       ├── messenger.py                # A2A messaging utilities
+│       └── server.py                   # A2A server for evaluator
 ├── src/
 │   ├── agentbeats/
-│   │   └── run_scenario.py        # Entry point
+│   │   ├── run_scenario.py             # Scenario runner entry point
+│   │   ├── client.py                   # A2A client implementation
+│   │   ├── client_cli.py               # CLI for running evaluations
+│   │   ├── models.py                   # Data models
+│   │   └── cloudflare.py               # Cloudflare tunnel utilities
 │   └── mcp/
-│       ├── Dockerfile             # Docker image for MCP server
-│       ├── server.py              # MCP tool server
+│       ├── Dockerfile                  # Docker image for MCP server
+│       ├── server.py                   # MCP tool server with FHIR operations
 │       └── resources/
-│           ├── tasks/tasks.json   # Task definitions
-│           └── prompts/           # System prompt templates
-└── outputs/                       # Evaluation results
+│           ├── tasks/tasks.json        # Task definitions (330 tasks)
+│           └── prompts/system_prompt.txt
+└── outputs/                            # Evaluation results
 ```
 
 ### Implementing a Custom Agent
