@@ -36,8 +36,8 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("medagentbench_evaluator")
 
-# Output directory for runs.jsonl logging (required)
-OUTPUT_DIR = "outputs/medagentbench"
+# Output directory for runs.jsonl logging (from environment or default)
+OUTPUT_DIR = os.environ.get("MEDAGENT_OUTPUT_DIR", "outputs/medagentbench")
 
 
 # ============================================================================

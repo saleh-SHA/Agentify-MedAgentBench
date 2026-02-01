@@ -6,6 +6,7 @@ This project extends [MedAgentBench](https://github.com/stanfordmlgroup/MedAgent
 
 - [Overview](#overview)
 - [Extensions to MedAgentBench](#extensions-to-medagentbench)
+  - [Benchmark Results](#benchmark-results)
 - [What Does This Benchmark Evaluate?](#what-does-this-benchmark-evaluate)
 - [How It Works](#how-it-works)
 - [Architecture](#architecture)
@@ -151,17 +152,17 @@ The evaluation follows a true agent-to-agent architecture:
 
 ### Benchmark Results
 
-The improvements to the evaluation framework—including refined task prompts, schema-strict tools, and comprehensive validation—have led to significant accuracy gains:
+The improvements to the evaluation framework—including refined task prompts, schema-strict tools, and comprehensive validation—have led to significant accuracy gains on the original 300 tasks (Tasks 1-10):
 
-| Model  | Original MedAgentBench | Agentify-MedAgentBench (300 tasks) |
-| ------ | ---------------------- | ---------------------------------- |
-| GPT-4o | ~64%                   | **89.3%**                          |
+| Model  | Original MedAgentBench | Agentify-MedAgentBench |
+| ------ | ---------------------- | ---------------------- |
+| GPT-4o | ~64%                   | **89.3%**              |
 
 This 25+ percentage point improvement demonstrates the impact of clearer task specifications and robust tooling on agent performance.
 
 **Task 11 - Hard Multi-Step Reasoning (30 new tasks):**
 
-We introduced 30 new challenging tasks requiring multi-step clinical reasoning (cardiovascular risk score calculation). These tasks test the agent's ability to chain multiple tools, perform calculations, and apply clinical scoring rules.
+We introduced 30 new challenging tasks requiring multi-step clinical reasoning (cardiovascular risk score calculation). These tasks test the agent's ability to chain multiple tools, perform calculations, and apply clinical scoring rules. Task 11 results are reported separately as they represent a new, harder task category.
 
 | Model       | Task 11 Accuracy |
 | ----------- | ---------------- |
@@ -218,7 +219,7 @@ When you run the benchmark, here's what happens behind the scenes:
 
 ### Step 1: Infrastructure Startup
 
-The scenario runner reads the configuration file and starts three services:
+The scenario runner reads the configuration file and starts these services:
 
 - A **FHIR server** (Docker container) containing synthetic patient data
 - An **MCP server** that exposes FHIR operations as discoverable tools
@@ -239,7 +240,7 @@ When the agent (called the "Purple Agent") receives a task, it:
 
 1. **Connects to the MCP server** and discovers available tools (search_patients, create_medication_request, etc.)
 2. **Enters a tool-calling loop**: it sends the prompt to an LLM, which may request tool calls
-3. **Executes tool calls** through the MCP server, which queries or mockingly modifies the FHIR server
+3. **Executes tool calls** through the MCP server, which mock-modifies the FHIR server
 4. **Iterates** until the LLM produces a final answer or hits the maximum iteration limit
 5. **Returns the answer** along with metadata about what tools were called
 
@@ -405,7 +406,7 @@ This section walks you through running your first evaluation end-to-end.
 
 Before you begin, ensure you have:
 
-- Python 3.11 or higher
+- Python 3.13
 - Docker installed and running
 - An OpenAI API key (or key for another LLM provider)
 - The [uv](https://github.com/astral-sh/uv) package manager
@@ -413,7 +414,7 @@ Before you begin, ensure you have:
 ### Step 1: Clone and Install
 
 ```bash
-git clone https://github.com/your-repo/Agentify-MedAgentBench.git
+git clone https://github.com/saleh-SHA/Agentify-MedAgentBench.git
 cd Agentify-MedAgentBench
 uv sync
 ```
@@ -424,10 +425,9 @@ Create a `.env` file in the project root with your API key:
 
 ```bash
 OPENAI_API_KEY=your-api-key-here
-MEDAGENT_LLM_MODEL=openai/gpt-4o-mini
 ```
 
-The framework uses LiteLLM, so you can use other providers by changing the model string (e.g., `anthropic/claude-3.5-sonnet`).
+The framework uses LiteLLM. To use other providers (e.g., Anthropic), you'll need to modify the model in `scenarios/medagentbench/agent/src/agent.py`.
 
 ### Step 3: Run the Evaluation
 
@@ -497,15 +497,15 @@ uv run agentbeats-run scenarios/medagentbench/scenario.toml --show-logs
 
 The evaluation is configured through `scenarios/medagentbench/scenario.toml`. This file defines the agent endpoints, server configurations, and evaluation parameters.
 
-| Parameter        | Default                         | Description                                                          |
-| ---------------- | ------------------------------- | -------------------------------------------------------------------- |
-| `num_tasks`      | `30`                            | Number of tasks to run. Set to `null` or remove to run all 300 tasks |
-| `task_ids`       | (optional)                      | Specific task IDs to run. Overrides `num_tasks` if provided          |
-| `max_rounds`     | `8`                             | Maximum tool-calling iterations per task before timeout              |
-| `domain`         | `"medagentbench"`               | Domain identifier for the evaluation                                 |
-| `mcp_server_url` | `"http://localhost:8002"`       | URL of the MCP server providing FHIR tools                           |
-| `fhir_api_base`  | `"http://localhost:8080/fhir/"` | Base URL of the FHIR server                                          |
-| `num_workers`    | `10`                            | Number of parallel agent workers for concurrent task execution       |
+| Parameter        | Default                         | Description                                                      |
+| ---------------- | ------------------------------- | ---------------------------------------------------------------- |
+| `num_tasks`      | `30`                            | Number of tasks to run. Set to `null` or remove to run all tasks |
+| `task_ids`       | (optional)                      | Specific task IDs to run. Overrides `num_tasks` if provided      |
+| `max_rounds`     | `8`                             | Maximum tool-calling iterations per task before timeout          |
+| `domain`         | `"medagentbench"`               | Domain identifier for the evaluation                             |
+| `mcp_server_url` | `"http://localhost:8002"`       | URL of the MCP server providing FHIR tools                       |
+| `fhir_api_base`  | `"http://localhost:8080/fhir/"` | Base URL of the FHIR server                                      |
+| `num_workers`    | `2`                             | Number of parallel agent workers for concurrent task execution   |
 
 ### Selecting Tasks
 
@@ -542,23 +542,20 @@ The `num_workers` setting enables parallel task execution:
 # Sequential execution (default)
 num_workers = 1
 
-# Moderate parallelism (5-10 workers)
-num_workers = 10
+# Moderate parallelism (2 workers)
+num_workers = 2
 
-# High parallelism (requires more resources)
-num_workers = 20
 ```
 
 Each worker runs as a separate process on a different port (9019, 9020, etc.). Make sure the ports are available and accessible.
 
 ### Environment Variables
 
-| Variable             | Default                       | Description                          |
-| -------------------- | ----------------------------- | ------------------------------------ |
-| `OPENAI_API_KEY`     | -                             | API key for your LLM provider        |
-| `MEDAGENT_LLM_MODEL` | `openai/gpt-4o-mini`          | LiteLLM model identifier             |
-| `MCP_FHIR_API_BASE`  | `http://localhost:8080/fhir/` | FHIR server URL (used by MCP server) |
-| `MCP_SERVER_URL`     | `http://localhost:8002`       | MCP server URL (used by agent)       |
+Create a `.env` file in the project root with your API key (see `sample.env` for a template):
+
+| Variable         | Required | Description                   |
+| ---------------- | -------- | ----------------------------- |
+| `OPENAI_API_KEY` | Yes      | API key for your LLM provider |
 
 ---
 

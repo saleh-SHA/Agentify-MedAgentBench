@@ -23,9 +23,9 @@ logger = logging.getLogger("medagentbench_agent")
 # MCP Server URL - provided via DataPart config from evaluator (configured in scenario.toml)
 MCP_SERVER_URL = None
 
-# LLM configuration (required)
+# LLM configuration (from environment or defaults)
 # LLM_MODEL: The model identifier in LiteLLM format (e.g., "openai/gpt-4o", "anthropic/claude-3.5-sonnet")
-LLM_MODEL = "openai/gpt-4o"
+LLM_MODEL =  "openai/gpt-4o"
 
 # LLM_PROVIDER: Optional provider override (e.g., "openai", "anthropic", "google", "azure")
 # Set to None (or leave empty) to let LiteLLM auto-detect from the model string prefix
